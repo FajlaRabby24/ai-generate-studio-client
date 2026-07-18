@@ -36,13 +36,13 @@ Do exactly what is asked. Nothing more.
 
 ## What NOT to do
 
+- Don't open scratchpad. I will test that manually.
 - Don't add error boundaries, loading skeletons, animations, or accessibility improvements unless asked — even if you think they'd help.
 - Don't add comments explaining obvious code.
 - Don't write tests unless asked.
 - Don't touch `.env`, `next.config.ts`, `tailwind.config.ts`, or auth config unless the task is specifically about those.
 - Don't rename existing variables/files/routes as a "cleanup."
 - Don't add TODO comments or placeholder logic beyond what's needed to make the requested feature work.
-- Don't open scratchpad if not asked.
 
 ## Output Expectations
 
