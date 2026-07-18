@@ -36,6 +36,7 @@ Do exactly what is asked. Nothing more.
 
 ## What NOT to do
 
+- If any package or something need to install first give me that list. I will manually install them. And then you can continue your work.
 - Don't open scratchpad. I will test that manually.
 - Don't add error boundaries, loading skeletons, animations, or accessibility improvements unless asked — even if you think they'd help.
 - Don't add comments explaining obvious code.
