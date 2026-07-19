@@ -1,9 +1,10 @@
 "use client";
 
-import { Menu, Moon, Sparkles, Sun } from "lucide-react";
+import { Menu, Moon, Sparkles, Sun, User, CreditCard, LogOut, LayoutDashboard } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
@@ -15,8 +16,16 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { getCookie } from "@/utils/cookieUtils";
+import { jwtUtils } from "@/utils/jwtUtils";
 
 // Navigation link structure
 const navLinks = [
@@ -31,10 +40,22 @@ export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [decodedUser, setDecodedUser] = useState<any>(null);
 
   // Avoid hydration mismatch by rendering theme toggle only on the client
   useEffect(() => {
     setMounted(true);
+
+    const fetchToken = async () => {
+      const token = await getCookie("accessToken");
+      if (token) {
+        const decoded = jwtUtils.decodedToken(token);
+        if (decoded) {
+          setDecodedUser(decoded);
+        }
+      }
+    };
+    fetchToken();
   }, []);
 
   return (
@@ -90,27 +111,98 @@ export default function Navbar() {
             <div className="h-9 w-9 rounded-xl bg-muted/40 animate-pulse" />
           )}
 
-          <Link href="/auth/login">
-            <ShimmerButton
-              shimmerColor="rgba(139, 92, 246, 0.3)"
-              background="transparent"
-              borderRadius="12px"
-              className="h-9 px-4 py-0 text-sm font-medium text-foreground hover:bg-muted/30 border border-border/50 transition-all"
-            >
-              Login
-            </ShimmerButton>
-          </Link>
+          {decodedUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    className="rounded-full size-9 p-0 cursor-pointer overflow-hidden border border-border/40 bg-gradient-to-br from-violet-600 to-indigo-600 text-white font-semibold text-sm flex items-center justify-center shadow-inner active:scale-95 transition-all animate-in fade-in zoom-in duration-200"
+                    aria-label="User profile menu"
+                  />
+                }
+              >
+                {decodedUser.name ? decodedUser.name.substring(0, 1).toUpperCase() : "U"}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 mt-1 rounded-xl p-1.5 border border-border/40 bg-popover shadow-lg"
+              >
+                <div className="flex flex-col space-y-1.5 p-2.5">
+                  <p className="text-sm font-semibold text-foreground leading-none">
+                    {decodedUser.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {decodedUser.email}
+                  </p>
+                  {decodedUser.role && (
+                    <div className="mt-1.5 inline-flex w-fit items-center rounded-full bg-violet-500/10 px-2.5 py-0.5 text-[10px] font-medium text-violet-500 dark:bg-violet-400/10 dark:text-violet-400">
+                      {decodedUser.role}
+                    </div>
+                  )}
+                </div>
 
-          <Link href="/auth/register">
-            <ShimmerButton
-              shimmerColor="#ffffff"
-              background="linear-gradient(to right, #7c3aed, #4f46e5)"
-              borderRadius="12px"
-              className="h-9 px-5 py-0 text-sm font-semibold text-white shadow-md shadow-violet-500/10 hover:shadow-violet-500/20 active:scale-[0.98] transition-all"
-            >
-              Register
-            </ShimmerButton>
-          </Link>
+                <DropdownMenuSeparator className="my-1.5" />
+
+                <Link href="/dashboard" className="w-full">
+                  <DropdownMenuItem className="rounded-lg cursor-pointer">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/dashboard/profile" className="w-full">
+                  <DropdownMenuItem className="rounded-lg cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile Settings</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/dashboard/billing" className="w-full">
+                  <DropdownMenuItem className="rounded-lg cursor-pointer">
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    <span>Billing</span>
+                  </DropdownMenuItem>
+                </Link>
+
+                <DropdownMenuSeparator className="my-1.5" />
+
+                <DropdownMenuItem
+                  variant="destructive"
+                  className="rounded-lg cursor-pointer"
+                  onClick={() => {
+                    // Refresh token cookie cleanup is handled by redirect / server, or direct console logs
+                    console.log("Logged out from Navbar");
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link href="/auth/login">
+                <ShimmerButton
+                  shimmerColor="rgba(139, 92, 246, 0.3)"
+                  background="transparent"
+                  borderRadius="12px"
+                  className="h-9 px-4 py-0 text-sm font-medium text-foreground hover:bg-muted/30 border border-border/50 transition-all"
+                >
+                  Login
+                </ShimmerButton>
+              </Link>
+
+              <Link href="/auth/register">
+                <ShimmerButton
+                  shimmerColor="#ffffff"
+                  background="linear-gradient(to right, #7c3aed, #4f46e5)"
+                  borderRadius="12px"
+                  className="h-9 px-5 py-0 text-sm font-semibold text-white shadow-md shadow-violet-500/10 hover:shadow-violet-500/20 active:scale-[0.98] transition-all"
+                >
+                  Register
+                </ShimmerButton>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Responsive Header Actions */}
@@ -183,37 +275,75 @@ export default function Navbar() {
               </div>
 
               {/* Mobile Auth Actions at Bottom */}
-              <div className="flex flex-col gap-3 mt-auto">
-                <Link
-                  href="/auth/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full"
-                >
-                  <ShimmerButton
-                    shimmerColor="rgba(139, 92, 246, 0.3)"
-                    background="transparent"
-                    borderRadius="12px"
-                    className="w-full h-11 py-0 font-medium text-foreground border border-border/60 hover:bg-muted/30 transition-all"
+              {decodedUser ? (
+                <div className="flex flex-col gap-3 mt-auto p-2 border-t border-border/40 pt-4">
+                  <div className="flex items-center gap-3 px-1">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white font-semibold text-base shadow-inner">
+                      {decodedUser.name ? decodedUser.name.substring(0, 1).toUpperCase() : "U"}
+                    </div>
+                    <div className="flex-grow min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {decodedUser.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {decodedUser.email}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full mt-2"
                   >
-                    Login
-                  </ShimmerButton>
-                </Link>
+                    <Button className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/95 transition-all cursor-pointer">
+                      Go to Dashboard
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    className="w-full h-11 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20 font-medium transition-all cursor-pointer"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      console.log("Logged out from Mobile Navbar");
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3 mt-auto">
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full"
+                  >
+                    <ShimmerButton
+                      shimmerColor="rgba(139, 92, 246, 0.3)"
+                      background="transparent"
+                      borderRadius="12px"
+                      className="w-full h-11 py-0 font-medium text-foreground border border-border/60 hover:bg-muted/30 transition-all"
+                    >
+                      Login
+                    </ShimmerButton>
+                  </Link>
 
-                <Link
-                  href="/auth/register"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full"
-                >
-                  <ShimmerButton
-                    shimmerColor="#ffffff"
-                    background="linear-gradient(to right, #7c3aed, #4f46e5)"
-                    borderRadius="12px"
-                    className="w-full h-11 py-0 font-semibold text-white shadow-md shadow-violet-500/10 active:scale-[0.98] transition-all"
+                  <Link
+                    href="/auth/register"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full"
                   >
-                    Register
-                  </ShimmerButton>
-                </Link>
-              </div>
+                    <ShimmerButton
+                      shimmerColor="#ffffff"
+                      background="linear-gradient(to right, #7c3aed, #4f46e5)"
+                      borderRadius="12px"
+                      className="w-full h-11 py-0 font-semibold text-white shadow-md shadow-violet-500/10 active:scale-[0.98] transition-all"
+                    >
+                      Register
+                    </ShimmerButton>
+                  </Link>
+                </div>
+              )}
             </SheetContent>
           </Sheet>
         </div>

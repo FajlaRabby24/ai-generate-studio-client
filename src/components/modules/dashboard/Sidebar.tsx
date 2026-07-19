@@ -7,12 +7,12 @@ import {
   Image as ImageIcon,
   LayoutDashboard,
   LogOut,
+  MessageSquare,
   Mic,
+  Settings,
   Sparkles,
   User,
   Video,
-  Settings,
-  MessageSquare,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -23,9 +23,9 @@ import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { UserRole } from "@/utils/authUtils";
+import { getCookie } from "@/utils/cookieUtils";
 import { jwtUtils } from "@/utils/jwtUtils";
 import { getCommonNavItems, userNavItems } from "@/utils/sidebarNavitems";
-import { getCookie } from "@/utils/cookieUtils";
 
 const getIcon = (iconName: string) => {
   switch (iconName) {
@@ -92,13 +92,18 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
   return (
     <div className="flex flex-col h-full bg-card/65 backdrop-blur-md">
       {/* Brand Header */}
-      <div className="flex h-16 items-center px-6 border-b border-border/40 gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md">
-          <Sparkles className="h-4.5 w-4.5 text-white" />
-        </div>
-        <span className="font-bold text-base bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-          AI Generate Studio
-        </span>
+      <div>
+        <Link
+          href={"/"}
+          className="flex h-16 items-center px-6 border-b border-border/40 gap-2"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md">
+            <Sparkles className="h-4.5 w-4.5 text-white" />
+          </div>
+          <span className="font-bold text-base bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+            AI Generate Studio
+          </span>
+        </Link>
       </div>
 
       {/* Nav Items List */}
@@ -148,7 +153,9 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
         {/* User Card */}
         <div className="flex items-center gap-3 px-2 py-1.5">
           <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
-            {decodedUser?.name ? decodedUser.name.substring(0, 1).toUpperCase() : "U"}
+            {decodedUser?.name
+              ? decodedUser.name.substring(0, 1).toUpperCase()
+              : "U"}
           </div>
           <div className="flex-grow min-w-0">
             <p className="text-xs font-semibold text-foreground truncate">

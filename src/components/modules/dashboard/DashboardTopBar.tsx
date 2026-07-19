@@ -23,9 +23,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { getCookie } from "@/utils/cookieUtils";
+import { jwtUtils } from "@/utils/jwtUtils";
+import { useEffect } from "react";
 
 export default function DashboardTopBar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [decodedUser, setDecodedUser] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const token = await getCookie("accessToken");
+      if (token) {
+        const decoded = jwtUtils.decodedToken(token);
+        if (decoded) {
+          setDecodedUser(decoded);
+        }
+      }
+    };
+    fetchToken();
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border/30 bg-background/80 backdrop-blur-md px-4 md:px-6">
@@ -108,7 +125,7 @@ export default function DashboardTopBar() {
               />
             }
           >
-            U
+            {decodedUser?.name ? decodedUser.name.substring(0, 1).toUpperCase() : "U"}
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
@@ -117,14 +134,16 @@ export default function DashboardTopBar() {
             {/* User Profile Info Summary */}
             <div className="flex flex-col space-y-1.5 p-2.5">
               <p className="text-sm font-semibold text-foreground leading-none">
-                Demo User
+                {decodedUser?.name || "Demo User"}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                demo@studio.com
+                {decodedUser?.email || "demo@studio.com"}
               </p>
-              <div className="mt-1 inline-flex w-fit items-center rounded-full bg-violet-500/10 px-2.5 py-0.5 text-[10px] font-medium text-violet-500 dark:bg-violet-400/10 dark:text-violet-400">
-                Administrator
-              </div>
+              {decodedUser?.role && (
+                <div className="mt-1 inline-flex w-fit items-center rounded-full bg-violet-500/10 px-2.5 py-0.5 text-[10px] font-medium text-violet-500 dark:bg-violet-400/10 dark:text-violet-400">
+                  {decodedUser.role}
+                </div>
+              )}
             </div>
 
             <DropdownMenuSeparator className="my-1.5" />
