@@ -19,6 +19,9 @@ import { GoogleButton } from "@/components/ui/google-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { uploadToCloudinary } from "@/utils/uploadImageToCloudinary";
+import { validateImage } from "@/utils/validateProfileImage";
+import { toast } from "sonner";
 
 export default function RegisterForm() {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -59,12 +62,36 @@ export default function RegisterForm() {
     fileInputRef.current?.click();
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: {
+    name: string;
+    email: string;
+    password: string;
+    image: File | null;
+  }) => {
+    let image = null;
+    if (data.image) {
+      const validateResponse = await validateImage(data.image);
+      if (!validateResponse.success) {
+        toast.error(validateResponse.message);
+        return;
+      }
+
+      const uploadImage = await uploadToCloudinary(
+        data.image,
+        "image",
+        "AI Generate Studio/profile-images",
+      );
+      if (!uploadImage.success) {
+        toast.error(uploadImage.message);
+        return;
+      }
+      image = uploadImage?.data?.url;
+    }
     console.log("Registration Submit Data:", {
       name: data.name,
       email: data.email,
       password: data.password,
-      imageFile: data.image,
+      imageFile: image,
     });
     // Action will be wired by auth flows
   };
