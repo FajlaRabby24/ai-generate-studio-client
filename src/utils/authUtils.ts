@@ -4,6 +4,12 @@ export enum UserRole {
   USER = "USER",
 }
 
+export enum UserStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  BANNED = "BANNED",
+}
+
 export const authRoutes = ["/auth/login", "/auth/register"];
 
 export const isAuthRoute = (pathName: string): boolean => {

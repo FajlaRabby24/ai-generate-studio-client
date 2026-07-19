@@ -1,3 +1,4 @@
+import { UserRole, UserStatus } from "@/utils/authUtils";
 import { AuthValidation } from "@/zod-schema/auth/auth.schema";
 import z from "zod";
 
@@ -25,4 +26,13 @@ export interface ILoginResponse {
   token: string;
   accessToken: string;
   refreshToken: string;
+}
+
+export interface IGetMeResponse {
+  name: string;
+  email: string;
+  id: string;
+  role: UserRole;
+  status: UserStatus;
+  isDeleted: boolean;
 }
