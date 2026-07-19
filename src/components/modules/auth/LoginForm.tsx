@@ -1,17 +1,27 @@
 "use client";
 
-import { Eye, EyeOff, Lock, Mail, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Eye, EyeOff, Lock, Mail, Sparkles } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { GoogleButton } from "@/components/ui/google-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { loginService } from "@/services/auth/login.service";
+import { ILoginPayload } from "@/types/auth.types";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = React.useState(false);
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (payload: ILoginPayload) => loginService(payload),
+  });
 
   const {
     register,
@@ -24,12 +34,22 @@ export default function LoginForm() {
     },
   });
 
-  const onSubmit = (data: any) => {
-    console.log("Login Submit Data:", {
-      email: data.email,
-      password: data.password,
-    });
-    // Action will be wired by auth flows
+  const onSubmit = async (data: ILoginPayload) => {
+    try {
+      const res = await mutateAsync(data);
+      if (!res.success) {
+        toast.error(res.message || "Login failed");
+        return;
+      }
+      toast.success("Welcome back! Logged in successfully.");
+      router.push("/dashboard");
+    } catch (err: any) {
+      const errMsg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login failed. Please try again.";
+      toast.error(errMsg);
+    }
   };
 
   return (
@@ -132,12 +152,13 @@ export default function LoginForm() {
         {/* Login Button */}
         <ShimmerButton
           type="submit"
+          disabled={isPending}
           shimmerColor="#ffffff"
           background="linear-gradient(to right, #7c3aed, #4f46e5)"
           borderRadius="12px"
-          className="w-full h-10 mt-2 font-semibold text-white shadow-md shadow-violet-500/10 hover:shadow-violet-500/20 active:scale-[0.98] transition-all"
+          className="w-full h-10 mt-2 font-semibold text-white shadow-md shadow-violet-500/10 hover:shadow-violet-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
         >
-          Sign In
+          {isPending ? "Signing In..." : "Sign In"}
         </ShimmerButton>
 
         {/* Divider */}
