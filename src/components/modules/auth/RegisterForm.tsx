@@ -1,5 +1,14 @@
 "use client";
 
+import { GoogleButton } from "@/components/ui/google-button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { registerService } from "@/services/auth/register.service";
+import { IRegisterPayload } from "@/types/auth.types";
+import { uploadToCloudinary } from "@/utils/uploadImageToCloudinary";
+import { validateImage } from "@/utils/validateProfileImage";
+import { useMutation } from "@tanstack/react-query";
 import {
   Camera,
   Eye,
@@ -12,22 +21,21 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-
-import { GoogleButton } from "@/components/ui/google-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { uploadToCloudinary } from "@/utils/uploadImageToCloudinary";
-import { validateImage } from "@/utils/validateProfileImage";
 import { toast } from "sonner";
 
 export default function RegisterForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = React.useState(false);
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (payload: IRegisterPayload) => registerService(payload),
+  });
 
   const {
     register,
@@ -68,7 +76,7 @@ export default function RegisterForm() {
     password: string;
     image: File | null;
   }) => {
-    let image = null;
+    let image = undefined;
     if (data.image) {
       const validateResponse = await validateImage(data.image);
       if (!validateResponse.success) {
@@ -87,13 +95,29 @@ export default function RegisterForm() {
       }
       image = uploadImage?.data?.url;
     }
-    console.log("Registration Submit Data:", {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      imageFile: image,
-    });
-    // Action will be wired by auth flows
+
+    try {
+      const payload: IRegisterPayload = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        ...(image && { image }),
+      };
+
+      const res = await mutateAsync(payload);
+      if (!res.success) {
+        toast.error(res.message || "Registration failed");
+        return;
+      }
+      toast.success("Account registered successfully! Please sign in.");
+      router.push("/auth/login");
+    } catch (err: any) {
+      const errMsg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Registration failed. Please try again.";
+      toast.error(errMsg);
+    }
   };
 
   return (
@@ -279,12 +303,13 @@ export default function RegisterForm() {
         {/* Register Button */}
         <ShimmerButton
           type="submit"
+          disabled={isPending}
           shimmerColor="#ffffff"
           background="linear-gradient(to right, #7c3aed, #4f46e5)"
           borderRadius="12px"
-          className="w-full h-10 mt-2 font-semibold text-white shadow-md shadow-violet-500/10 hover:shadow-violet-500/20 active:scale-[0.98] transition-all"
+          className="w-full h-10 mt-2 font-semibold text-white shadow-md shadow-violet-500/10 hover:shadow-violet-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
         >
-          Sign Up
+          {isPending ? "Signing Up..." : "Sign Up"}
         </ShimmerButton>
 
         {/* Divider */}
