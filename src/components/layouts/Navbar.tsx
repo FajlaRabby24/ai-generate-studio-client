@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import {
   Sheet,
   SheetContent,
@@ -79,19 +80,12 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {/* Theme Toggle Button */}
           {mounted ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-xl hover:bg-muted/80 size-9 transition-all"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              {theme === "dark" ? (
-                <Sun className="h-[1.2rem] w-[1.2rem] text-amber-500 transition-all" />
-              ) : (
-                <Moon className="h-[1.2rem] w-[1.2rem] text-violet-500 transition-all" />
-              )}
-              <span className="sr-only">Toggle theme</span>
-            </Button>
+            <AnimatedThemeToggler
+              theme={theme as "light" | "dark"}
+              onThemeChange={(newTheme) => setTheme(newTheme)}
+              variant="circle"
+              className="rounded-xl hover:bg-muted/80 size-9 flex items-center justify-center transition-all [&_svg]:h-[1.2rem] [&_svg]:w-[1.2rem] [&_svg]:text-amber-500 [&_svg]:dark:text-violet-500 cursor-pointer"
+            />
           ) : (
             <div className="h-9 w-9 rounded-xl bg-muted/40 animate-pulse" />
           )}
@@ -123,19 +117,12 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-2">
           {/* Theme Toggle for Mobile (outside drawer for easy access) */}
           {mounted ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-xl cursor-pointer size-9 hover:bg-muted/80 transition-all"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              {theme === "dark" ? (
-                <Sun className="h-[1.1rem] w-[1.1rem] text-amber-500" />
-              ) : (
-                <Moon className="h-[1.1rem] w-[1.1rem] text-violet-500" />
-              )}
-              <span className="sr-only">Toggle theme</span>
-            </Button>
+            <AnimatedThemeToggler
+              theme={theme as "light" | "dark"}
+              onThemeChange={(newTheme) => setTheme(newTheme)}
+              variant="circle"
+              className="rounded-xl cursor-pointer size-9 flex items-center justify-center hover:bg-muted/80 transition-all [&_svg]:h-[1.1rem] [&_svg]:w-[1.1rem] [&_svg]:text-amber-500 [&_svg]:dark:text-violet-500"
+            />
           ) : (
             <div className="h-9 w-9 rounded-xl bg-muted/40 animate-pulse" />
           )}

@@ -1,42 +1,51 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  CreditCard,
+  Film,
+  History,
+  Image as ImageIcon,
+  LayoutDashboard,
+  LogOut,
+  Mic,
+  Sparkles,
+  User,
+  Video,
+} from "lucide-react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
-import {
-  LayoutDashboard,
-  Image as ImageIcon,
-  Video,
-  Film,
-  Sparkles,
-  Mic,
-  History,
-  CreditCard,
-  User,
-  LogOut,
-  Sun,
-  Moon,
-} from "lucide-react";
+import { useEffect, useState } from "react";
 
-import { cn } from "@/lib/utils";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Sidebar Links Configuration with "/dashboard" paths
 const sidebarLinks = [
   {
     category: "General",
-    items: [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    ],
+    items: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
   },
   {
     category: "AI Generators",
     items: [
-      { href: "/dashboard/text-to-image", label: "Text to Image", icon: ImageIcon },
+      {
+        href: "/dashboard/text-to-image",
+        label: "Text to Image",
+        icon: ImageIcon,
+      },
       { href: "/dashboard/text-to-video", label: "Text to Video", icon: Video },
-      { href: "/dashboard/image-to-video", label: "Image to Video", icon: Film },
-      { href: "/dashboard/image-to-image", label: "Image to Image", icon: Sparkles },
+      {
+        href: "/dashboard/image-to-video",
+        label: "Image to Video",
+        icon: Film,
+      },
+      {
+        href: "/dashboard/image-to-image",
+        label: "Image to Image",
+        icon: Sparkles,
+      },
       { href: "/dashboard/text-to-speech", label: "Text to Speech", icon: Mic },
     ],
   },
@@ -96,7 +105,7 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
                       "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl transition-all",
                       isActive
                         ? "bg-muted text-primary font-semibold shadow-xs"
-                        : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                        : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
                     )}
                   >
                     <Icon
@@ -104,7 +113,7 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
                         "h-4 w-4",
                         isActive
                           ? "text-primary"
-                          : "text-muted-foreground group-hover:text-foreground"
+                          : "text-muted-foreground group-hover:text-foreground",
                       )}
                     />
                     {item.label}
@@ -137,18 +146,12 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
         <div className="flex items-center justify-between gap-2 px-1">
           {/* Theme Toggle */}
           {mounted ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-xl size-8 cursor-pointer hover:bg-muted/60"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              {theme === "dark" ? (
-                <Sun className="h-4 w-4 text-amber-500" />
-              ) : (
-                <Moon className="h-4 w-4 text-violet-500" />
-              )}
-            </Button>
+            <AnimatedThemeToggler
+              theme={theme as "light" | "dark"}
+              onThemeChange={(newTheme) => setTheme(newTheme)}
+              variant="circle"
+              className="rounded-xl size-8 cursor-pointer flex items-center justify-center hover:bg-muted/60 [&_svg]:h-4 [&_svg]:w-4 [&_svg]:text-amber-500 [&_svg]:dark:text-violet-500"
+            />
           ) : (
             <div className="h-8 w-8 rounded-xl bg-muted/40 animate-pulse" />
           )}
