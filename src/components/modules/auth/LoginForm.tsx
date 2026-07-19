@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, Lock, Mail, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { GoogleButton } from "@/components/ui/google-button";
@@ -37,6 +37,7 @@ export default function LoginForm() {
   const onSubmit = async (data: ILoginPayload) => {
     try {
       const res = await mutateAsync(data);
+      console.log("login response", res);
       if (!res.success) {
         toast.error(res.message || "Login failed");
         return;

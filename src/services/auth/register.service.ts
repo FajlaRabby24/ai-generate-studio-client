@@ -2,20 +2,21 @@
 
 import { httpClient } from "@/lib/httpClient";
 import { IRegisterPayload, IRegisterResponse } from "@/types/auth.types";
+import { catchAsync } from "@/utils/catchAsync";
 import { AuthValidation } from "@/zod-schema/auth/auth.schema";
 
-export const registerService = async (payload: IRegisterPayload) => {
-  const parsedPayload =
-    AuthValidation.registerValidationSchema.safeParse(payload);
+export const registerService = async (payload: IRegisterPayload) =>
+  catchAsync(async () => {
+    const parsedPayload =
+      AuthValidation.registerValidationSchema.safeParse(payload);
 
-  if (!parsedPayload.success) {
-    return {
-      success: false,
-      message: "Invalid input",
-    };
-  }
+    if (!parsedPayload.success) {
+      return {
+        success: false,
+        message: "Invalid input",
+      };
+    }
 
-  try {
     const res = await httpClient.post<IRegisterResponse>(
       "/auth/register",
       parsedPayload.data,
@@ -28,14 +29,5 @@ export const registerService = async (payload: IRegisterPayload) => {
       };
     }
 
-    return {
-      success: true,
-      data: res.data,
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      message: error?.message || "Registration failed. Please try again.",
-    };
-  }
-};
+    return res;
+  });
