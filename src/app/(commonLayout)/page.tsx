@@ -2,6 +2,7 @@ import { HeroSection } from "@/components/modules/home/hero-odyssey";
 import { ToolsSuite } from "@/components/modules/home/ToolsSuite";
 import { HowItWorks } from "@/components/modules/home/HowItWorks";
 import { PromptPlayground } from "@/components/modules/home/PromptPlayground";
+import { FaqSection } from "@/components/modules/home/FaqSection";
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
       <ToolsSuite />
       <HowItWorks />
       <PromptPlayground />
+      <FaqSection />
     </main>
   );
 }
