@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/modules/home/hero-odyssey";
 import { ToolsSuite } from "@/components/modules/home/ToolsSuite";
 import { HowItWorks } from "@/components/modules/home/HowItWorks";
+import { PromptPlayground } from "@/components/modules/home/PromptPlayground";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <HeroSection />
       <ToolsSuite />
       <HowItWorks />
+      <PromptPlayground />
     </main>
   );
 }
