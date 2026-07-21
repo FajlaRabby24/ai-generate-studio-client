@@ -1,5 +1,6 @@
 "use client";
 
+import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -57,14 +58,14 @@ const ElasticHueSlider: React.FC<ElasticHueSliderProps> = ({
           onMouseUp={handleMouseUp}
           onTouchStart={handleMouseDown}
           onTouchEnd={handleMouseUp}
-          className="absolute inset-0 w-full h-full appearance-none bg-transparent cursor-pointer z-20"
+          className="absolute inset-0 w-full h-full appearance-none cursor-pointer z-20"
           style={{ WebkitAppearance: "none" }}
         />
 
-        <div className="absolute left-0 w-full h-1 bg-gray-700 rounded-full z-0"></div>
+        <div className="absolute left-0 w-full h-1 rounded-full z-0"></div>
 
         <div
-          className="absolute left-0 h-1 bg-blue-500 rounded-full z-10"
+          className="absolute left-0 h-1 rounded-full z-10"
           style={{ width: `${thumbPosition}%` }}
         ></div>
 
@@ -95,12 +96,6 @@ const ElasticHueSlider: React.FC<ElasticHueSliderProps> = ({
     </div>
   );
 };
-
-interface FeatureItemProps {
-  name: string;
-  value: string;
-  position: string;
-}
 
 interface LightningProps {
   hue?: number;
@@ -301,32 +296,7 @@ const Lightning: React.FC<LightningProps> = ({
   return <canvas ref={canvasRef} className="w-full h-full relative" />;
 };
 
-const FeatureItem: React.FC<FeatureItemProps> = ({ name, value, position }) => {
-  return (
-    <div
-      className={`absolute ${position} z-10 group transition-all duration-300 hover:scale-110`}
-    >
-      <div className="flex items-center gap-2 relative">
-        <div className="relative">
-          <div className="w-2 h-2 bg-white rounded-full group-hover:animate-pulse"></div>
-          <div className="absolute -inset-1 bg-white/20 rounded-full blur-sm opacity-70 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
-        <div className=" text-white relative">
-          <div className="font-medium group-hover:text-white transition-colors duration-300">
-            {name}
-          </div>
-          <div className="text-white/70 text-sm group-hover:text-white/70 transition-colors duration-300">
-            {value}
-          </div>
-          <div className="absolute -inset-2 bg-white/10 rounded-lg blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export const HeroSection: React.FC = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lightningHue, setLightningHue] = useState(220);
 
   const containerVariants = {
@@ -367,27 +337,23 @@ export const HeroSection: React.FC = () => {
             label="Adjust Lightning Hue"
           />
 
-          <motion.h1 className="text-4xl md:text-7xl font-bold mb-2">
+          <motion.h1 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-2 ">
             AI Generate Studio
           </motion.h1>
 
-          <motion.h2 className="text-xl md:text-5xl pb-3 font-semibold bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 bg-clip-text text-transparent">
+          <motion.h2 className="text-xl md:text-5xl pb-3 font-semibold">
             Lighting Up The Future of Creation
           </motion.h2>
 
-          <motion.p className="mb-6 max-w-2xl text-md md:text-lg text-gray-300">
+          <motion.p className="mb-6 max-w-2xl text-md md:text-lg ">
             Generate high-resolution images, cinematic videos, natural
             voiceovers, and AI content inside one unified studio workflow
           </motion.p>
 
           <Link href={"/dashboard"}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors cursor-pointer font-medium mb-10"
-            >
+            <ShimmerButton className="px-8 py-3 backdrop-blur-sm rounded-full transition-colors cursor-pointer font-medium mb-10 hover:bg-white/30">
               Discover More
-            </motion.button>
+            </ShimmerButton>
           </Link>
 
           {/* Showcase Banner Image below Discover More Button */}
@@ -395,9 +361,9 @@ export const HeroSection: React.FC = () => {
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative w-full max-w-4xl  mx-auto rounded-2xl overflow-hidden border border-white/15 shadow-2xl shadow-blue-500/20 group backdrop-blur-md"
+            className="relative w-full max-w-4xl  mx-auto rounded-2xl overflow-hidden border border-white/15 group backdrop-blur-md"
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute inset-0 z-10 pointer-events-none"></div>
             <div className="px-3 py-4 backdrop-blur-2xl rounded-2xl">
               <Image
                 src="/banner.jpg"
@@ -412,27 +378,24 @@ export const HeroSection: React.FC = () => {
         </motion.div>
       </div>
 
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="absolute inset-0 z-0"
-      >
-        {/* <div className="absolute inset-0 bg-black/80"></div> */}
-        <div className="absolute inset-0 "></div>
-
-        <div className="absolute top-[35%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-b from-blue-500/20 to-purple-600/10 blur-3xl"></div>
-
-        <div className="absolute top-0 w-[100%] left-1/2 transform -translate-x-1/2 h-full">
+        className="absolute top-0  left-0 z-0"
+      > */}
+      {/* <div className="absolute inset-0 "></div>
+        <div className="absolute top-[35%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"></div> */}
+      {/* <div className="absolute top-0 w-[100%] left-1/2 transform -translate-x-1/2 h-full">
           <Lightning
             hue={lightningHue}
             xOffset={0}
-            speed={1.6}
-            intensity={0.6}
+            speed={1.9}
+            intensity={1.9}
             size={2}
           />
-        </div>
-      </motion.div>
+        </div> */}
+      {/* </motion.div> */}
     </div>
   );
 };
