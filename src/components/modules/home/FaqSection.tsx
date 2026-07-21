@@ -68,7 +68,7 @@ export function FaqSection() {
         transition={{ duration: 0.5 }}
         className="w-full rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md p-6 md:p-8 shadow-xl"
       >
-        <Accordion defaultValue={["item-1"]} className="w-full space-y-2">
+        <Accordion className="w-full space-y-2">
           {faqs.map((faq) => (
             <AccordionItem
               key={faq.id}

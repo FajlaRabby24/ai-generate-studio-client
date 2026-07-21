@@ -54,7 +54,8 @@ const tools = [
 ];
 
 export function ToolsSuite() {
-  const { theme } = useTheme();
+  const themeContext = useTheme();
+  const theme = themeContext?.theme;
 
   return (
     <section className="py-24 px-4 max-w-7xl mx-auto relative z-10">
