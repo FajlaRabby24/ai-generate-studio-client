@@ -354,7 +354,7 @@ export const HeroSection: React.FC = () => {
 
   return (
     <div className="relative w-full overflow-hidden">
-      <div className="relative z-20 max-w-7xl mx-auto flex px-4 sm:px-6 lg:px-8 ">
+      <div className="relative z-20 max-w-7xl mx-auto flex px-4 sm:px-6 lg:px-8 pb-7">
         <motion.div
           variants={containerVariants}
           initial="hidden"
