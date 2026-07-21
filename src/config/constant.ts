@@ -1,0 +1,39 @@
+export enum Plan {
+  FREE,
+  PRO,
+}
+
+export enum GenerationType {
+  TEXT_TO_IMAGE,
+  AI_CHATBOT,
+  CODE_CHECKER,
+  IMAGE_BACKGROUND_REMOVER,
+  IMAGE_CAPTION_GENERATOR,
+  RESUME_ANALYZER,
+  LANGUAGE_TRANSLATOR,
+  GRAMMER_IMPROVER,
+  TEXT_TO_SPEECH,
+  SPEECH_TO_TEXT,
+  IMAGE_TO_VIDEO,
+  TEXT_TO_VIDEO,
+}
+
+export enum GenerationStatus {
+  PENDING,
+  PROCESSING,
+  COMPLETED,
+  FAILED,
+}
+
+export enum PaymentGateway {
+  STRIPE,
+  SSLCOMMERZ,
+  PAYPAL,
+}
+
+export enum PaymentStatus {
+  PENDING,
+  SUCCESS,
+  FAILED,
+  REFUNDED,
+}

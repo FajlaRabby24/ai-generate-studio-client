@@ -41,7 +41,7 @@ export function FooterCTA() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register">
+              <Link href="/auth/register">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -51,7 +51,7 @@ export function FooterCTA() {
                   <ArrowRight className="w-4 h-4" />
                 </motion.div>
               </Link>
-              <Link href="/login">
+              <Link href="/auth/login">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
