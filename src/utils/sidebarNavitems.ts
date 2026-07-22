@@ -47,30 +47,30 @@ export const userNavItems: NavSection[] = [
         icon: "MdOutlineDraw",
       },
       {
-        title: "Text to Video",
-        href: "/dashboard/text-to-video",
-        icon: "MdOutlineVideoLibrary",
-      },
-      {
-        title: "Text to Speech",
-        href: "/dashboard/text-to-speech",
-        icon: "MdOutlineSurfing",
-      },
-      {
-        title: "Image to Video",
-        href: "/dashboard/image-to-video",
-        icon: "MdOutlineVideoLibrary",
-      },
-      {
-        title: "Remove Background",
-        href: "/dashboard/remove-background",
-        icon: "MdOutlineDeleteOutline",
-      },
-      {
         title: "AI Chatbot",
         href: "/dashboard/ai-chatbot",
         icon: "MdOutlineChat",
       },
+      // {
+      //   title: "Text to Video",
+      //   href: "/dashboard/text-to-video",
+      //   icon: "MdOutlineVideoLibrary",
+      // },
+      // {
+      //   title: "Text to Speech",
+      //   href: "/dashboard/text-to-speech",
+      //   icon: "MdOutlineSurfing",
+      // },
+      // {
+      //   title: "Image to Video",
+      //   href: "/dashboard/image-to-video",
+      //   icon: "MdOutlineVideoLibrary",
+      // },
+      // {
+      //   title: "Remove Background",
+      //   href: "/dashboard/remove-background",
+      //   icon: "MdOutlineDeleteOutline",
+      // },
     ],
   },
 ];

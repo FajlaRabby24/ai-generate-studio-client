@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import {
   adminProtectedRoutes,
+  betterAuthSessionCookieName,
   commonProtectedRoutes,
   getDefaultDashboardRoute,
   isAuthRoute,
@@ -9,7 +10,6 @@ import {
   userProtectedRoutes,
   UserRole,
 } from "./utils/authUtils";
-import { getSessionCookieName } from "./utils/tokenUtils";
 
 import { jwtUtils } from "./utils/jwtUtils";
 
@@ -17,7 +17,7 @@ export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const accessToken = request.cookies.get("accessToken")?.value;
-  const sessionTokenName = await getSessionCookieName();
+  const sessionTokenName = betterAuthSessionCookieName;
   const sessionToken = request.cookies.get(sessionTokenName)?.value;
 
   const isAuthenticated = !!accessToken && !!sessionToken;

@@ -2,8 +2,9 @@
 
 import { httpClient } from "@/lib/httpClient";
 import { ILoginPayload, ILoginResponse } from "@/types/auth.types";
+import { betterAuthSessionCookieName } from "@/utils/authUtils";
 import { catchAsync } from "@/utils/catchAsync";
-import { getSessionCookieName, setTokenInCookies } from "@/utils/tokenUtils";
+import { setTokenInCookies } from "@/utils/tokenUtils";
 import { AuthValidation } from "@/zod-schema/auth/auth.schema";
 
 export const loginService = async (payload: ILoginPayload) =>
@@ -41,7 +42,7 @@ export const loginService = async (payload: ILoginPayload) =>
 
     await setTokenInCookies("accessToken", accessToken);
     await setTokenInCookies("refreshToken", refreshToken);
-    await setTokenInCookies(await getSessionCookieName(), token);
+    await setTokenInCookies(betterAuthSessionCookieName, token);
 
     return res;
   });

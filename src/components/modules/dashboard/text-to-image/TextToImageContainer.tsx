@@ -1,81 +1,79 @@
 "use client";
 
-import React, { useState } from "react";
+import { GenerationType } from "@/config/constant";
+import {
+  generateTextToImageService,
+  getGenerationLeftCountService,
+  IGenerateTextToImagePayload,
+} from "@/services/dashboard/text-to-image/text-to-image.service";
+import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
-  Sparkles,
-  Wand2,
-  Image as ImageIcon,
+  AlertCircle,
   Download,
-  Copy,
-  Check,
-  RotateCcw,
-  Zap,
+  Image as ImageIcon,
   Maximize2,
   RefreshCw,
-  AlertCircle,
+  Sparkles,
+  Zap,
 } from "lucide-react";
-import { GenerationType } from "@/config/constant";
-import { TextToImageValidation } from "@/zod-schema/dashboard/text-to-image/zod";
+import { useEffect, useState } from "react";
 
 export function TextToImageContainer() {
   const [prompt, setPrompt] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [remainingCredits, setRemainingCredits] = useState(15);
+  const [remainingCredits, setRemainingCredits] = useState<number | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (payload: IGenerateTextToImagePayload) =>
+      generateTextToImageService(payload),
+  });
+
+  const { mutateAsync: fetchGenerationCount } = useMutation({
+    mutationFn: (generationType: GenerationType) =>
+      getGenerationLeftCountService(generationType),
+  });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetchGenerationCount(GenerationType.TEXT_TO_IMAGE);
+        if (res?.success && res.data) {
+          setRemainingCredits(res.data.textToImage ?? 0);
+        }
+      } catch (err) {
+        console.error("Failed to load remaining credits", err);
+      }
+    })();
+  }, [fetchGenerationCount]);
 
   // Handle Image Generation Request
   const handleGenerate = async () => {
     setValidationError(null);
 
     // Prepare payload automatically selecting GenerationType.TEXT_TO_IMAGE
-    const payload = {
+    const payload: IGenerateTextToImagePayload = {
       prompt,
       type: GenerationType.TEXT_TO_IMAGE,
     };
 
-    // Client-side Zod validation before requesting server
-    const validationResult = TextToImageValidation.generateTextToImageSchema.safeParse(payload);
-    if (!validationResult.success) {
-      const firstErrorMessage = validationResult.error.issues[0]?.message || "Invalid input payload";
-      setValidationError(firstErrorMessage);
-      return;
-    }
-
-    setIsGenerating(true);
-
     try {
-      // Simulate API response for testing layout (Will be hooked to server fetch)
-      setTimeout(() => {
-        setGeneratedImage(
-          "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80"
+      const res = await mutateAsync(payload);
+      if (res?.success) {
+        if (res?.data?.imageUrl) {
+          setGeneratedImage(res.data.imageUrl);
+        }
+        setRemainingCredits(res?.data?.creditRemainig || null);
+      } else {
+        setValidationError(
+          res?.message || "Failed to generate image. Please try again.",
         );
-        setIsGenerating(false);
-        setRemainingCredits((prev) => Math.max(0, prev - 1));
-      }, 2500);
+      }
     } catch (err: any) {
-      setIsGenerating(false);
-      setValidationError(err.message || "Failed to process text to image request");
-    }
-  };
-
-  const handleCopyPrompt = () => {
-    if (!prompt) return;
-    navigator.clipboard.writeText(prompt);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleEnhancePrompt = () => {
-    setValidationError(null);
-    if (!prompt) {
-      setPrompt(
-        "A hyper-realistic cyberpunk city street at night, neon reflections in rain puddles, 8K resolution, octane render"
+      setValidationError(
+        err?.message || "Failed to process text to image request",
       );
-    } else {
-      setPrompt((prev) => `${prev}, highly detailed, cinematic lighting, 8K, unreal engine 5 render`);
     }
   };
 
@@ -93,7 +91,8 @@ export function TextToImageContainer() {
             </span>
           </div>
           <p className="text-muted-foreground text-sm">
-            Generate ultra-realistic 8K digital artwork using Black Forest Labs AI engine.
+            Generate ultra-realistic 8K digital artwork using Black Forest Labs
+            AI engine.
           </p>
         </div>
 
@@ -125,14 +124,6 @@ export function TextToImageContainer() {
                 <label className="text-xs font-bold uppercase tracking-wider text-foreground">
                   Prompt Description <span className="text-red-500">*</span>
                 </label>
-                <button
-                  onClick={handleEnhancePrompt}
-                  type="button"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer"
-                >
-                  <Wand2 className="w-3.5 h-3.5" />
-                  <span>AI Enhance</span>
-                </button>
               </div>
 
               <div className="relative">
@@ -162,10 +153,10 @@ export function TextToImageContainer() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleGenerate}
-              disabled={isGenerating}
+              disabled={isPending}
               className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-bold text-sm shadow-lg hover:shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
-              {isGenerating ? (
+              {isPending ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
                   <span>Synthesizing Pixels...</span>
@@ -183,7 +174,7 @@ export function TextToImageContainer() {
         {/* Right Column: Result & Preview Display Canvas (7 Columns) */}
         <div className="lg:col-span-7 flex flex-col">
           <div className="flex-1 min-h-[440px] p-6 rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md shadow-xl flex flex-col items-center justify-center relative overflow-hidden">
-            {isGenerating ? (
+            {isPending ? (
               /* Generating Loader State */
               <div className="flex flex-col items-center text-center space-y-4 p-8">
                 <div className="relative w-20 h-20 flex items-center justify-center">
@@ -222,23 +213,7 @@ export function TextToImageContainer() {
 
                 {/* Result Control Toolbar */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <button
-                    onClick={handleCopyPrompt}
-                    className="px-4 py-2 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold flex items-center gap-1.5 border border-border/40 hover:bg-secondary/80 transition-all cursor-pointer"
-                  >
-                    {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copied ? "Copied" : "Copy Prompt"}</span>
-                  </button>
-
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleGenerate}
-                      className="px-4 py-2 rounded-xl bg-secondary text-secondary-foreground text-xs font-semibold flex items-center gap-1.5 border border-border/40 hover:bg-secondary/80 transition-all cursor-pointer"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Regenerate</span>
-                    </button>
-
                     <a
                       href={generatedImage}
                       download="ai-generated-image.jpg"
@@ -263,7 +238,11 @@ export function TextToImageContainer() {
                     Your Canvas is Empty
                   </h3>
                   <p className="text-xs leading-relaxed">
-                    Type a prompt on the left panel or click <span className="font-semibold text-primary">AI Enhance</span> to generate your first 8K AI artwork.
+                    Type a prompt on the left panel or click{" "}
+                    <span className="font-semibold text-primary">
+                      AI Enhance
+                    </span>{" "}
+                    to generate your first 8K AI artwork.
                   </p>
                 </div>
               </div>

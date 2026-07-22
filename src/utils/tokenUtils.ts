@@ -1,6 +1,7 @@
 "use server";
 
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { betterAuthSessionCookieName } from "./authUtils";
 import { setCookie } from "./cookieUtils";
 
 const getTokenSecondsRemaining = (token: string): number => {
@@ -22,12 +23,6 @@ const getTokenSecondsRemaining = (token: string): number => {
   }
 };
 
-export const getSessionCookieName = async () => {
-  return process.env.NODE_ENV === "production"
-    ? "__Secure-better-auth.session_token"
-    : "better-auth.session_token";
-};
-
 export const setTokenInCookies = async (
   name: string,
   token: string,
@@ -35,7 +30,7 @@ export const setTokenInCookies = async (
 ) => {
   let maxAgeInSeconds;
 
-  if (name !== (await getSessionCookieName())) {
+  if (name !== betterAuthSessionCookieName) {
     maxAgeInSeconds = getTokenSecondsRemaining(token);
   }
 
