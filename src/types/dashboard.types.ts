@@ -29,3 +29,7 @@ export interface IGetGenerationLeftCountResponse {
   imageToVideo: number;
   textToVideo: number;
 }
+
+export interface IAIChatBotResponse {
+  response: string;
+}

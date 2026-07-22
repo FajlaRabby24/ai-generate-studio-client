@@ -44,6 +44,7 @@ Do exactly what is asked. Nothing more.
 - Don't touch `.env`, `next.config.ts`, `tailwind.config.ts`, or auth config unless the task is specifically about those.
 - Don't rename existing variables/files/routes as a "cleanup."
 - Don't add TODO comments or placeholder logic beyond what's needed to make the requested feature work.
+- Don't run typecheck (bun run typecheck) and build (bun run build) command.
 
 ## Output Expectations
 
