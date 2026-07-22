@@ -46,7 +46,7 @@ export function TextToImageContainer() {
         console.error("Failed to load remaining credits", err);
       }
     })();
-  }, [fetchGenerationCount]);
+  }, [fetchGenerationCount, generatedImage]);
 
   // Handle Image Generation Request
   const handleGenerate = async () => {
