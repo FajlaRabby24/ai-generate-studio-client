@@ -37,3 +37,16 @@ export enum PaymentStatus {
   FAILED = "FAILED",
   REFUNDED = "REFUNDED",
 }
+
+export enum SubscriptionPlan {
+  FREE = "FREE",
+  MONTHLY = "MONTHLY",
+  YEARLY = "YEARLY",
+}
+
+export enum SubscriptionStatus {
+  ACTIVE = "ACTIVE",
+  CANCELLED = "CANCELLED",
+  EXPIRED = "EXPIRED",
+  PAST_DUE = "PAST_DUE",
+}

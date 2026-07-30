@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/ui/magic-card";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { getDashboardStatsService } from "@/services/dashboard/stats/UserDashboardStats.service";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -17,11 +19,14 @@ import {
   RefreshCw,
   ScanFace,
   Share2,
+  Sparkles,
   Terminal,
   Volume2,
   Zap,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -30,55 +35,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-// Mock Data
-const mockUser = {
-  name: "Fajla",
-  email: "fajla@example.com",
-  plan: "PRO",
-  renewalDate: "Aug 29, 2026",
-};
-
-const mockQuotas = [
-  {
-    name: "Text to Image",
-    used: 15,
-    limit: 20,
-    icon: ImageIcon,
-    color: "from-purple-500 to-pink-500",
-  },
-  {
-    name: "AI Chatbot",
-    used: 48,
-    limit: null, // Unlimited
-    icon: MessageSquare,
-    color: "from-emerald-500 to-teal-500",
-  },
-  {
-    name: "Remove Background",
-    used: 8,
-    limit: 10,
-    icon: ScanFace,
-    color: "from-sky-500 to-blue-500",
-  },
-  {
-    name: "Resume Analyzer",
-    used: 3,
-    limit: 5,
-    icon: FileText,
-    color: "from-amber-500 to-orange-500",
-  },
-];
-
-const mockActivityData = [
-  { day: "Mon", generations: 4 },
-  { day: "Tue", generations: 7 },
-  { day: "Wed", generations: 5 },
-  { day: "Thu", generations: 12 },
-  { day: "Fri", generations: 8 },
-  { day: "Sat", generations: 15 },
-  { day: "Sun", generations: 10 },
-];
 
 const quickActions = [
   {
@@ -132,37 +88,81 @@ const quickActions = [
   },
 ];
 
-const mockGenerations = [
-  {
-    id: "1",
-    type: "Image",
-    prompt:
-      "Futuristic neon cyberpunk alley with glowing signs and flying drones",
-    status: "Success",
-    time: "2 hours ago",
-    url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60",
-  },
-  {
-    id: "2",
-    type: "Chat",
-    prompt:
-      "Write a high-performance Express middleware for checking API rate limits using Redis",
-    status: "Success",
-    time: "5 hours ago",
-  },
-  {
-    id: "3",
-    type: "Background Removal",
-    prompt: "portrait-professional-photo.png",
-    status: "Success",
-    time: "1 day ago",
-    url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60",
-  },
-];
-
 const UserDashboardPage = () => {
   const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
+
+  const { data: userDashboardStats, isLoading } = useQuery({
+    queryKey: ["userDashboardStats"],
+    queryFn: () => getDashboardStatsService(),
+  });
+
+  const stats = userDashboardStats?.data;
+
+  // Render Skeleton Loader while fetching backend data
+  if (isLoading || !mounted || !stats) {
+    return (
+      <div className="space-y-8 text-neutral-900 dark:text-white transition-colors duration-300 animate-pulse">
+        {/* 1. Header Banner Skeleton */}
+        <div className="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900/50 p-8 h-40" />
+
+        {/* 2. Quota Cards Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="p-6 bg-neutral-100 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 rounded-xl h-36"
+            />
+          ))}
+        </div>
+
+        {/* 3. Graph & Activity Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 p-6 bg-neutral-100 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 rounded-2xl h-80" />
+          <div className="p-6 bg-neutral-100 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 rounded-2xl h-80" />
+        </div>
+      </div>
+    );
+  }
+
+  const displayUser = stats.user;
+  const displayQuotas =
+    stats.quotas?.map((q: any) => ({
+      ...q,
+      icon:
+        q.name === "Text to Image"
+          ? ImageIcon
+          : q.name === "AI Chatbot"
+            ? MessageSquare
+            : q.name === "Remove Background"
+              ? ScanFace
+              : q.name === "Resume Analyzer"
+                ? FileText
+                : ImageIcon,
+    })) || [];
+  const displayActivityData = stats.activityData || [];
+  const displayGenerations =
+    stats.recentGenerations?.map((gen: any) => ({
+      id: gen.id,
+      type:
+        gen.type === "TEXT_TO_IMAGE"
+          ? "Image"
+          : gen.type === "AI_CHATBOT"
+            ? "Chat"
+            : gen.type === "IMAGE_BACKGROUND_REMOVER"
+              ? "Background Removal"
+              : gen.type.replace(/_/g, " "),
+      prompt: gen.prompt || "No prompt provided",
+      status: gen.status,
+      time: new Date(gen.createdAt).toLocaleDateString(),
+      url: gen.outputUrls,
+    })) || [];
 
   // Container stagger transition variants
   const containerVariants = {
@@ -196,7 +196,7 @@ const UserDashboardPage = () => {
           <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="space-y-2">
               <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-neutral-950 via-neutral-700 to-neutral-500 dark:from-white dark:via-neutral-200 dark:to-neutral-400 bg-clip-text text-transparent flex items-center gap-3">
-                Welcome back, {mockUser.name}{" "}
+                Welcome back, {displayUser.name}{" "}
                 <span className="animate-pulse">👋</span>
               </h1>
               <p className="text-neutral-500 dark:text-neutral-400 text-sm md:text-base">
@@ -212,12 +212,17 @@ const UserDashboardPage = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-sm tracking-wide text-neutral-800 dark:text-white">
-                    {mockUser.plan} TIER
+                    {displayUser.plan} TIER
                   </span>
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
                 </div>
                 <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                  Renews on {mockUser.renewalDate}
+                  Renews on{" "}
+                  {displayUser.subscription?.currentPeriodEnd
+                    ? new Date(
+                        displayUser.subscription.currentPeriodEnd,
+                      ).toLocaleDateString()
+                    : "N/A"}
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 text-neutral-400 dark:text-neutral-500 ml-2" />
@@ -231,7 +236,7 @@ const UserDashboardPage = () => {
         variants={itemVariants}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        {mockQuotas.map((quota, idx) => {
+        {displayQuotas.map((quota: any, idx: number) => {
           const Icon = quota.icon;
           const percentage = quota.limit
             ? Math.round((quota.used / quota.limit) * 100)
@@ -308,7 +313,7 @@ const UserDashboardPage = () => {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
-                data={mockActivityData}
+                data={displayActivityData}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
                 <defs>
@@ -425,37 +430,41 @@ const UserDashboardPage = () => {
           {quickActions.map((action, idx) => {
             const Icon = action.icon;
             return (
-              <MagicCard
-                key={idx}
-                className="group relative flex items-center justify-between p-6 bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800/80 rounded-xl cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300 hover:-translate-y-0.5 shadow-sm dark:shadow-none"
-                gradientColor={
-                  isDark
-                    ? "rgba(124, 58, 237, 0.05)"
-                    : "rgba(99, 102, 241, 0.03)"
-                }
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-lg border ${action.color}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-neutral-800 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-                        {action.title}
-                      </span>
-                      {action.badge && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400 border border-violet-500/20">
-                          {action.badge}
-                        </span>
-                      )}
+              <Link href={action.href} key={idx}>
+                <MagicCard
+                  className="group relative flex items-center justify-between p-6 bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800/80 rounded-xl cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300 hover:-translate-y-0.5 shadow-sm dark:shadow-none"
+                  gradientColor={
+                    isDark
+                      ? "rgba(124, 58, 237, 0.05)"
+                      : "rgba(99, 102, 241, 0.03)"
+                  }
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-lg border ${action.color}`}>
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <p className="text-neutral-500 dark:text-neutral-400 text-xs mt-1 leading-snug">
-                      {action.description}
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm text-neutral-800 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                          {action.title}
+                        </span>
+                        {action.badge && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400 border border-violet-500/20">
+                            {action.badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-neutral-500 dark:text-neutral-400 text-xs mt-1 leading-snug">
+                        {action.description}
+                      </p>
+                    </div>
+                    <ArrowRight
+                      size={20}
+                      className="text-neutral-400 dark:text-neutral-600 group-hover:text-neutral-900 dark:group-hover:text-white group-hover:translate-x-0.5 transition-all duration-300"
+                    />
                   </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-neutral-400 dark:text-neutral-600 group-hover:text-neutral-900 dark:group-hover:text-white group-hover:translate-x-0.5 transition-all duration-300" />
-              </MagicCard>
+                </MagicCard>
+              </Link>
             );
           })}
         </div>
@@ -475,72 +484,97 @@ const UserDashboardPage = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {mockGenerations.map((gen, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col justify-between overflow-hidden bg-white dark:bg-neutral-900/35 border border-neutral-200 dark:border-neutral-800/80 rounded-xl p-5 hover:border-neutral-300 dark:hover:border-neutral-700/80 transition-colors shadow-sm dark:shadow-none"
+        {displayGenerations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-neutral-900/35 border border-neutral-200 dark:border-neutral-800/80 rounded-xl text-center space-y-4 shadow-sm dark:shadow-none transition-colors duration-300">
+            <div className="p-4 bg-violet-500/10 rounded-full text-violet-600 dark:text-violet-400">
+              <Sparkles className="h-8 w-8" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-bold text-lg text-neutral-800 dark:text-white">
+                No creations yet
+              </h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-sm">
+                Get started by creating your very first AI image, conversation,
+                or text translation.
+              </p>
+            </div>
+            <Button
+              onClick={() =>
+                (window.location.href = "/dashboard/text-to-image")
+              }
+              className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl px-6 py-2.5 text-sm font-semibold transition-all"
             >
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-violet-600 dark:text-violet-400 bg-violet-500/10 px-2 py-1 rounded">
-                    {gen.type}
-                  </span>
-                  <span className="text-xs text-neutral-500 dark:text-neutral-550">
-                    {gen.time}
-                  </span>
+              Start Creating
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {displayGenerations.map((gen: any, idx: number) => (
+              <div
+                key={idx}
+                className="flex flex-col justify-between overflow-hidden bg-white dark:bg-neutral-900/35 border border-neutral-200 dark:border-neutral-800/80 rounded-xl p-5 hover:border-neutral-300 dark:hover:border-neutral-700/80 transition-colors shadow-sm dark:shadow-none"
+              >
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-violet-600 dark:text-violet-400 bg-violet-500/10 px-2 py-1 rounded">
+                      {gen.type}
+                    </span>
+                    <span className="text-xs text-neutral-500 dark:text-neutral-550">
+                      {gen.time}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-neutral-700 dark:text-neutral-300 font-medium line-clamp-2 mb-4 italic">
+                    "{gen.prompt}"
+                  </p>
+
+                  {gen.url && (
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4 border border-neutral-200 dark:border-neutral-800">
+                      <img
+                        src={gen.url}
+                        alt={gen.prompt}
+                        className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
                 </div>
 
-                <p className="text-sm text-neutral-700 dark:text-neutral-300 font-medium line-clamp-2 mb-4 italic">
-                  "{gen.prompt}"
-                </p>
+                <div className="flex justify-between items-center pt-2 border-t border-neutral-200 dark:border-neutral-800/60 mt-auto">
+                  <span className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    {gen.status}
+                  </span>
 
-                {gen.url && (
-                  <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4 border border-neutral-200 dark:border-neutral-800">
-                    <img
-                      src={gen.url}
-                      alt={gen.prompt}
-                      className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-between items-center pt-2 border-t border-neutral-200 dark:border-neutral-800/60 mt-auto">
-                <span className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  {gen.status}
-                </span>
-
-                <div className="flex items-center gap-1">
-                  {gen.url && (
+                  <div className="flex items-center gap-1">
+                    {gen.url && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
                     >
-                      <Download className="h-4 w-4" />
+                      <Share2 className="h-4 w-4" />
                     </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                  >
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );

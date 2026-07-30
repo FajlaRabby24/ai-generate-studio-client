@@ -1,3 +1,12 @@
+import {
+  GenerationStatus,
+  GenerationType,
+  Plan,
+  SubscriptionPlan,
+  SubscriptionStatus,
+} from "@/config/constant";
+import { UserRole } from "@/utils/authUtils";
+
 export interface NavItem {
   title: string;
   href: string;
@@ -32,4 +41,51 @@ export interface IGetGenerationLeftCountResponse {
 
 export interface IAIChatBotResponse {
   response: string;
+}
+
+export interface IUserDashboardStatsResponse {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    plan: Plan;
+    role: UserRole;
+    subscription: {
+      id: string;
+      plan: SubscriptionPlan;
+      status: SubscriptionStatus;
+      currentPeriodStart: Date;
+      currentPeriodEnd: Date;
+      cancelAtPeriodEnd: boolean;
+      stripeCustomerId: string | null;
+    } | null;
+  };
+  quotas: {
+    name: string;
+    used: number;
+    limit: number;
+    remaining: number;
+    color: string;
+  }[];
+  activityData: {
+    day: string;
+    generations: number;
+  }[];
+  recentGenerations: {
+    id: string;
+    userId: string;
+    type: GenerationType;
+    status: GenerationStatus;
+    prompt: string | null;
+    projectId: string | null;
+    outputUrls: string | null;
+    isPublic: boolean;
+    isFeatured: boolean;
+    isDeleted: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    _count: {
+      likes: number;
+    };
+  }[];
 }
