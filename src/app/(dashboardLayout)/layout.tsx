@@ -1,5 +1,5 @@
-import Sidebar from "@/components/modules/dashboard/Sidebar";
 import DashboardTopBar from "@/components/modules/dashboard/DashboardTopBar";
+import Sidebar from "@/components/modules/dashboard/Sidebar";
 
 export default function DashboardLayout({
   children,
@@ -16,7 +16,8 @@ export default function DashboardLayout({
       {/* 2. Main Content Column */}
       <div className="flex-1 flex flex-col md:pl-64">
         <DashboardTopBar />
-        <main className="flex-grow p-4 md:p-8 pt-6 md:pt-8">{children}</main>
+        {/* <main className="flex-grow p-4 md:p-8 pt-6 md:pt-8">{children}</main> */}
+        <main className="flex-grow p-6">{children}</main>
       </div>
     </div>
   );
