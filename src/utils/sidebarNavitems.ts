@@ -12,26 +12,26 @@ export const getCommonNavItems = (role: UserRole): NavSection[] => {
           href: defaultDashboard,
           icon: "LayoutDashboard",
         },
-        {
-          title: "My Profile",
-          href: `/my-profile`,
-          icon: "User",
-        },
-        {
-          title: "History",
-          href: `/history`,
-          icon: "History",
-        },
-        {
-          title: "Billing",
-          href: `/billing`,
-          icon: "CreditCard",
-        },
-        {
-          title: "Settings",
-          href: `/settings`,
-          icon: "Settings",
-        },
+        // {
+        //   title: "My Profile",
+        //   href: `/my-profile`,
+        //   icon: "User",
+        // },
+        // {
+        //   title: "History",
+        //   href: `/history`,
+        //   icon: "History",
+        // },
+        // {
+        //   title: "Billing",
+        //   href: `/billing`,
+        //   icon: "CreditCard",
+        // },
+        // {
+        //   title: "Settings",
+        //   href: `/settings`,
+        //   icon: "Settings",
+        // },
       ],
     },
   ];
