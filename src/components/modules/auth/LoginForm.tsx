@@ -20,7 +20,8 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = React.useState(false);
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: (payload: ILoginPayload) => loginService(payload),
+    mutationFn: (payload: ILoginPayload) =>
+      loginService(payload, navigator.userAgent),
   });
 
   const {

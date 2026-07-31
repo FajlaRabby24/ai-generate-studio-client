@@ -12,11 +12,11 @@ export const getCommonNavItems = (role: UserRole): NavSection[] => {
           href: defaultDashboard,
           icon: "LayoutDashboard",
         },
-        // {
-        //   title: "My Profile",
-        //   href: `/my-profile`,
-        //   icon: "User",
-        // },
+        {
+          title: "My Profile",
+          href: `/dashboard/my-profile`,
+          icon: "User",
+        },
         // {
         //   title: "History",
         //   href: `/history`,

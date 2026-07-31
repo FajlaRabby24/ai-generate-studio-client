@@ -7,7 +7,10 @@ import { catchAsync } from "@/utils/catchAsync";
 import { setTokenInCookies } from "@/utils/tokenUtils";
 import { AuthValidation } from "@/zod-schema/auth/auth.schema";
 
-export const loginService = async (payload: ILoginPayload) =>
+export const loginService = async (
+  payload: ILoginPayload,
+  userAgent?: string,
+) =>
   catchAsync(async () => {
     const parsedPayload =
       AuthValidation.loginValidationSchema.safeParse(payload);
@@ -19,10 +22,10 @@ export const loginService = async (payload: ILoginPayload) =>
       };
     }
 
-    const res = await httpClient.post<ILoginResponse>(
-      "/auth/login",
-      parsedPayload.data,
-    );
+    const res = await httpClient.post<ILoginResponse>("/auth/login", {
+      ...parsedPayload.data,
+      device: userAgent,
+    });
 
     if (!res.success) {
       return {
