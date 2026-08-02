@@ -22,16 +22,16 @@ export const getCommonNavItems = (role: UserRole): NavSection[] => {
           href: `/dashboard/history`,
           icon: "History",
         },
-        // {
-        //   title: "Billing",
-        //   href: `/billing`,
-        //   icon: "CreditCard",
-        // },
-        // {
-        //   title: "Settings",
-        //   href: `/settings`,
-        //   icon: "Settings",
-        // },
+        {
+          title: "Billing",
+          href: `/dashboard/billing`,
+          icon: "CreditCard",
+        },
+        {
+          title: "Settings",
+          href: `/dashboard/settings`,
+          icon: "Settings",
+        },
       ],
     },
   ];
@@ -51,26 +51,26 @@ export const userNavItems: NavSection[] = [
         href: "/dashboard/ai-chatbot",
         icon: "MdOutlineChat",
       },
-      // {
-      //   title: "Text to Video",
-      //   href: "/dashboard/text-to-video",
-      //   icon: "MdOutlineVideoLibrary",
-      // },
-      // {
-      //   title: "Text to Speech",
-      //   href: "/dashboard/text-to-speech",
-      //   icon: "MdOutlineSurfing",
-      // },
-      // {
-      //   title: "Image to Video",
-      //   href: "/dashboard/image-to-video",
-      //   icon: "MdOutlineVideoLibrary",
-      // },
-      // {
-      //   title: "Remove Background",
-      //   href: "/dashboard/remove-background",
-      //   icon: "MdOutlineDeleteOutline",
-      // },
+      {
+        title: "Text to Video",
+        href: "/dashboard/text-to-video",
+        icon: "MdOutlineVideoLibrary",
+      },
+      {
+        title: "Text to Speech",
+        href: "/dashboard/text-to-speech",
+        icon: "MdOutlineSurfing",
+      },
+      {
+        title: "Image to Video",
+        href: "/dashboard/image-to-video",
+        icon: "MdOutlineVideoLibrary",
+      },
+      {
+        title: "Remove Background",
+        href: "/dashboard/remove-background",
+        icon: "MdOutlineDeleteOutline",
+      },
     ],
   },
 ];
