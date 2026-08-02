@@ -3,7 +3,6 @@
 import { GenerationType } from "@/config/constant";
 import {
   generateTextToImageService,
-  getGenerationLeftCountService,
   IGenerateTextToImagePayload,
 } from "@/services/dashboard/text-to-image/text-to-image.service";
 import { useMutation } from "@tanstack/react-query";
@@ -15,38 +14,19 @@ import {
   Maximize2,
   RefreshCw,
   Sparkles,
-  Zap,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export function TextToImageContainer() {
   const [prompt, setPrompt] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [remainingCredits, setRemainingCredits] = useState<number | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: IGenerateTextToImagePayload) =>
       generateTextToImageService(payload),
   });
-
-  const { mutateAsync: fetchGenerationCount } = useMutation({
-    mutationFn: (generationType: GenerationType) =>
-      getGenerationLeftCountService(generationType),
-  });
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetchGenerationCount(GenerationType.TEXT_TO_IMAGE);
-        if (res?.success && res.data) {
-          setRemainingCredits(res.data.textToImage ?? 0);
-        }
-      } catch (err) {
-        console.error("Failed to load remaining credits", err);
-      }
-    })();
-  }, [fetchGenerationCount, generatedImage]);
 
   // Handle Image Generation Request
   const handleGenerate = async () => {
@@ -58,22 +38,25 @@ export function TextToImageContainer() {
       type: GenerationType.TEXT_TO_IMAGE,
     };
 
+    if (!prompt.trim()) {
+      toast.error("Prompt cannot be empty");
+      return;
+    }
+
     try {
       const res = await mutateAsync(payload);
+      console.log("response from mutate", res);
       if (res?.success) {
         if (res?.data?.imageUrl) {
           setGeneratedImage(res.data.imageUrl);
         }
-        setRemainingCredits(res?.data?.creditRemainig || null);
       } else {
-        setValidationError(
-          res?.message || "Failed to generate image. Please try again.",
-        );
+        console.log("text to image response", res);
+        toast.error(res?.message || "Failed to generate image");
       }
     } catch (err: any) {
-      setValidationError(
-        err?.message || "Failed to process text to image request",
-      );
+      console.log("text to image response Error", err);
+      toast.error(err?.message || "Failed to process text to image request");
     }
   };
 
@@ -94,14 +77,6 @@ export function TextToImageContainer() {
             Generate ultra-realistic 8K digital artwork using Black Forest Labs
             AI engine.
           </p>
-        </div>
-
-        {/* Credits Counter Badge */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card border border-border/60 text-xs font-semibold text-foreground shadow-sm">
-            <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span>{remainingCredits} Generations Left</span>
-          </div>
         </div>
       </div>
 

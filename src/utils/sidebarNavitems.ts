@@ -17,11 +17,11 @@ export const getCommonNavItems = (role: UserRole): NavSection[] => {
           href: `/dashboard/my-profile`,
           icon: "User",
         },
-        // {
-        //   title: "History",
-        //   href: `/history`,
-        //   icon: "History",
-        // },
+        {
+          title: "History",
+          href: `/dashboard/history`,
+          icon: "History",
+        },
         // {
         //   title: "Billing",
         //   href: `/billing`,

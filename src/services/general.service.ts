@@ -17,7 +17,7 @@ const validateRequest = <T>(payload: T, schema: ZodType<T>) => {
 const getHeaders = async () => {
   const { accessToken, sessionToken } = await getTokens();
   if (!accessToken || !sessionToken) {
-    return { success: false, message: "Unauthorized" };
+    throw new Error("Unauthorized");
   }
   return {
     headers: {

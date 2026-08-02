@@ -3,10 +3,12 @@ export const catchAsync = async (fn: Function) => {
     const result = await fn();
     return result;
   } catch (error: any) {
-    console.log(error);
+    console.log("from catchAsync", error?.response?.data);
     return {
       success: false,
-      message: error?.message || "An error occurred. Please try again.",
+      message:
+        error?.response?.data?.message ||
+        "An error occurred. Please try again.",
     };
   }
 };
