@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { MagicCard } from "@/components/ui/magic-card";
 import { GenerationType } from "@/config/constant";
 import { aiChatBotService } from "@/services/dashboard/ai-chatbot/ai-chatbot.service";
-import { getGenerationLeftCountService } from "@/services/dashboard/text-to-image/text-to-image.service";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, Bot, Send, Trash2, User, Zap } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Bot, Send, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 interface ChatMessage {
   role: "user" | "model";
@@ -19,7 +19,6 @@ interface ChatMessage {
 export function ChatBotContainer() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [remainingCredits, setRemainingCredits] = useState<number | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -31,29 +30,6 @@ export function ChatBotContainer() {
       chatHistory: ChatMessage[];
     }) => aiChatBotService(payload),
   });
-
-  // Mutation for fetching remaining credits count
-  const { mutateAsync: fetchGenerationCount } = useMutation({
-    mutationFn: (generationType: GenerationType) =>
-      getGenerationLeftCountService(generationType),
-  });
-
-  // Reusable function to refresh remaining credits
-  const refreshCredits = useCallback(async () => {
-    try {
-      const res = await fetchGenerationCount(GenerationType.AI_CHATBOT);
-      if (res?.success && res.data) {
-        setRemainingCredits(res.data.aiChatbot ?? 0);
-      }
-    } catch (err) {
-      console.error("Failed to load remaining credits", err);
-    }
-  }, [fetchGenerationCount]);
-
-  // Load credits on mount
-  useEffect(() => {
-    refreshCredits();
-  }, [refreshCredits]);
 
   // Scroll to bottom whenever messages or typing state changes
   useEffect(() => {
@@ -94,23 +70,14 @@ export function ChatBotContainer() {
             parts: [{ text: res.data.response }],
           },
         ]);
-
-        // 4. Refetch remaining credits since chatbot decrements it in the background
-        await refreshCredits();
       } else {
-        setValidationError(
+        toast.error(
           res?.message || "Failed to generate AI response. Please try again.",
         );
       }
     } catch (err: any) {
-      setValidationError(err?.message || "Failed to process chatbot request");
+      toast.error(err?.message || "Failed to process chatbot request");
     }
-  };
-
-  // Clear chat thread
-  const handleClearChat = () => {
-    setMessages([]);
-    setValidationError(null);
   };
 
   return (
@@ -132,42 +99,13 @@ export function ChatBotContainer() {
             chatbot model.
           </p>
         </div>
-
-        {/* Action Controls & Credits */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-border/60 text-xs font-semibold text-foreground shadow-sm">
-            <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span>
-              {remainingCredits !== null
-                ? `${remainingCredits} Generations Left`
-                : "Loading Credits..."}
-            </span>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleClearChat}
-            className="gap-1.5 rounded-xl text-xs font-semibold cursor-pointer text-muted-foreground hover:text-foreground border-border/60 hover:bg-muted"
-          >
-            <Trash2 className="w-4 h-4" />
-            Clear
-          </Button>
-        </div>
       </div>
-
-      {/* Validation Error Alert */}
-      {validationError && (
-        <div className="mt-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold flex items-center gap-2 shrink-0">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{validationError}</span>
-        </div>
-      )}
 
       {/* Main Chat Interface */}
       <MagicCard
         mode="gradient"
         gradientColor="rgba(124, 58, 237, 0.05)"
-        className="flex-1 mt-4 flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card/10 backdrop-blur-md shadow-xl"
+        className="flex-1 mt-4 flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card/10 backdrop-blur-md shadow-xl [&>div.relative.z-40]:flex-grow [&>div.relative.z-40]:flex [&>div.relative.z-40]:flex-col [&>div.relative.z-40]:min-h-0"
       >
         <div className="flex-1 flex flex-col min-h-0">
           {/* Messages Viewport */}
