@@ -50,3 +50,10 @@ export enum SubscriptionStatus {
   EXPIRED = "EXPIRED",
   PAST_DUE = "PAST_DUE",
 }
+
+export enum NotificationType {
+  SYSTEM = "SYSTEM",
+  BILLING = "BILLING",
+  PROMOTION = "PROMOTION",
+  ALERT = "ALERT",
+}
