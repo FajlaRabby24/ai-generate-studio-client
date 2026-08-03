@@ -3,6 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/ui/magic-card";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   deleteHistoryItemService,
   getMyHistoryService,
 } from "@/services/dashboard/history/history.service";
@@ -11,8 +19,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   Copy,
   Download,
   Eye,
@@ -111,15 +117,12 @@ export default function HistoryComponent({
       searchParams.forEach((value, key) => {
         queryObj[key] = value;
       });
-      if (!queryObj.limit) queryObj.limit = 9;
+      if (!queryObj.limit) queryObj.limit = 6;
 
       const res = await getMyHistoryService(queryObj);
-      // console.log("history response", res);
       return res;
     },
   });
-
-  // console.log("history response", response);
 
   // Soft delete mutation
   const { mutateAsync: deleteItem } = useMutation({
@@ -174,11 +177,8 @@ export default function HistoryComponent({
   const historyList = response?.data || [];
   const meta = response?.meta || { page: 1, limit: 6, total: 0, totalPage: 1 };
 
-  console.log("historyList", historyList);
-  console.log("meta", meta);
-
   return (
-    <div className="space-y-6 mx-auto p-4 md:p-6 text-neutral-900 dark:text-white transition-colors duration-300">
+    <div className="space-y-6  text-neutral-900 dark:text-white transition-colors duration-300">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -193,8 +193,8 @@ export default function HistoryComponent({
       </div>
 
       {/* Search & Filters */}
-      <div className="flex flex-col xl:flex-row gap-4 items-center justify-between bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 p-4 rounded-2xl shadow-sm">
-        <div className="relative w-full xl:max-w-xs">
+      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 p-4 rounded-2xl shadow-sm w-full">
+        <div className="relative w-full lg:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
           <input
             type="text"
@@ -205,7 +205,7 @@ export default function HistoryComponent({
           />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto w-full xl:w-auto scrollbar-none pb-1 xl:pb-0">
+        <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto scrollbar-none pb-1 lg:pb-0">
           {categoryFilters.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeFilter === tab.value;
@@ -377,31 +377,68 @@ export default function HistoryComponent({
 
             {/* Pagination */}
             {meta.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-4 pt-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page <= 1}
-                  onClick={() => updateFilters({ page: page - 1 })}
-                  className="rounded-xl flex items-center gap-1 font-bold cursor-pointer"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
-                </Button>
-                <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">
-                  Page {page} of {meta.totalPage}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page >= meta.totalPage}
-                  onClick={() => updateFilters({ page: page + 1 })}
-                  className="rounded-xl flex items-center gap-1 font-bold cursor-pointer"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+              <Pagination className="pt-6 text-center mx-auto">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      disabled={page <= 1}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (page > 1) updateFilters({ page: page - 1 });
+                      }}
+                      className="cursor-pointer"
+                    />
+                  </PaginationItem>
+
+                  {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map(
+                    (p) => {
+                      const isNear =
+                        Math.abs(p - page) <= 1 ||
+                        p === 1 ||
+                        p === meta.totalPages;
+                      if (!isNear) {
+                        if (p === 2 || p === meta.totalPages - 1) {
+                          return (
+                            <PaginationItem key={p}>
+                              <span className="px-2 text-neutral-400">...</span>
+                            </PaginationItem>
+                          );
+                        }
+                        return null;
+                      }
+                      return (
+                        <PaginationItem key={p}>
+                          <PaginationLink
+                            href="#"
+                            isActive={p === page}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              updateFilters({ page: p });
+                            }}
+                            className="cursor-pointer text-xs font-semibold"
+                          >
+                            {p}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    },
+                  )}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      disabled={page >= meta.totalPages}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (page < meta.totalPages)
+                          updateFilters({ page: page + 1 });
+                      }}
+                      className="cursor-pointer"
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
           </div>
         )}
@@ -423,7 +460,7 @@ export default function HistoryComponent({
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-2xl p-6 overflow-hidden z-10 space-y-6"
+              className="relative w-full max-w-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-2xl p-6 overflow-y-auto max-h-[90vh] z-10 space-y-6"
             >
               <div className="flex justify-between items-start gap-4">
                 <div className="space-y-1">
@@ -444,7 +481,6 @@ export default function HistoryComponent({
                   ✕
                 </button>
               </div>
-
               {/* text to image/video modal  */}
               <div className="rounded-2xl overflow-hidden bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 flex items-center justify-center relative min-h-[220px]">
                 {selectedItem.type === "TEXT_TO_IMAGE" ||
@@ -469,7 +505,6 @@ export default function HistoryComponent({
                   </div>
                 )}
               </div>
-
               <div className="space-y-3">
                 <div className="space-y-1">
                   <h4 className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
@@ -479,9 +514,8 @@ export default function HistoryComponent({
                     {selectedItem.prompt}
                   </p>
                 </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-100 dark:border-neutral-900">
+              </div>{" "}
+              <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-neutral-100 dark:border-neutral-900 w-full">
                 {selectedItem.type === "TEXT_TO_IMAGE" ||
                 selectedItem.type === "IMAGE_BACKGROUND_REMOVER" ? (
                   <a
@@ -489,7 +523,7 @@ export default function HistoryComponent({
                     download="creation.png"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white rounded-xl shadow transition"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold bg-violet-600 hover:bg-violet-750 text-white rounded-xl shadow transition w-full sm:w-auto text-center cursor-pointer"
                   >
                     <Download className="h-3.5 w-3.5" />
                     Download Image
@@ -500,7 +534,7 @@ export default function HistoryComponent({
                     navigator.clipboard.writeText(selectedItem.prompt);
                     toast.success("Prompt copied to clipboard");
                   }}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-neutral-200 dark:border-neutral-800 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-900 transition cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold border border-neutral-200 dark:border-neutral-800 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-900 transition cursor-pointer w-full sm:w-auto text-center"
                 >
                   <Copy className="h-3.5 w-3.5" />
                   Copy Prompt

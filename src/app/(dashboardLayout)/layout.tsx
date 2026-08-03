@@ -14,10 +14,12 @@ export default function DashboardLayout({
       </aside>
 
       {/* 2. Main Content Column */}
-      <div className="flex-1 flex flex-col md:pl-64">
+      <div className="flex-1 flex flex-col md:pl-64 min-w-0">
         <DashboardTopBar />
         {/* <main className="flex-grow p-4 md:p-8 pt-6 md:pt-8">{children}</main> */}
-        <main className="flex-grow p-6">{children}</main>
+        <main className="flex-grow p-6 min-w-0 overflow-x-hidden">
+          {children}
+        </main>
       </div>
     </div>
   );

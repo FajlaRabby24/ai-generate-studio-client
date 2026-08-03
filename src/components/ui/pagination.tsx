@@ -35,26 +35,36 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 
 type PaginationLinkProps = {
   isActive?: boolean
+  disabled?: boolean
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
   React.ComponentProps<"a">
 
 function PaginationLink({
   className,
   isActive,
+  disabled,
   size = "icon",
   ...props
 }: PaginationLinkProps) {
   return (
     <Button
-      variant={isActive ? "outline" : "ghost"}
+      variant={isActive ? "default" : "outline"}
       size={size}
-      className={cn(className)}
+      className={cn(
+        "cursor-pointer rounded-xl font-semibold transition-all duration-200",
+        isActive
+          ? "bg-blue-600 text-white border-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:border-blue-600 dark:text-white"
+          : "bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        className
+      )}
       nativeButton={false}
+      disabled={disabled}
       render={
         <a
           aria-current={isActive ? "page" : undefined}
           data-slot="pagination-link"
           data-active={isActive}
+          className={cn(disabled && "pointer-events-none opacity-50")}
           {...props}
         />
       }
@@ -65,17 +75,19 @@ function PaginationLink({
 function PaginationPrevious({
   className,
   text = "Previous",
+  disabled,
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   return (
     <PaginationLink
       aria-label="Go to previous page"
       size="default"
-      className={cn("pl-1.5!", className)}
+      className={cn("gap-1.5 px-3 py-1.5 flex items-center justify-center", className)}
+      disabled={disabled}
       {...props}
     >
-      <ChevronLeftIcon data-icon="inline-start" />
-      <span className="hidden sm:block">{text}</span>
+      <ChevronLeftIcon className="h-4 w-4" />
+      <span className="hidden sm:inline">{text}</span>
     </PaginationLink>
   )
 }
@@ -83,17 +95,19 @@ function PaginationPrevious({
 function PaginationNext({
   className,
   text = "Next",
+  disabled,
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   return (
     <PaginationLink
       aria-label="Go to next page"
       size="default"
-      className={cn("pr-1.5!", className)}
+      className={cn("gap-1.5 px-3 py-1.5 flex items-center justify-center", className)}
+      disabled={disabled}
       {...props}
     >
-      <span className="hidden sm:block">{text}</span>
-      <ChevronRightIcon data-icon="inline-end" />
+      <span className="hidden sm:inline">{text}</span>
+      <ChevronRightIcon className="h-4 w-4" />
     </PaginationLink>
   )
 }

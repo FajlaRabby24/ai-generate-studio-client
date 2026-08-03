@@ -234,7 +234,7 @@ const UserDashboardPage = () => {
       {/* 2. Quota Usage Cards */}
       <motion.div
         variants={itemVariants}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3"
       >
         {displayQuotas.map((quota: any, idx: number) => {
           const Icon = quota.icon;
