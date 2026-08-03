@@ -23,6 +23,7 @@ import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { UserRole } from "@/utils/authUtils";
+import { useLogout } from "@/hooks/useLogout";
 import { getCookie } from "@/utils/cookieUtils";
 import { jwtUtils } from "@/utils/jwtUtils";
 import { getCommonNavItems, userNavItems } from "@/utils/sidebarNavitems";
@@ -59,6 +60,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
+  const handleLogout = useLogout();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -186,7 +188,7 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
             variant="ghost"
             size="sm"
             className="rounded-xl h-8 px-3 font-medium text-xs text-destructive hover:bg-destructive/10"
-            onClick={() => console.log("Logout clicked")}
+            onClick={handleLogout}
           >
             <LogOut className="h-3.5 w-3.5 mr-1" />
             Logout

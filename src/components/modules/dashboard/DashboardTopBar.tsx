@@ -23,11 +23,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useLogout } from "@/hooks/useLogout";
 import { getCookie } from "@/utils/cookieUtils";
 import { jwtUtils } from "@/utils/jwtUtils";
 import { useEffect } from "react";
-
 export default function DashboardTopBar() {
+  const handleLogout = useLogout();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [decodedUser, setDecodedUser] = useState<any>(null);
 
@@ -125,7 +126,9 @@ export default function DashboardTopBar() {
               />
             }
           >
-            {decodedUser?.name ? decodedUser.name.substring(0, 1).toUpperCase() : "U"}
+            {decodedUser?.name
+              ? decodedUser.name.substring(0, 1).toUpperCase()
+              : "U"}
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
@@ -168,7 +171,7 @@ export default function DashboardTopBar() {
             <DropdownMenuItem
               variant="destructive"
               className="rounded-lg cursor-pointer"
-              onClick={() => console.log("Logout clicked from TopBar")}
+              onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
