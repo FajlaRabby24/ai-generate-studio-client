@@ -35,6 +35,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
+import Swal from "sweetalert2";
 
 const categoryFilters = [
   { label: "All Creations", value: "ALL", icon: Filter },
@@ -137,9 +138,28 @@ export default function HistoryComponent({
     },
   });
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    await deleteItem(id);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this! The creation will be removed from your history.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#8b5cf6",
+      cancelButtonColor: "#ef4444",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      background: document.documentElement.classList.contains("dark")
+        ? "#171717"
+        : "#ffffff",
+      color: document.documentElement.classList.contains("dark")
+        ? "#ffffff"
+        : "#000000",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteItem(id);
+      }
+    });
   };
 
   const getCardIcon = (type: string) => {
