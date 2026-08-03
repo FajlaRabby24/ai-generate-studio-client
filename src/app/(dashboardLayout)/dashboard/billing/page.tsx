@@ -1,11 +1,7 @@
-import EmptyState from "@/components/shared/EmptyState";
+import BillingComponent from "@/components/modules/dashboard/billing/BillingComponent";
 
 const BillingPage = () => {
-  return (
-    <div>
-      <EmptyState title="Billing & Subscriptions" />
-    </div>
-  );
+  return <BillingComponent />;
 };
 
 export default BillingPage;

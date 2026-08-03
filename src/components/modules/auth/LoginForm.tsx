@@ -38,7 +38,6 @@ export default function LoginForm() {
   const onSubmit = async (data: ILoginPayload) => {
     try {
       const res = await mutateAsync(data);
-      console.log("login response", res);
       if (!res.success) {
         toast.error(res.message || "Login failed");
         return;
