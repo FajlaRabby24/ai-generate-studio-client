@@ -29,3 +29,22 @@ export const logoutService = async () =>
       message: "Logged out successfully",
     };
   });
+
+// Clear session cookies and invalidate token session in the backend database
+export const clearSessionService = async () =>
+  catchAsync(async () => {
+    // 1. Try requesting backend session invalidation if user has active tokens
+    const options = await generalService.getHeaders();
+    const res = await httpClient.post("/auth/logout/all", {}, options);
+    if (!res.success) {
+      return {
+        success: false,
+        message: "Failed to logout",
+      };
+    }
+
+    return {
+      success: true,
+      message: "All sessions cleared successfully",
+    };
+  });
