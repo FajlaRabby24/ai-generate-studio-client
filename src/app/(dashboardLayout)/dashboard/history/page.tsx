@@ -1,9 +1,13 @@
 import HistoryComponent from "@/components/modules/dashboard/History/HistoryComponent";
+import { PageProps } from "@/types/general.types";
+import { parseSearchParams } from "@/utils/queryString";
 
-const HistoryPage = () => {
+const HistoryPage = async ({ searchParams }: PageProps) => {
+  const { queryObject } = await parseSearchParams(searchParams);
+
   return (
     <div>
-      <HistoryComponent />
+      <HistoryComponent initialQuery={queryObject} />
     </div>
   );
 };
