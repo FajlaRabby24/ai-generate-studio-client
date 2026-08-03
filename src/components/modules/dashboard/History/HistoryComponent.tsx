@@ -2,10 +2,17 @@
 
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/ui/magic-card";
+import {
+  deleteHistoryItemService,
+  getMyHistoryService,
+} from "@/services/dashboard/history/history.service";
+import { IHistory } from "@/types/history.types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Calendar,
-  Code2,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   Download,
   Eye,
@@ -17,79 +24,119 @@ import {
   Sparkles,
   Trash2,
   Video,
+  Volume2,
 } from "lucide-react";
-import React, { useState } from "react";
-
-const mockHistory = [
-  {
-    id: "gen-1",
-    type: "TEXT_TO_IMAGE",
-    status: "COMPLETED",
-    prompt:
-      "A futuristic floating cyberpunk citadel in the clouds, illuminated by neon holograms and flying traffic streams, oil painting style.",
-    outputUrls:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
-    createdAt: "2026-08-03T11:30:00.000Z",
-  },
-  {
-    id: "gen-2",
-    type: "AI_CHATBOT",
-    status: "COMPLETED",
-    prompt:
-      "Analyze the time complexity of recursion vs iteration and explain call stack space limitations.",
-    outputUrls:
-      "Recursion uses O(N) call stack space because each call pushes a new frame onto the stack, whereas iteration uses O(1) space. If stack depth exceeds memory limits, it triggers a StackOverflowError.",
-    createdAt: "2026-08-03T10:15:00.000Z",
-  },
-  {
-    id: "gen-3",
-    type: "TEXT_TO_VIDEO",
-    status: "COMPLETED",
-    prompt:
-      "Cinematic close-up of crystal droplets freezing on a red winter rose under moonlight.",
-    outputUrls:
-      "https://assets.mixkit.co/videos/preview/mixkit-water-dripping-from-a-flower-42479-large.mp4",
-    createdAt: "2026-08-02T16:45:00.000Z",
-  },
-  {
-    id: "gen-4",
-    type: "IMAGE_BACKGROUND_REMOVER",
-    status: "COMPLETED",
-    prompt: "Studio portrait background removal - model in yellow raincoat.",
-    outputUrls:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
-    createdAt: "2026-08-01T09:20:00.000Z",
-  },
-  {
-    id: "gen-5",
-    type: "CODE_CHECKER",
-    status: "COMPLETED",
-    prompt:
-      "Check this react component for memory leaks: useEffect returning nothing after setInterval.",
-    outputUrls:
-      "Warning: Memory leak detected. Your setInterval timer is not cleared when the component unmounts. Return a cleanup function: `return () => clearInterval(timer)`.",
-    createdAt: "2026-07-31T14:10:00.000Z",
-  },
-];
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 const categoryFilters = [
   { label: "All Creations", value: "ALL", icon: Filter },
   { label: "Images", value: "TEXT_TO_IMAGE", icon: ImageIcon },
   { label: "AI Chat", value: "AI_CHATBOT", icon: MessageSquare },
-  { label: "Video", value: "TEXT_TO_VIDEO", icon: Video },
+  { label: "Text to Video", value: "TEXT_TO_VIDEO", icon: Video },
+  { label: "Image to Video", value: "IMAGE_TO_VIDEO", icon: Video },
+  { label: "Text to Speech", value: "TEXT_TO_SPEECH", icon: Volume2 },
   { label: "Backgrounds", value: "IMAGE_BACKGROUND_REMOVER", icon: Scan },
-  { label: "Code Utilities", value: "CODE_CHECKER", icon: Code2 },
 ];
 
-export default function HistoryComponent() {
-  const [historyList, setHistoryList] = useState(mockHistory);
-  const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState("ALL");
+interface HistoryComponentProps {
+  initialQuery?: any;
+}
+
+export default function HistoryComponent({
+  initialQuery,
+}: HistoryComponentProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
+
+  const page = Number(searchParams.get("page")) || 1;
+  const searchTerm = searchParams.get("searchTerm") || "";
+  const activeFilter = searchParams.get("type") || "ALL";
+
+  const [searchInput, setSearchInput] = useState(searchTerm);
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  // Sync search input with URL search term (only if different to avoid cursor jumps)
+  useEffect(() => {
+    if (searchTerm !== searchInput) {
+      setSearchInput(searchTerm);
+    }
+  }, [searchTerm]);
+
+  // Debounce search input
+  useEffect(() => {
+    if (searchInput === searchTerm) return;
+
+    const timer = setTimeout(() => {
+      updateFilters({ searchTerm: searchInput });
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const updateFilters = (newParams: Record<string, string | number | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value === null || value === "" || value === "ALL") {
+        params.delete(key);
+      } else {
+        params.set(key, String(value));
+      }
+    });
+
+    // Reset to page 1 for any filter change that isn't pagination
+    if (newParams.page === undefined) {
+      params.set("page", "1");
+    }
+
+    startTransition(() => {
+      router.push(`/dashboard/history?${params.toString()}`);
+    });
+  };
+
+  const clearFilters = () => {
+    setSearchInput("");
+    router.push("/dashboard/history");
+  };
+
+  // Fetch paginated generation history records tied to search parameters
+  const { data: response, isLoading } = useQuery({
+    queryKey: ["history", searchParams.toString()],
+    queryFn: async () => {
+      const queryObj: Record<string, any> = {};
+      searchParams.forEach((value, key) => {
+        queryObj[key] = value;
+      });
+      if (!queryObj.limit) queryObj.limit = 9;
+
+      const res = await getMyHistoryService(queryObj);
+      // console.log("history response", res);
+      return res;
+    },
+  });
+
+  // console.log("history response", response);
+
+  // Soft delete mutation
+  const { mutateAsync: deleteItem } = useMutation({
+    mutationFn: (id: string) => deleteHistoryItemService(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["history"] });
+      toast.success("Creation removed from history");
+      if (selectedItem) setSelectedItem(null);
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to delete item");
+    },
+  });
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setHistoryList((prev) => prev.filter((item) => item.id !== id));
+    await deleteItem(id);
   };
 
   const getCardIcon = (type: string) => {
@@ -99,21 +146,23 @@ export default function HistoryComponent() {
       case "AI_CHATBOT":
         return <MessageSquare className="h-4 w-4 text-emerald-500" />;
       case "TEXT_TO_VIDEO":
+      case "IMAGE_TO_VIDEO":
         return <Video className="h-4 w-4 text-pink-500" />;
       case "IMAGE_BACKGROUND_REMOVER":
         return <Scan className="h-4 w-4 text-sky-500" />;
-      case "CODE_CHECKER":
-        return <Code2 className="h-4 w-4 text-red-500" />;
+      case "TEXT_TO_SPEECH":
+        return <Volume2 className="h-4 w-4 text-violet-500" />;
       default:
-        return <Sparkles className="h-4 w-4 text-violet-500" />;
+        return <Sparkles className="h-4 w-4 text-amber-500" />;
     }
   };
 
   const formatType = (type: string) => {
-    return type.replace(/_/g, " ");
+    return type?.replace(/_/g, " ") || "";
   };
 
   const formatDate = (isoString: string) => {
+    if (!isoString) return "";
     const date = new Date(isoString);
     return date.toLocaleDateString("en-US", {
       month: "short",
@@ -122,52 +171,48 @@ export default function HistoryComponent() {
     });
   };
 
-  const filteredHistory = historyList.filter((item) => {
-    const matchesFilter = activeFilter === "ALL" || item.type === activeFilter;
-    const matchesSearch = item.prompt
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  const historyList = response?.data || [];
+  const meta = response?.meta || { page: 1, limit: 6, total: 0, totalPage: 1 };
+
+  console.log("historyList", historyList);
+  console.log("meta", meta);
 
   return (
-    <div className="space-y-6  mx-auto p-4 md:p-6 text-neutral-900 dark:text-white transition-colors duration-300">
-      {/* 1. Page Header */}
+    <div className="space-y-6 mx-auto p-4 md:p-6 text-neutral-900 dark:text-white transition-colors duration-300">
+      {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-neutral-950 via-neutral-750 to-neutral-500 dark:from-white dark:via-neutral-200 dark:to-neutral-400 bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-linear-to-r from-neutral-950 via-neutral-750 to-neutral-500 dark:from-white dark:via-neutral-200 dark:to-neutral-400 bg-clip-text text-transparent">
             Creations History
           </h1>
           <p className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-            Browse, view, or manage your generated images, chats, and utility
+            Browse, view, or manage your generated outputs, chats, and utility
             runs.
           </p>
         </div>
       </div>
 
-      {/* 2. Search & Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 p-4 rounded-2xl shadow-sm">
-        {/* Search */}
-        <div className="relative w-full md:max-w-xs">
+      {/* Search & Filters */}
+      <div className="flex flex-col xl:flex-row gap-4 items-center justify-between bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 p-4 rounded-2xl shadow-sm">
+        <div className="relative w-full xl:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search prompts..."
             className="w-full pl-9 pr-4 py-2 text-sm bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-violet-500/50 rounded-xl transition"
           />
         </div>
 
-        {/* Filters Tabs scrollbar */}
-        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto scrollbar-none pb-1 md:pb-0">
+        <div className="flex items-center gap-2 overflow-x-auto w-full xl:w-auto scrollbar-none pb-1 xl:pb-0">
           {categoryFilters.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeFilter === tab.value;
             return (
               <button
                 key={tab.value}
-                onClick={() => setActiveFilter(tab.value)}
+                onClick={() => updateFilters({ type: tab.value })}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap border transition cursor-pointer ${
                   isActive
                     ? "bg-violet-600 border-violet-600 text-white shadow-sm"
@@ -182,9 +227,18 @@ export default function HistoryComponent() {
         </div>
       </div>
 
-      {/* 3. History Items Grid */}
+      {/* Creations Grid */}
       <AnimatePresence mode="popLayout">
-        {filteredHistory.length === 0 ? (
+        {isLoading || isPending ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="h-72 w-full animate-pulse bg-neutral-100 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 rounded-2xl"
+              />
+            ))}
+          </div>
+        ) : historyList.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -199,123 +253,164 @@ export default function HistoryComponent() {
               Try adjusting your search criteria or filter selections, or head
               over to the generators to start creating!
             </p>
+            {searchTerm || activeFilter !== "ALL" ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFilters}
+                className="mt-4 rounded-xl font-bold cursor-pointer"
+              >
+                Clear Filters
+              </Button>
+            ) : null}
           </motion.div>
         ) : (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            layout
-          >
-            {filteredHistory.map((item) => (
-              <motion.div
-                key={item.id}
-                layoutId={item.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-                onClick={() => setSelectedItem(item)}
-                className="cursor-pointer flex h-full"
-              >
-                <MagicCard
-                  className="flex flex-col justify-between p-5 bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm dark:shadow-none hover:border-neutral-300 dark:hover:border-neutral-750 transition-all duration-300 w-full"
-                  gradientColor="rgba(139, 92, 246, 0.03)"
+          <div className="space-y-6">
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              layout
+            >
+              {historyList.map((item: IHistory) => (
+                <motion.div
+                  key={item.id}
+                  layoutId={item.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                  onClick={() => setSelectedItem(item)}
+                  className="cursor-pointer flex h-full"
                 >
-                  <div className="space-y-4 flex-grow">
-                    {/* Header: Icon / Badge & Date */}
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
-                        {getCardIcon(item.type)}
-                        <span className="text-neutral-700 dark:text-neutral-300">
-                          {formatType(item.type)}
+                  <MagicCard
+                    className="flex flex-col justify-between p-5 bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm dark:shadow-none hover:border-neutral-300 dark:hover:border-neutral-750 transition-all duration-300 w-full [&>div.relative.z-40]:flex [&>div.relative.z-40]:flex-col [&>div.relative.z-40]:h-full [&>div.relative.z-40]:w-full"
+                    gradientColor="rgba(139, 92, 246, 0.03)"
+                  >
+                    <div className="space-y-4 grow flex flex-col">
+                      {/* Header Badge */}
+                      <div className="flex justify-between items-center shrink-0">
+                        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                          {getCardIcon(item.type)}
+                          <span className="text-neutral-700 dark:text-neutral-300">
+                            {formatType(item.type)}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-neutral-400 flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDate(item.createdAt)}
                         </span>
                       </div>
-                      <span className="text-[10px] text-neutral-400 flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(item.createdAt)}
-                      </span>
+
+                      {/* Preview Container */}
+                      <div className="h-36 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-950/60 border border-neutral-100 dark:border-neutral-900 flex items-center justify-center relative group flex-grow">
+                        {item.type === "TEXT_TO_IMAGE" ||
+                        item.type === "IMAGE_BACKGROUND_REMOVER" ? (
+                          <img
+                            src={item.outputUrls}
+                            alt="Creation Preview"
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                          />
+                        ) : item.type === "TEXT_TO_VIDEO" ||
+                          item.type === "IMAGE_TO_VIDEO" ? (
+                          <div className="text-center space-y-1 p-4">
+                            <div className="p-3 bg-pink-500/10 rounded-full text-pink-500 inline-block">
+                              <Video className="h-6 w-6" />
+                            </div>
+                            <p className="text-[10px] font-semibold text-neutral-500">
+                              Video Output
+                            </p>
+                          </div>
+                        ) : item.type === "AI_CHATBOT" ? (
+                          <div className="text-center space-y-1 p-4">
+                            <div className="p-3 bg-emerald-500/10 rounded-full text-emerald-500 inline-block">
+                              <MessageSquare className="h-6 w-6" />
+                            </div>
+                            <p className="text-[10px] font-semibold text-neutral-500">
+                              Chat Log
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="text-center space-y-1 p-4">
+                            <div className="p-3 bg-violet-500/10 rounded-full text-violet-500 inline-block">
+                              <Sparkles className="h-6 w-6" />
+                            </div>
+                            <p className="text-[10px] font-semibold text-neutral-500">
+                              Generated Run
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Prompt */}
+                      <div className="space-y-1 shrink-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                          Prompt
+                        </p>
+                        <p className="text-xs text-neutral-600 dark:text-neutral-300 line-clamp-2 leading-relaxed">
+                          {item.prompt}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Media preview area */}
-                    <div className="h-36 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-950/60 border border-neutral-100 dark:border-neutral-900 flex items-center justify-center relative group">
-                      {item.type === "TEXT_TO_IMAGE" ||
-                      item.type === "IMAGE_BACKGROUND_REMOVER" ? (
-                        <img
-                          src={item.outputUrls}
-                          alt="Creations preview"
-                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                        />
-                      ) : item.type === "TEXT_TO_VIDEO" ? (
-                        <div className="text-center space-y-1 p-4">
-                          <div className="p-3 bg-pink-500/10 rounded-full text-pink-500 inline-block">
-                            <Video className="h-6 w-6" />
-                          </div>
-                          <p className="text-[10px] font-semibold text-neutral-500">
-                            Video Output
-                          </p>
-                        </div>
-                      ) : item.type === "AI_CHATBOT" ? (
-                        <div className="text-center space-y-1 p-4">
-                          <div className="p-3 bg-emerald-500/10 rounded-full text-emerald-500 inline-block">
-                            <MessageSquare className="h-6 w-6" />
-                          </div>
-                          <p className="text-[10px] font-semibold text-neutral-500">
-                            Chat Log
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="text-center space-y-1 p-4">
-                          <div className="p-3 bg-violet-500/10 rounded-full text-violet-500 inline-block">
-                            <Sparkles className="h-6 w-6" />
-                          </div>
-                          <p className="text-[10px] font-semibold text-neutral-500">
-                            Generated Run
-                          </p>
-                        </div>
-                      )}
+                    {/* Footer Actions */}
+                    <div className="flex items-center justify-between border-t border-neutral-100 dark:border-neutral-900 pt-4 mt-4 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs cursor-pointer gap-1 text-violet-600 dark:text-violet-400 hover:bg-violet-500/5 px-2 py-1 rounded-lg"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        View Details
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleDelete(item.id, e)}
+                        className="text-red-500 hover:text-red-650 hover:bg-red-500/5 border border-transparent hover:border-red-500/10 rounded-lg p-1.5 size-7 cursor-pointer flex items-center justify-center"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
+                  </MagicCard>
+                </motion.div>
+              ))}
+            </motion.div>
 
-                    {/* Prompt snippet */}
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                        Prompt
-                      </p>
-                      <p className="text-xs text-neutral-600 dark:text-neutral-300 line-clamp-2 leading-relaxed">
-                        {item.prompt}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Actions footer */}
-                  <div className="flex items-center justify-between border-t border-neutral-100 dark:border-neutral-900 pt-4 mt-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs gap-1 text-violet-600 dark:text-violet-400 hover:bg-violet-500/5 px-2 py-1 rounded-lg"
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      View Details
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => handleDelete(item.id, e)}
-                      className="text-red-500 hover:text-red-650 hover:bg-red-500/5 border border-transparent hover:border-red-500/10 rounded-lg p-1.5 size-7 cursor-pointer flex items-center justify-center"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </MagicCard>
-              </motion.div>
-            ))}
-          </motion.div>
+            {/* Pagination */}
+            {meta.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 pt-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => updateFilters({ page: page - 1 })}
+                  className="rounded-xl flex items-center gap-1 font-bold cursor-pointer"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">
+                  Page {page} of {meta.totalPage}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= meta.totalPage}
+                  onClick={() => updateFilters({ page: page + 1 })}
+                  className="rounded-xl flex items-center gap-1 font-bold cursor-pointer"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         )}
       </AnimatePresence>
 
-      {/* 4. Details Popup Overlay Modal */}
+      {/* Details Popup Modal */}
       <AnimatePresence>
         {selectedItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop filter */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -324,14 +419,12 @@ export default function HistoryComponent() {
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
 
-            {/* Modal Box */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               className="relative w-full max-w-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-2xl p-6 overflow-hidden z-10 space-y-6"
             >
-              {/* Modal Header */}
               <div className="flex justify-between items-start gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 w-fit">
@@ -352,16 +445,17 @@ export default function HistoryComponent() {
                 </button>
               </div>
 
-              {/* Modal Media Showcase */}
+              {/* text to image/video modal  */}
               <div className="rounded-2xl overflow-hidden bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 flex items-center justify-center relative min-h-[220px]">
                 {selectedItem.type === "TEXT_TO_IMAGE" ||
                 selectedItem.type === "IMAGE_BACKGROUND_REMOVER" ? (
                   <img
                     src={selectedItem.outputUrls}
-                    alt="Creations detailed"
+                    alt="Creation Preview"
                     className="w-full max-h-[350px] object-contain"
                   />
-                ) : selectedItem.type === "TEXT_TO_VIDEO" ? (
+                ) : selectedItem.type === "TEXT_TO_VIDEO" ||
+                  selectedItem.type === "IMAGE_TO_VIDEO" ? (
                   <video
                     src={selectedItem.outputUrls}
                     controls
@@ -376,7 +470,6 @@ export default function HistoryComponent() {
                 )}
               </div>
 
-              {/* Modal Prompt & Details */}
               <div className="space-y-3">
                 <div className="space-y-1">
                   <h4 className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
@@ -388,13 +481,12 @@ export default function HistoryComponent() {
                 </div>
               </div>
 
-              {/* Modal Actions */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-100 dark:border-neutral-900">
                 {selectedItem.type === "TEXT_TO_IMAGE" ||
                 selectedItem.type === "IMAGE_BACKGROUND_REMOVER" ? (
                   <a
                     href={selectedItem.outputUrls}
-                    download="creations.png"
+                    download="creation.png"
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white rounded-xl shadow transition"
@@ -406,6 +498,7 @@ export default function HistoryComponent() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(selectedItem.prompt);
+                    toast.success("Prompt copied to clipboard");
                   }}
                   className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold border border-neutral-200 dark:border-neutral-800 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-900 transition cursor-pointer"
                 >

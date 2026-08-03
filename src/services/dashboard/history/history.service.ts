@@ -2,7 +2,7 @@
 
 import { httpClient } from "@/lib/httpClient";
 import { generalService } from "@/services/general.service";
-import { IHistoryDelete } from "@/types/history.types";
+import { IHistory, IHistoryDelete } from "@/types/history.types";
 import { catchAsync } from "@/utils/catchAsync";
 
 import { parseSearchParams } from "@/utils/queryString";
@@ -14,7 +14,7 @@ export const getMyHistoryService = async (query?: Record<string, any>) =>
     const { queryString } = await parseSearchParams(query || {});
     const url = queryString ? `/history?${queryString}` : "/history";
 
-    const res = await httpClient.get<any>(url, options);
+    const res = await httpClient.get<IHistory[]>(url, options);
     return res;
   });
 
