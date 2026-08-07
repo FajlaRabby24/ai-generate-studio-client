@@ -57,3 +57,5 @@ export enum NotificationType {
   PROMOTION = "PROMOTION",
   ALERT = "ALERT",
 }
+
+export const AspectRatio = ["16:9", "9:16"] as const;
