@@ -33,12 +33,7 @@ export default function AuthLayout({
         {/* We use a poster/fallback image and native video tags */}
         <BackgroundVideo />
         {/* Background Poster for Reduced Motion or Video Fallback */}
-        <div
-          className="absolute inset-0 bg-cover bg-center hidden motion-reduce:block"
-          style={{
-            backgroundImage: `url('https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260806_132328_5f9029c8-218f-4489-82b6-29ff2849920e.png')`,
-          }}
-        />
+      
       </div>
 
       {/* Scrim Overlay */}
