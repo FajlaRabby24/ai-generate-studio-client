@@ -1,30 +1,19 @@
 "use client";
 
-import { GoogleButton } from "@/components/ui/google-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { registerService } from "@/services/auth/register.service";
-import { IRegisterPayload } from "@/types/auth.types";
-import { uploadToCloudinary } from "@/utils/uploadImageToCloudinary";
-import { validateImage } from "@/utils/validateProfileImage";
 import { useMutation } from "@tanstack/react-query";
-import {
-  Camera,
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  Sparkles,
-  User,
-  X,
-} from "lucide-react";
+import { Camera, Eye, EyeOff, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+import { Label } from "@/components/ui/label";
+import { registerService } from "@/services/auth/register.service";
+import { IRegisterPayload } from "@/types/auth.types";
+import { uploadToCloudinary } from "@/utils/uploadImageToCloudinary";
+import { validateImage } from "@/utils/validateProfileImage";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -121,33 +110,32 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-border/40 bg-card/65 p-8 shadow-xl backdrop-blur-md">
-      {/* Form Header */}
-      <div className="flex flex-col items-center gap-2 text-center mb-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md">
-          <Link href="/">
-            {" "}
-            <Sparkles className="h-5 w-5 text-white" />
-          </Link>
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Create an account
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your details below to register
-        </p>
-      </div>
+    <div className="w-full min-[1101px]:w-[min(34vw,620px)] min-[1101px]:min-w-[380px] max-[1100px]:w-[min(70vw,520px)] max-[720px]:w-full flex flex-col items-start select-none">
+      {/* CHIP */}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <h1 className="font-display font-bold text-4xl tracking-[0.03em] leading-[0.95] text-white mt-[clamp(16px,2vw,32px)] uppercase select-none">
+        AI GENERATE STUDIO
+      </h1>
+      {/* TAGLINE */}
+      <p className="font-mono font-[300] text-[clamp(11px,0.94vw,17px)] tracking-[0.14em] text-white/62 mt-[clamp(8px,1vw,16px)] leading-[1.4] uppercase select-none">
+        Your creative suite for AI generation.
+      </p>
+
+      {/* FORM */}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full flex flex-col gap-[clamp(10px,1vw,16px)] mt-[clamp(24px,3.2vw,50px)]"
+        noValidate
+      >
         {/* Profile Image Input with Preview */}
-        <div className="flex flex-col items-center gap-2">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="flex flex-col items-center self-center gap-3 mb-2">
+          <span className="font-mono text-[11px] tracking-[0.18em] uppercase text-white/62">
             Profile Photo
-          </Label>
-          <div className="relative flex h-24 w-24">
+          </span>
+          <div className="relative w-24 h-24">
             <div
               onClick={triggerFileSelect}
-              className="group relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-border/60 bg-muted/40 transition-all hover:border-violet-500/70 hover:bg-muted/70"
+              className="group relative w-full h-full cursor-pointer flex flex-col items-center justify-center overflow-hidden border border-dashed border-white/26 bg-white/5 hover:border-white/50 hover:bg-white/9 transition-all duration-250 select-none rounded-none"
             >
               {imagePreview ? (
                 <Image
@@ -159,20 +147,20 @@ export default function RegisterForm() {
                   className="object-cover"
                 />
               ) : (
-                <div className="flex flex-col items-center gap-1 text-muted-foreground group-hover:text-violet-500 transition-colors">
-                  <Camera className="h-6 w-6" />
-                  <span className="text-[10px] font-medium">Upload</span>
+                <div className="flex flex-col items-center gap-1.5 text-white/42 group-hover:text-white transition-colors duration-250">
+                  <Camera className="h-5 w-5" />
+                  <span className="font-mono text-[10px] tracking-wider uppercase font-[300]">
+                    Upload
+                  </span>
                 </div>
               )}
-
               {/* Overlay on Hover */}
               {imagePreview && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-250">
                   <Camera className="h-5 w-5 text-white" />
                 </div>
               )}
             </div>
-
             {imagePreview && (
               <button
                 type="button"
@@ -184,7 +172,7 @@ export default function RegisterForm() {
                     fileInputRef.current.value = "";
                   }
                 }}
-                className="absolute -top-1 -right-1 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-md hover:bg-destructive/90 transition-all cursor-pointer border border-background"
+                className="absolute -top-1.5 -right-1.5 z-20 flex h-6 w-6 items-center justify-center bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer border border-black rounded-none outline-none focus-visible:outline focus-visible:outline-white/70"
                 aria-label="Remove Image"
               >
                 <X className="h-3.5 w-3.5" />
@@ -203,76 +191,61 @@ export default function RegisterForm() {
           />
         </div>
 
-        {/* Name Input */}
-        <div className="space-y-1.5">
-          <Label htmlFor="name" className="text-xs font-medium text-foreground">
+        {/* Name Field */}
+        <div className="flex flex-col gap-1.5 relative">
+          <Label htmlFor="name" className="sr-only">
             Full Name
           </Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-              <User className="h-4 w-4" />
-            </span>
-            <Input
-              id="name"
-              type="text"
-              placeholder="John Doe"
-              className="pl-9 h-10 rounded-xl"
-              {...register("name", { required: "Name is required" })}
-            />
-          </div>
+          <input
+            id="name"
+            type="text"
+            placeholder="FULL NAME"
+            className="w-full bg-transparent border-0 border-b border-white/26 rounded-none px-0.5 pb-[clamp(8px,0.8vw,12px)] pt-0 font-display font-[300] text-[clamp(16px,0.95vw,18px)] text-white placeholder:text-white/62 focus:border-white/85 focus:placeholder:text-white/42 transition-colors duration-250 outline-none focus:outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-[3px]"
+            {...register("name", { required: "Name is required" })}
+          />
           {errors.name && (
-            <p className="text-xs text-destructive">{errors.name.message}</p>
+            <p className="text-xs font-mono tracking-wider text-red-500 mt-1 select-none">
+              {errors.name.message}
+            </p>
           )}
         </div>
 
-        {/* Email Input */}
-        <div className="space-y-1.5">
-          <Label
-            htmlFor="email"
-            className="text-xs font-medium text-foreground"
-          >
+        {/* Email Field */}
+        <div className="flex flex-col gap-1.5 relative">
+          <Label htmlFor="email" className="sr-only">
             Email Address
           </Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-              <Mail className="h-4 w-4" />
-            </span>
-            <Input
-              id="email"
-              type="email"
-              placeholder="name@example.com"
-              className="pl-9 h-10 rounded-xl"
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
-                },
-              })}
-            />
-          </div>
+          <input
+            id="email"
+            type="email"
+            placeholder="EMAIL"
+            className="w-full bg-transparent border-0 border-b border-white/26 rounded-none px-0.5 pb-[clamp(8px,0.8vw,12px)] pt-0 font-display font-[300] text-[clamp(16px,0.95vw,18px)] text-white placeholder:text-white/62 focus:border-white/85 focus:placeholder:text-white/42 transition-colors duration-250 outline-none focus:outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-[3px]"
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address",
+              },
+            })}
+          />
           {errors.email && (
-            <p className="text-xs text-destructive">{errors.email.message}</p>
+            <p className="text-xs font-mono tracking-wider text-red-500 mt-1 select-none">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
-        {/* Password Input */}
-        <div className="space-y-1.5">
-          <Label
-            htmlFor="password"
-            className="text-xs font-medium text-foreground"
-          >
+        {/* Password Field */}
+        <div className="flex flex-col gap-1.5 relative">
+          <Label htmlFor="password" className="sr-only">
             Password
           </Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-              <Lock className="h-4 w-4" />
-            </span>
-            <Input
+          <div className="relative w-full">
+            <input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              className="pl-9 pr-10 h-10 rounded-xl"
+              placeholder="PASSWORD"
+              className="w-full bg-transparent border-0 border-b border-white/26 rounded-none px-0.5 pb-[clamp(8px,0.8vw,12px)] pt-0 font-display font-[300] text-[clamp(16px,0.95vw,18px)] text-white placeholder:text-white/62 focus:border-white/85 focus:placeholder:text-white/42 transition-colors duration-250 outline-none focus:outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-[3px]"
               {...register("password", {
                 required: "Password is required",
                 minLength: {
@@ -284,7 +257,8 @@ export default function RegisterForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground cursor-pointer focus:outline-none"
+              className="absolute right-2 bottom-[clamp(8px,0.8vw,12px)] text-white/42 hover:text-white transition-colors cursor-pointer outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-2"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -294,49 +268,43 @@ export default function RegisterForm() {
             </button>
           </div>
           {errors.password && (
-            <p className="text-xs text-destructive">
+            <p className="text-xs font-mono tracking-wider text-red-500 mt-1 select-none">
               {errors.password.message}
             </p>
           )}
         </div>
 
-        {/* Register Button */}
-        <ShimmerButton
-          type="submit"
-          disabled={isPending}
-          shimmerColor="#ffffff"
-          background="linear-gradient(to right, #7c3aed, #4f46e5)"
-          borderRadius="12px"
-          className="w-full h-10 mt-2 font-semibold text-white shadow-md shadow-violet-500/10 hover:shadow-violet-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
-        >
-          {isPending ? "Signing Up..." : "Sign Up"}
-        </ShimmerButton>
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-4 mt-4 w-full">
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full bg-white/10 text-white rounded-none border-0 py-[clamp(12px,1.2vw,18px)] px-5 font-mono font-[400] uppercase tracking-[0.22em] text-[clamp(11px,0.78vw,14px)] hover:bg-white/17 transition-colors duration-250 cursor-pointer disabled:opacity-50 disabled:pointer-events-none outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-[3px]"
+          >
+            {isPending ? "SIGNING UP..." : "SIGN UP"}
+          </button>
 
-        {/* Divider */}
-        <div className="relative flex py-1 items-center">
-          <div className="flex-grow border-t border-border/30"></div>
-          <span className="flex-shrink mx-4 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-            Or
-          </span>
-          <div className="flex-grow border-t border-border/30"></div>
+          {/* Google SSO Button */}
+          <button
+            type="button"
+            onClick={() => console.log("Google registration submit")}
+            className="w-full bg-white/5 text-white/42 rounded-none border-0 py-[clamp(12px,1.2vw,18px)] px-5 font-mono font-[400] uppercase tracking-[0.22em] text-[clamp(11px,0.78vw,14px)] hover:bg-white/9 hover:text-white transition-all duration-250 cursor-pointer outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-[3px]"
+          >
+            SIGN UP WITH GOOGLE
+          </button>
         </div>
 
-        {/* Google Register Button */}
-        <GoogleButton
-          text="Sign up with Google"
-          onClick={() => console.log("Google registration submit")}
-        />
-
-        {/* Redirect Footer */}
-        <div className="text-center text-sm text-muted-foreground mt-4">
-          Already have an account?{" "}
+        {/* Redirect Referral Link */}
+        <p className="self-center font-mono text-[clamp(11px,0.74vw,14px)] tracking-[0.18em] uppercase text-white mt-[clamp(16px,1.8vw,32px)] ">
+          Already have an account?
           <Link
             href="/auth/login"
-            className="font-medium text-primary hover:underline transition-all"
+            className="ml-2 hover:text-white/62 hover:underline underline-offset-4 transition-colors outline-none focus-visible:outline focus-visible:outline-white/70"
           >
             Sign In
           </Link>
-        </div>
+        </p>
       </form>
     </div>
   );

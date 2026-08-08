@@ -1,17 +1,14 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { Eye, EyeOff, Lock, Mail, Sparkles } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { GoogleButton } from "@/components/ui/google-button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { loginService } from "@/services/auth/login.service";
 import { ILoginPayload } from "@/types/auth.types";
 
@@ -54,79 +51,60 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-border/40 bg-card/65 p-8 shadow-xl backdrop-blur-md">
-      {/* Form Header */}
-      <div className="flex flex-col items-center gap-2 text-center mb-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md">
-          <Link href="/">
-            <Sparkles className="h-5 w-5 text-white" />
-          </Link>
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Welcome back
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your email and password to sign in
-        </p>
-      </div>
+    <div className=" min-[1101px]:w-[min(34vw,620px)] min-[1101px]:min-w-[380px] max-[1100px]:w-[min(70vw,520px)] max-[720px]:w-full flex flex-col items-start select-none">
+      {/* CHIP */}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Email Input */}
-        <div className="space-y-1.5">
-          <Label
-            htmlFor="email"
-            className="text-xs font-medium text-foreground"
-          >
+      <h1 className="font-display font-bold text-4xl tracking-[0.03em] leading-[0.95] text-white mt-[clamp(16px,2vw,32px)] uppercase select-none">
+        AI GENERATE STUDIO
+      </h1>
+
+      {/* TAGLINE */}
+      <p className="font-mono font-[300] text-[clamp(11px,0.94vw,17px)] tracking-[0.14em] text-white/62 mt-[clamp(8px,1vw,16px)] leading-[1.4] uppercase select-none">
+        Your creative suite for AI generation.
+      </p>
+
+      {/* FORM */}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full flex flex-col gap-[clamp(10px,1vw,16px)] mt-[clamp(24px,3.2vw,50px)]"
+        noValidate
+      >
+        {/* Email Field */}
+        <div className="flex flex-col gap-1.5 relative">
+          <Label htmlFor="email" className="sr-only">
             Email Address
           </Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-              <Mail className="h-4 w-4" />
-            </span>
-            <Input
-              id="email"
-              type="email"
-              placeholder="name@example.com"
-              className="pl-9 h-10 rounded-xl"
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
-                },
-              })}
-            />
-          </div>
+          <input
+            id="email"
+            type="email"
+            placeholder="EMAIL"
+            className="w-full bg-transparent border-0 border-b border-white/26 rounded-none px-0.5 pb-[clamp(8px,0.8vw,12px)] pt-0 font-display font-[300] text-[clamp(16px,0.95vw,18px)] text-white placeholder:text-white/62 focus:border-white/85 focus:placeholder:text-white/42 transition-colors duration-250 outline-none focus:outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-[3px]"
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address",
+              },
+            })}
+          />
           {errors.email && (
-            <p className="text-xs text-destructive">{errors.email.message}</p>
+            <p className="text-xs font-mono tracking-wider text-red-500 mt-1 select-none">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
-        {/* Password Input */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label
-              htmlFor="password"
-              className="text-xs font-medium text-foreground"
-            >
-              Password
-            </Label>
-            <Link
-              href="/auth/forgot-password"
-              className="text-xs text-primary hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-              <Lock className="h-4 w-4" />
-            </span>
-            <Input
+        {/* Password Field */}
+        <div className="flex flex-col gap-1.5 relative">
+          <Label htmlFor="password" className="sr-only">
+            Password
+          </Label>
+          <div className="relative w-full">
+            <input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              className="pl-9 pr-10 h-10 rounded-xl"
+              placeholder="PASSWORD"
+              className="w-full bg-transparent border-0 border-b border-white/26 rounded-none px-0.5 pb-[clamp(8px,0.8vw,12px)] pt-0 font-display font-[300] text-[clamp(16px,0.95vw,18px)] text-white placeholder:text-white/62 focus:border-white/85 focus:placeholder:text-white/42 transition-colors duration-250 outline-none focus:outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-[3px]"
               {...register("password", {
                 required: "Password is required",
               })}
@@ -134,7 +112,8 @@ export default function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground cursor-pointer focus:outline-none"
+              className="absolute right-2 bottom-[clamp(8px,0.8vw,12px)] text-white/42 hover:text-white transition-colors cursor-pointer outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-2"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -144,49 +123,53 @@ export default function LoginForm() {
             </button>
           </div>
           {errors.password && (
-            <p className="text-xs text-destructive">
+            <p className="text-xs font-mono tracking-wider text-red-500 mt-1 select-none">
               {errors.password.message}
             </p>
           )}
         </div>
 
-        {/* Login Button */}
-        <ShimmerButton
-          type="submit"
-          disabled={isPending}
-          shimmerColor="#ffffff"
-          background="linear-gradient(to right, #7c3aed, #4f46e5)"
-          borderRadius="12px"
-          className="w-full h-10 mt-2 font-semibold text-white shadow-md shadow-violet-500/10 hover:shadow-violet-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
-        >
-          {isPending ? "Signing In..." : "Sign In"}
-        </ShimmerButton>
-
-        {/* Divider */}
-        <div className="relative flex py-1 items-center">
-          <div className="flex-grow border-t border-border/30"></div>
-          <span className="flex-shrink mx-4 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-            Or
-          </span>
-          <div className="flex-grow border-t border-border/30"></div>
+        {/* Forgot Password Link */}
+        <div className="flex justify-end -mt-2">
+          <Link
+            href="/auth/forgot-password"
+            className="font-mono text-[11px] tracking-[0.18em] uppercase text-white/62 hover:text-white hover:underline underline-offset-4 transition-colors outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-2"
+          >
+            Forgot password?
+          </Link>
         </div>
 
-        {/* Google Login Button */}
-        <GoogleButton
-          text="Sign in with Google"
-          onClick={() => console.log("Google login submit")}
-        />
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-4 mt-4 w-full">
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full bg-white/10 text-white rounded-none border-0 py-[clamp(12px,1.2vw,18px)] px-5 font-mono font-[400] uppercase tracking-[0.22em] text-[clamp(11px,0.78vw,14px)] hover:bg-white/17 transition-colors duration-250 cursor-pointer disabled:opacity-50 disabled:pointer-events-none outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-[3px]"
+          >
+            {isPending ? "SIGNING IN..." : "SIGN IN"}
+          </button>
 
-        {/* Redirect Footer */}
-        <div className="text-center text-sm text-muted-foreground mt-4">
-          Don't have an account?{" "}
+          {/* Google SSO Button */}
+          <button
+            type="button"
+            onClick={() => console.log("Google login submit")}
+            className="w-full bg-white/5 text-white/42 rounded-none border-0 py-[clamp(12px,1.2vw,18px)] px-5 font-mono font-[400] uppercase tracking-[0.22em] text-[clamp(11px,0.78vw,14px)] hover:bg-white/9 hover:text-white transition-all duration-250 cursor-pointer outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-[3px]"
+          >
+            SIGN IN WITH GOOGLE
+          </button>
+        </div>
+
+        {/* Redirect Referral Link */}
+        <p className="self-center font-mono text-[clamp(11px,0.74vw,14px)] tracking-[0.18em] uppercase text-white mt-[clamp(16px,1.8vw,32px)] ">
+          Don't have an account?
           <Link
             href="/auth/register"
-            className="font-medium text-primary hover:underline transition-all"
+            className="ml-2 hover:text-white/62 hover:underline underline-offset-4 transition-colors outline-none focus-visible:outline focus-visible:outline-white/70"
           >
             Sign Up
           </Link>
-        </div>
+        </p>
       </form>
     </div>
   );
