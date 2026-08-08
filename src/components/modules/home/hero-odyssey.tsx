@@ -331,13 +331,13 @@ export const HeroSection: React.FC = () => {
           animate="visible"
           className="relative z-30 flex flex-col items-center text-center max-w-5xl mx-auto"
         >
-          <ElasticHueSlider
+          {/* <ElasticHueSlider
             value={lightningHue}
             onChange={setLightningHue}
             label="Adjust Lightning Hue"
-          />
+          /> */}
 
-          <motion.h1 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-2 ">
+          <motion.h1 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-2 mt-3 ">
             AI Generate Studio
           </motion.h1>
 

@@ -13,6 +13,8 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
 });
 
+import BackgroundVideo from "@/components/ui/background-video";
+
 export default function AuthLayout({
   children,
 }: Readonly<{
@@ -29,20 +31,7 @@ export default function AuthLayout({
       {/* Media Layer */}
       <div className="absolute inset-0 z-[-1] bg-black">
         {/* We use a poster/fallback image and native video tags */}
-        <video
-          className="w-full h-full object-cover object-center block motion-reduce:hidden"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260806_132328_5f9029c8-218f-4489-82b6-29ff2849920e.png"
-        >
-          <source
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260806_133255_956f653f-5d80-4b06-abd5-0f46c98b60fa.mp4"
-            type="video/mp4"
-          />
-        </video>
+        <BackgroundVideo />
         {/* Background Poster for Reduced Motion or Video Fallback */}
         <div
           className="absolute inset-0 bg-cover bg-center hidden motion-reduce:block"
