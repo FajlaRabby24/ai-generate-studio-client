@@ -26,7 +26,20 @@ const getHeaders = async () => {
   };
 };
 
+const homePageCall = async () => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_FOR_HOME}`).then((r) =>
+      r.text(),
+    );
+    return res;
+  } catch (error) {
+    console.error("Failed to fetch homePageCall:", error);
+    return null;
+  }
+};
+
 export const generalService = {
   validateRequest,
   getHeaders,
+  homePageCall,
 };

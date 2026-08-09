@@ -40,7 +40,6 @@ import Swal from "sweetalert2";
 const categoryFilters = [
   { label: "All Creations", value: "ALL", icon: Filter },
   { label: "Images", value: "TEXT_TO_IMAGE", icon: ImageIcon },
-  { label: "AI Chat", value: "AI_CHATBOT", icon: MessageSquare },
   { label: "Text to Video", value: "TEXT_TO_VIDEO", icon: Video },
   { label: "Image to Video", value: "IMAGE_TO_VIDEO", icon: Video },
   { label: "Text to Speech", value: "TEXT_TO_SPEECH", icon: Volume2 },
