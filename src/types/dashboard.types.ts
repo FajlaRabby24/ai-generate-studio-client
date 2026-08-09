@@ -89,3 +89,25 @@ export interface IUserDashboardStatsResponse {
     };
   }[];
 }
+
+export interface IGetRecentTextToImageResponse {
+  id: string;
+  userId: string;
+  type: GenerationType.TEXT_TO_IMAGE;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  textToImages: ITextToImageResponse[];
+}
+
+export interface ITextToImageResponse {
+  id: string;
+  generatedId: string;
+  status: GenerationStatus;
+  prompt: string;
+  outputUrl: string;
+  isPublic: boolean;
+  isFeatured: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}

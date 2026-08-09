@@ -5,6 +5,7 @@ import { httpClient } from "@/lib/httpClient";
 import { generalService } from "@/services/general.service";
 import {
   IGetGenerationLeftCountResponse,
+  IGetRecentTextToImageResponse,
   TextToImageResponse,
 } from "@/types/dashboard.types";
 import { catchAsync } from "@/utils/catchAsync";
@@ -49,3 +50,12 @@ export const getGenerationLeftCountService = async (
 
     return res;
   });
+
+export const getRecentGenerationServiceTextToImage = async () => {
+  const authHeaders = await generalService.getHeaders();
+  const res = await httpClient.get<IGetRecentTextToImageResponse[]>(
+    "/text-to-image/recent",
+    authHeaders,
+  );
+  return res;
+};

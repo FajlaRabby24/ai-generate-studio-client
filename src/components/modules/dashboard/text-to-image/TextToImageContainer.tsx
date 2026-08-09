@@ -1,11 +1,12 @@
 "use client";
 
-import { GenerationType } from "@/config/constant";
+import { GenerationStatus, GenerationType } from "@/config/constant";
 import {
   generateTextToImageService,
+  getRecentGenerationServiceTextToImage,
   IGenerateTextToImagePayload,
 } from "@/services/dashboard/text-to-image/text-to-image.service";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   AlertCircle,
@@ -14,14 +15,25 @@ import {
   Maximize2,
   RefreshCw,
   Sparkles,
+  History,
+  Clock,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export function TextToImageContainer() {
   const [prompt, setPrompt] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const { data: recentRes, isLoading: isLoadingHistory } = useQuery({
+    queryKey: ["recentTextToImage"],
+    queryFn: getRecentGenerationServiceTextToImage,
+  });
+  
+  const recentGenerations = recentRes?.data || [];
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: IGenerateTextToImagePayload) =>
@@ -50,6 +62,8 @@ export function TextToImageContainer() {
         if (res?.data?.imageUrl) {
           setGeneratedImage(res.data.imageUrl);
         }
+        queryClient.invalidateQueries({ queryKey: ["recentTextToImage"] });
+        toast.success("Image generated successfully!");
       } else {
         console.log("text to image response", res);
         toast.error(res?.message || "Failed to generate image");
@@ -215,7 +229,7 @@ export function TextToImageContainer() {
                   <p className="text-xs leading-relaxed">
                     Type a prompt on the left panel or click{" "}
                     <span className="font-semibold text-primary">
-                      AI Enhance
+                      Generate Image
                     </span>{" "}
                     to generate your first 8K AI artwork.
                   </p>
@@ -224,6 +238,76 @@ export function TextToImageContainer() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* History/Gallery Grid */}
+      <div className="mt-8 space-y-6 pt-6 border-t border-border/40">
+        <div className="flex items-center justify-between px-2">
+          <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <History className="w-5 h-5 text-muted-foreground" />
+            Recent Generations
+          </h3>
+        </div>
+        
+        {isLoadingHistory ? (
+           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
+             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
+             <p className="text-muted-foreground text-center">Loading recent generations...</p>
+           </div>
+        ) : recentGenerations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
+            <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground text-center">No recent generations to display.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {recentGenerations.map((item) => {
+              const imageRecord = item.textToImages?.[0];
+              if (!imageRecord) return null;
+              
+              const isCompleted = imageRecord.status === GenerationStatus.COMPLETED && imageRecord.outputUrl;
+              
+              return (
+                <div
+                  key={item.id}
+                  className="group relative rounded-2xl overflow-hidden border border-border/40 bg-card/40 backdrop-blur-sm transition-all hover:shadow-xl hover:border-primary/30 flex flex-col"
+                >
+                  {isCompleted ? (
+                    <>
+                      <div className="aspect-square relative overflow-hidden bg-black/5">
+                        <img
+                          src={imageRecord.outputUrl}
+                          alt={imageRecord.prompt}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 pointer-events-none bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+                        <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-1.5 flex items-center justify-center">
+                           <a href={imageRecord.outputUrl} target="_blank" rel="noopener noreferrer">
+                             <Maximize2 className="w-4 h-4 text-white" />
+                           </a>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col h-full border border-dashed border-primary/30 rounded-2xl bg-primary/5">
+                      <div className="aspect-square relative overflow-hidden flex flex-col items-center justify-center p-6 text-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-2 animate-pulse">
+                          <Clock className="w-6 h-6 text-primary" />
+                        </div>
+                        <span className="text-sm font-bold text-primary">Generating...</span>
+                      </div>
+                      <div className="p-4 border-t border-primary/20 bg-primary/10 flex-1">
+                        <p className="text-xs text-foreground/80 line-clamp-3 leading-relaxed italic">
+                          "{imageRecord.prompt}"
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
