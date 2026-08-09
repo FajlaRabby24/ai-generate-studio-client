@@ -2,6 +2,7 @@
 
 import { httpClient } from "@/lib/httpClient";
 import { generalService } from "@/services/general.service";
+import { IGetRecentTextToSpeechResponse } from "@/types/dashboard.types";
 import {
   IGetVoicesPayload,
   IGetVoicesResponse,
@@ -46,3 +47,12 @@ export const getVoicesService = async (payload: IGetVoicesPayload) =>
 
     return res;
   });
+
+export const getRecentGenerationServiceTextToImage = async () => {
+  const authHeaders = await generalService.getHeaders();
+  const res = await httpClient.get<IGetRecentTextToSpeechResponse[]>(
+    "/text-to-speech/recent",
+    authHeaders,
+  );
+  return res;
+};

@@ -111,3 +111,25 @@ export interface ITextToImageResponse {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IGetRecentTextToSpeechResponse {
+  id: string;
+  userId: string;
+  type: GenerationType.TEXT_TO_SPEECH;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  textToSpeech: ITextToSpeechResponse[];
+}
+
+export interface ITextToSpeechResponse {
+  id: string;
+  generatedId: string;
+  status: GenerationStatus;
+  prompt: string;
+  outputUrl: string;
+  isPublic: boolean;
+  isFeatured: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}

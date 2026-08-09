@@ -1,11 +1,7 @@
-import EmptyState from "@/components/shared/EmptyState";
+import TextToSpeechComponent from "@/components/modules/dashboard/textToSpeech/TextToSpeechComponent";
 
 const TextToSpeechPage = () => {
-  return (
-    <div>
-      <EmptyState title="Text to Speech Generator" />
-    </div>
-  );
+  return <TextToSpeechComponent />;
 };
 
 export default TextToSpeechPage;

@@ -11,6 +11,8 @@ const testTextToSpeechSchema = z.object({
   type: z.nativeEnum(GenerationType, {
     message: "Invalid generation type",
   }),
+  rate: z.string().optional(),
+  pitch: z.string().optional(),
 });
 
 const getVoicesSchema = z.object({
