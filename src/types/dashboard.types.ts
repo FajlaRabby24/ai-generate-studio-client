@@ -119,7 +119,7 @@ export interface IGetRecentTextToSpeechResponse {
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
-  textToSpeech: ITextToSpeechResponse[];
+  textToSpeeches: ITextToSpeechResponse[];
 }
 
 export interface ITextToSpeechResponse {
@@ -127,7 +127,7 @@ export interface ITextToSpeechResponse {
   generatedId: string;
   status: GenerationStatus;
   prompt: string;
-  outputUrl: string;
+  audioUrl: string;
   isPublic: boolean;
   isFeatured: boolean;
   createdAt: Date;

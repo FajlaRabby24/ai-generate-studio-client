@@ -48,7 +48,7 @@ export const getVoicesService = async (payload: IGetVoicesPayload) =>
     return res;
   });
 
-export const getRecentGenerationServiceTextToImage = async () => {
+export const getRecentGenerationServiceTextToSpeech = async () => {
   const authHeaders = await generalService.getHeaders();
   const res = await httpClient.get<IGetRecentTextToSpeechResponse[]>(
     "/text-to-speech/recent",

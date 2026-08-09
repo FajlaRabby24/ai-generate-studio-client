@@ -15,44 +15,55 @@ import {
   Sliders,
   RefreshCw,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getVoicesService, getRecentGenerationServiceTextToSpeech } from "@/services/dashboard/text-to-speech/textToSpeech.service";
+import { IVoiceItem } from "@/types/textToSpeech.types";
+import { GenerationStatus } from "@/config/constant";
+import { IGetRecentTextToSpeechResponse } from "@/types/dashboard.types";
 
-// Mock Voices
-const mockVoices = [
-  { id: "en-US-JennyNeural", name: "Jenny (Female) - English (US)", gender: "Female", lang: "en-US" },
-  { id: "en-US-GuyNeural", name: "Guy (Male) - English (US)", gender: "Male", lang: "en-US" },
-  { id: "bn-BD-PradeepNeural", name: "Pradeep (Male) - Bengali (BD)", gender: "Male", lang: "bn-BD" },
-  { id: "bn-BD-NabanitaNeural", name: "Nabanita (Female) - Bengali (BD)", gender: "Female", lang: "bn-BD" },
-];
 
-// Mock History
-const initialMockHistory = [
-  {
-    id: "1",
-    prompt: "Welcome to AI Generate Studio. Here you can transform your text into realistic human speech using advanced neural voices.",
-    voiceName: "Jenny (Female) - English (US)",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    status: "completed",
-    createdAt: "10 mins ago",
-  },
-  {
-    id: "2",
-    prompt: "কৃত্রিম বুদ্ধিমত্তা চালিত টেক্সট টু স্পিচ সিস্টেমে আপনাকে স্বাগতম।",
-    voiceName: "Nabanita (Female) - Bengali (BD)",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    status: "completed",
-    createdAt: "1 hour ago",
-  },
-];
 
 const TextToSpeechComponent = () => {
   const [prompt, setPrompt] = useState("");
-  const [selectedVoice, setSelectedVoice] = useState("en-US-JennyNeural");
+  const [languageFilter, setLanguageFilter] = useState("English");
+  const [genderFilter, setGenderFilter] = useState("");
+  const [selectedVoice, setSelectedVoice] = useState("");
   const [speed, setSpeed] = useState("0%");
   const [pitch, setPitch] = useState("0%");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [history, setHistory] = useState(initialMockHistory);
+
+   const queryClient = useQueryClient();
+
+  // Fetch real voices from backend
+  const { data: voicesRes, isLoading: isLoadingVoices } = useQuery({
+    queryKey: ["voices", languageFilter, genderFilter],
+    queryFn: () => getVoicesService({ lang: languageFilter, gender: genderFilter }),
+  });
+
+  const voicesList = voicesRes?.data || [];
+
+  // Fetch recent text-to-speech generations
+  const { data: recentRes, isLoading: isLoadingHistory } = useQuery({
+    queryKey: ["recentTextToSpeech"],
+    queryFn: getRecentGenerationServiceTextToSpeech,
+  });
+
+  const recentGenerations = recentRes?.data || [];
+
+  // Update selected voice when voices list changes
+  useEffect(() => {
+    if (voicesList.length > 0) {
+      // Find if current selected voice is in the new list, otherwise default to first
+      const exists = voicesList.some((v: IVoiceItem) => v.id === selectedVoice);
+      if (!exists) {
+        setSelectedVoice(voicesList[0].id);
+      }
+    } else {
+      setSelectedVoice("");
+    }
+  }, [voicesList, selectedVoice]);
 
   // Audio player state tracking for history
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -96,16 +107,8 @@ const TextToSpeechComponent = () => {
     setIsGenerating(true);
     setTimeout(() => {
       setIsGenerating(false);
-      const newGeneration = {
-        id: Date.now().toString(),
-        prompt: prompt.trim(),
-        voiceName: mockVoices.find((v) => v.id === selectedVoice)?.name || selectedVoice,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-        status: "completed",
-        createdAt: "Just now",
-      };
-      setHistory((prev) => [newGeneration, ...prev]);
       setPrompt("");
+      queryClient.invalidateQueries({ queryKey: ["recentTextToSpeech"] });
       toast.success("Speech synthesized successfully!");
     }, 2000);
   };
@@ -115,8 +118,18 @@ const TextToSpeechComponent = () => {
       audioPlayersRef.current[id]?.pause();
       setPlayingId(null);
     }
-    setHistory((prev) => prev.filter((item) => item.id !== id));
     toast.success("History item deleted.");
+  };
+
+  const getVoiceDisplayName = (voiceId: string) => {
+    const voice = voicesList.find((v: IVoiceItem) => v.id === voiceId);
+    if (voice) {
+      return `${voice.name} (${voice.gender})`;
+    }
+    // Fallback parsing from ID (e.g. en-US-JennyNeural -> Jenny)
+    const parts = voiceId.split("-");
+    const nameWithNeural = parts[parts.length - 1] || voiceId;
+    return nameWithNeural.replace("Neural", "");
   };
 
   return (
@@ -195,20 +208,75 @@ const TextToSpeechComponent = () => {
               Voice Settings
             </h3>
 
+            {/* Filter controls */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Language</label>
+                <select
+                  value={languageFilter}
+                  onChange={(e) => setLanguageFilter(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-border/60 bg-background/50 text-foreground text-xs focus:border-primary outline-none transition-all cursor-pointer"
+                >
+                  <option value="">All Languages</option>
+                  <option value="Arabic">Arabic</option>
+                  <option value="Bangla">Bangla</option>
+                  <option value="Chinese">Chinese</option>
+                  <option value="English">English</option>
+                  <option value="French">French</option>
+                  <option value="German">German</option>
+                  <option value="Hindi">Hindi</option>
+                  <option value="Indonesian">Indonesian</option>
+                  <option value="Italian">Italian</option>
+                  <option value="Japanese">Japanese</option>
+                  <option value="Korean">Korean</option>
+                  <option value="Portuguese">Portuguese</option>
+                  <option value="Russian">Russian</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="Swedish">Swedish</option>
+                  <option value="Turkish">Turkish</option>
+                  <option value="Vietnamese">Vietnamese</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Gender</label>
+                <select
+                  value={genderFilter}
+                  onChange={(e) => setGenderFilter(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-border/60 bg-background/50 text-foreground text-xs focus:border-primary outline-none transition-all cursor-pointer"
+                >
+                  <option value="">All Genders</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+            </div>
+
             {/* Voice Dropdown */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Select Voice</label>
-              <select
-                value={selectedVoice}
-                onChange={(e) => setSelectedVoice(e.target.value)}
-                className="w-full p-3.5 rounded-xl border border-border/60 bg-background/50 text-foreground text-sm focus:border-primary outline-none transition-all cursor-pointer"
-              >
-                {mockVoices.map((voice) => (
-                  <option key={voice.id} value={voice.id} className="bg-card text-foreground">
-                    {voice.name}
-                  </option>
-                ))}
-              </select>
+              {isLoadingVoices ? (
+                <div className="w-full p-3.5 rounded-xl border border-border/60 bg-background/50 text-muted-foreground text-sm flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Loading voices...
+                </div>
+              ) : (
+                <select
+                  value={selectedVoice}
+                  onChange={(e) => setSelectedVoice(e.target.value)}
+                  disabled={voicesList.length === 0}
+                  className="w-full p-3.5 rounded-xl border border-border/60 bg-background/50 text-foreground text-sm focus:border-primary outline-none transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {voicesList.length === 0 ? (
+                    <option value="">No voices found</option>
+                  ) : (
+                    voicesList.map((voice : IVoiceItem) => (
+                      <option key={voice.id} value={voice.id} className="bg-card text-foreground">
+                        {voice.name} ({voice.gender}) - {voice.language}
+                      </option>
+                    ))
+                  )}
+                </select>
+              )}
             </div>
 
             {/* Speed Option */}
@@ -273,70 +341,91 @@ const TextToSpeechComponent = () => {
           </h3>
         </div>
 
-        {history.length === 0 ? (
+        {isLoadingHistory ? (
+           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
+             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
+             <p className="text-muted-foreground text-center">Loading recent audio generations...</p>
+           </div>
+        ) : recentGenerations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground text-center">No audio conversions yet.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {history.map((item) => (
-              <div
-                key={item.id}
-                className="group relative rounded-2xl p-5 border border-border/40 bg-card/40 backdrop-blur-sm transition-all hover:shadow-xl hover:border-primary/30 flex flex-col justify-between gap-4"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-start justify-between">
-                    <span className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary">
-                      {item.voiceName}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {item.createdAt}
-                    </span>
+            {recentGenerations.map((item: IGetRecentTextToSpeechResponse) => {
+              const speechRecord = item.textToSpeeches?.[0];
+              if (!speechRecord) return null;
+              
+              const isCompleted = speechRecord.status === GenerationStatus.COMPLETED && speechRecord.audioUrl;
+              
+              return (
+                <div
+                  key={item.id}
+                  className="group relative rounded-2xl p-5 border border-border/40 bg-card/40 backdrop-blur-sm transition-all hover:shadow-xl hover:border-primary/30 flex flex-col justify-between gap-4"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary">
+                        {getVoiceDisplayName(speechRecord.id)}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {new Date(speechRecord.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-foreground line-clamp-2 leading-relaxed font-medium">
+                      "{speechRecord.prompt}"
+                    </p>
                   </div>
-                  <p className="text-sm text-foreground line-clamp-2 leading-relaxed font-medium">
-                    "{item.prompt}"
-                  </p>
-                </div>
 
-                <div className="flex items-center justify-between gap-3 pt-2 border-t border-border/20">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handlePlayPause(item.id, item.audioUrl)}
-                      className="rounded-full w-9 h-9 p-0 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer"
-                    >
-                      {playingId === item.id ? (
-                        <Pause className="w-4 h-4" />
-                      ) : (
-                        <Play className="w-4 h-4 fill-primary ml-0.5" />
+                  <div className="flex items-center justify-between gap-3 pt-2 border-t border-border/20">
+                    {isCompleted ? (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handlePlayPause(item.id, speechRecord.audioUrl)}
+                          className="rounded-full w-9 h-9 p-0 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer"
+                        >
+                          {playingId === item.id ? (
+                            <Pause className="w-4 h-4" />
+                          ) : (
+                            <Play className="w-4 h-4 fill-primary ml-0.5" />
+                          )}
+                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          {playingId === item.id ? "Playing..." : "Listen audio"}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Clock className="w-4 h-4 animate-pulse" />
+                        <span className="text-xs">Processing speech...</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      {isCompleted && (
+                        <a href={speechRecord.audioUrl} download target="_blank" rel="noopener noreferrer">
+                          <Button size="sm" variant="ghost" className="rounded-xl hover:bg-muted/50 p-2 h-auto text-muted-foreground hover:text-foreground">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </a>
                       )}
-                    </Button>
-                    <span className="text-xs text-muted-foreground">
-                      {playingId === item.id ? "Playing preview..." : "Listen preview"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <a href={item.audioUrl} download target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" variant="ghost" className="rounded-xl hover:bg-muted/50 p-2 h-auto text-muted-foreground hover:text-foreground">
-                        <Download className="w-4 h-4" />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteHistory(item.id)}
+                        className="rounded-xl hover:bg-red-500/10 p-2 h-auto text-muted-foreground hover:text-red-500 cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
-                    </a>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDeleteHistory(item.id)}
-                      className="rounded-xl hover:bg-red-500/10 p-2 h-auto text-muted-foreground hover:text-red-500 cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
