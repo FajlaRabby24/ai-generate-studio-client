@@ -1,401 +1,297 @@
 "use client";
 
-import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  FileText,
+  ImageIcon,
+  MessageSquare,
+  Mic,
+  Scissors,
+  Video,
+  Sparkles,
+} from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
+import { AnimatedBeam } from "@/components/ui/animated-beam";
 
-interface ElasticHueSliderProps {
-  value: number;
-  onChange: (value: number) => void;
-  min?: number;
-  max?: number;
-  step?: number;
-  label?: string;
+interface ShinyTextProps {
+  text: string;
 }
 
-const ElasticHueSlider: React.FC<ElasticHueSliderProps> = ({
-  value,
-  onChange,
-  min = 0,
-  max = 360,
-  step = 1,
-  label = "Adjust Hue",
-}) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const sliderRef = useRef<HTMLDivElement>(null);
-
-  const progress = (value - min) / (max - min);
-  const thumbPosition = progress * 100;
-
-  const handleMouseDown = () => setIsDragging(true);
-  const handleMouseUp = () => setIsDragging(false);
-
+const ShinyText: React.FC<ShinyTextProps> = ({ text }) => {
   return (
-    <div
-      className="scale-50 relative w-full max-w-xs flex flex-col items-center"
-      ref={sliderRef}
+    <motion.span
+      className="inline-block bg-clip-text text-transparent"
+      style={{
+        backgroundImage:
+          "linear-gradient(100deg, #64CEFB 0%, #64CEFB 35%, #ffffff 50%, #64CEFB 65%, #64CEFB 100%)",
+        backgroundSize: "200% 100%",
+        WebkitBackgroundClip: "text",
+        color: "transparent",
+      }}
+      animate={{
+        backgroundPosition: ["200% 0%", "-200% 0%"],
+      }}
+      transition={{
+        duration: 3,
+        repeat: Infinity,
+        ease: "linear",
+      }}
     >
-      {label && (
-        <label
-          htmlFor="hue-slider-native"
-          className="text-gray-300 text-sm mb-1"
-        >
-          {label}
-        </label>
-      )}
-      <div className="relative w-full h-5 flex items-center">
-        <input
-          id="hue-slider-native"
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onTouchStart={handleMouseDown}
-          onTouchEnd={handleMouseUp}
-          className="absolute inset-0 w-full h-full appearance-none cursor-pointer z-20"
-          style={{ WebkitAppearance: "none" }}
-        />
-
-        <div className="absolute left-0 w-full h-1 rounded-full z-0"></div>
-
-        <div
-          className="absolute left-0 h-1 rounded-full z-10"
-          style={{ width: `${thumbPosition}%` }}
-        ></div>
-
-        <motion.div
-          className="absolute top-1/2 transform -translate-y-1/2 z-30"
-          style={{ left: `${thumbPosition}%` }}
-          animate={{ scale: isDragging ? 1.2 : 1 }}
-          transition={{
-            type: "spring",
-            stiffness: 500,
-            damping: isDragging ? 20 : 30,
-          }}
-        />
-      </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={value}
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 5 }}
-          transition={{ duration: 0.2 }}
-          className="text-xs text-gray-500 mt-2"
-        >
-          {value}°
-        </motion.div>
-      </AnimatePresence>
-    </div>
+      {text}
+    </motion.span>
   );
 };
 
-interface LightningProps {
-  hue?: number;
-  xOffset?: number;
-  speed?: number;
-  intensity?: number;
-  size?: number;
-}
-
-const Lightning: React.FC<LightningProps> = ({
-  hue = 230,
-  xOffset = 0,
-  speed = 1,
-  intensity = 1,
-  size = 1,
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const resizeCanvas = () => {
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
-    };
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-
-    const gl = canvas.getContext("webgl");
-    if (!gl) {
-      console.error("WebGL not supported");
-      return;
-    }
-
-    const vertexShaderSource = `
-      attribute vec2 aPosition;
-      void main() {
-        gl_Position = vec4(aPosition, 0.0, 1.0);
-      }
-    `;
-
-    const fragmentShaderSource = `
-      precision mediump float;
-      uniform vec2 iResolution;
-      uniform float iTime;
-      uniform float uHue;
-      uniform float uXOffset;
-      uniform float uSpeed;
-      uniform float uIntensity;
-      uniform float uSize;
-      
-      #define OCTAVE_COUNT 10
-
-      vec3 hsv2rgb(vec3 c) {
-          vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0,4.0,2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
-          return c.z * mix(vec3(1.0), rgb, c.y);
-      }
-
-      float hash11(float p) {
-          p = fract(p * .1031);
-          p *= p + 33.33;
-          p *= p + p;
-          return fract(p);
-      }
-
-      float hash12(vec2 p) {
-          vec3 p3 = fract(vec3(p.xyx) * .1031);
-          p3 += dot(p3, p3.yzx + 33.33);
-          return fract((p3.x + p3.y) * p3.z);
-      }
-
-      mat2 rotate2d(float theta) {
-          float c = cos(theta);
-          float s = sin(theta);
-          return mat2(c, -s, s, c);
-      }
-
-      float noise(vec2 p) {
-          vec2 ip = floor(p);
-          vec2 fp = fract(p);
-          float a = hash12(ip);
-          float b = hash12(ip + vec2(1.0, 0.0));
-          float c = hash12(ip + vec2(0.0, 1.0));
-          float d = hash12(ip + vec2(1.0, 1.0));
-          
-          vec2 t = smoothstep(0.0, 1.0, fp);
-          return mix(mix(a, b, t.x), mix(c, d, t.x), t.y);
-      }
-
-      float fbm(vec2 p) {
-          float value = 0.0;
-          float amplitude = 0.5;
-          for (int i = 0; i < OCTAVE_COUNT; ++i) {
-              value += amplitude * noise(p);
-              p *= rotate2d(0.45);
-              p *= 2.0;
-              amplitude *= 0.5;
-          }
-          return value;
-      }
-
-      void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
-          vec2 uv = fragCoord / iResolution.xy;
-          uv = 2.0 * uv - 1.0;
-          uv.x *= iResolution.x / iResolution.y;
-          uv.x += uXOffset;
-          
-          uv += 2.0 * fbm(uv * uSize + 0.8 * iTime * uSpeed) - 1.0;
-          
-          float dist = abs(uv.x);
-          vec3 baseColor = hsv2rgb(vec3(uHue / 360.0, 0.7, 0.8));
-          vec3 col = baseColor * pow(mix(0.0, 0.07, hash11(iTime * uSpeed)) / dist, 1.0) * uIntensity;
-          col = pow(col, vec3(1.0));
-          fragColor = vec4(col, 1.0);
-      }
-
-      void main() {
-          mainImage(gl_FragColor, gl_FragCoord.xy);
-      }
-    `;
-
-    const compileShader = (
-      source: string,
-      type: number,
-    ): WebGLShader | null => {
-      const shader = gl.createShader(type);
-      if (!shader) return null;
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error("Shader compile error:", gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
-      }
-      return shader;
-    };
-
-    const vertexShader = compileShader(vertexShaderSource, gl.VERTEX_SHADER);
-    const fragmentShader = compileShader(
-      fragmentShaderSource,
-      gl.FRAGMENT_SHADER,
-    );
-    if (!vertexShader || !fragmentShader) return;
-
-    const program = gl.createProgram();
-    if (!program) return;
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error("Program linking error:", gl.getProgramInfoLog(program));
-      return;
-    }
-    gl.useProgram(program);
-
-    const vertices = new Float32Array([
-      -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1,
-    ]);
-    const vertexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-    const aPosition = gl.getAttribLocation(program, "aPosition");
-    gl.enableVertexAttribArray(aPosition);
-    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
-
-    const iResolutionLocation = gl.getUniformLocation(program, "iResolution");
-    const iTimeLocation = gl.getUniformLocation(program, "iTime");
-    const uHueLocation = gl.getUniformLocation(program, "uHue");
-    const uXOffsetLocation = gl.getUniformLocation(program, "uXOffset");
-    const uSpeedLocation = gl.getUniformLocation(program, "uSpeed");
-    const uIntensityLocation = gl.getUniformLocation(program, "uIntensity");
-    const uSizeLocation = gl.getUniformLocation(program, "uSize");
-
-    const startTime = performance.now();
-    const render = () => {
-      resizeCanvas();
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform2f(iResolutionLocation, canvas.width, canvas.height);
-      const currentTime = performance.now();
-      gl.uniform1f(iTimeLocation, (currentTime - startTime) / 1000.0);
-      gl.uniform1f(uHueLocation, hue);
-      gl.uniform1f(uXOffsetLocation, xOffset);
-      gl.uniform1f(uSpeedLocation, speed);
-      gl.uniform1f(uIntensityLocation, intensity);
-      gl.uniform1f(uSizeLocation, size);
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-      requestAnimationFrame(render);
-    };
-    requestAnimationFrame(render);
-
-    return () => {
-      window.removeEventListener("resize", resizeCanvas);
-    };
-  }, [hue, xOffset, speed, intensity, size]);
-
-  return <canvas ref={canvasRef} className="w-full h-full relative" />;
-};
+const Circle = React.forwardRef<
+  HTMLDivElement,
+  { className?: string; children?: React.ReactNode; title?: string }
+>(({ className, children, title }, ref) => {
+  return (
+    <div
+      ref={ref}
+      title={title}
+      className={`z-10 flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 cursor-pointer hover:scale-110 active:scale-95 ${className}`}
+    >
+      {children}
+    </div>
+  );
+});
+Circle.displayName = "Circle";
 
 export const HeroSection: React.FC = () => {
-  const [lightningHue, setLightningHue] = useState(220);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.3,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  };
+  const containerRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef<HTMLDivElement>(null);
+  const left1Ref = useRef<HTMLDivElement>(null);
+  const left2Ref = useRef<HTMLDivElement>(null);
+  const left3Ref = useRef<HTMLDivElement>(null);
+  const right1Ref = useRef<HTMLDivElement>(null);
+  const right2Ref = useRef<HTMLDivElement>(null);
+  const right3Ref = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="relative w-full overflow-hidden">
-      <div className="relative z-20 max-w-7xl mx-auto flex px-4 sm:px-6 lg:px-8 pb-7">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="relative z-30 flex flex-col items-center text-center max-w-5xl mx-auto"
-        >
-          {/* <ElasticHueSlider
-            value={lightningHue}
-            onChange={setLightningHue}
-            label="Adjust Lightning Hue"
-          /> */}
-
-          <motion.h1 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-2 mt-3 ">
-            AI Generate Studio
-          </motion.h1>
-
-          <motion.h2 className="text-xl md:text-5xl pb-3 font-semibold">
-            Lighting Up The Future of Creation
-          </motion.h2>
-
-          <motion.p className="mb-6 max-w-2xl text-md md:text-lg ">
-            Generate high-resolution images, cinematic videos, natural
-            voiceovers, and AI content inside one unified studio workflow
-          </motion.p>
-
-          <Link href={"/dashboard"}>
-            <ShimmerButton className="px-8 py-3 backdrop-blur-sm rounded-full transition-colors cursor-pointer font-medium mb-10 hover:bg-white/30">
-              Discover More
-            </ShimmerButton>
-          </Link>
-
-          {/* Showcase Banner Image below Discover More Button */}
-          <motion.div
-            initial={{ y: 40, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative w-full max-w-4xl  mx-auto rounded-2xl overflow-hidden border border-white/15 group backdrop-blur-md"
-          >
-            <div className="absolute inset-0 z-10 pointer-events-none"></div>
-            <div className="px-3 py-4 backdrop-blur-2xl rounded-2xl">
-              <Image
-                src="/banner.jpg"
-                alt="AI Studio Showcase Banner"
-                width={1200}
-                height={675}
-                priority
-                className="w-full h-auto object-cover rounded-2xl "
-              />
-            </div>
-          </motion.div>
-        </motion.div>
+    <div className="relative w-full  md:h-[calc(100vh-64px)] overflow-y-auto lg:overflow-hidden bg-black text-white select-none flex flex-col">
+      {/* Background Loop Video */}
+      <div className="absolute inset-0 z-0 pointer-events-none bg-black">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover pointer-events-none opacity-75"
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_105406_16f4600d-7a92-4292-b96e-b19156c7830a.mp4"
+        />
+        {/* Scrim Overlay */}
+        <div className="absolute inset-0 bg-black/20" />
       </div>
 
-      {/* <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="absolute top-0  left-0 z-0"
-      > */}
-      {/* <div className="absolute inset-0 "></div>
-        <div className="absolute top-[35%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"></div> */}
-      {/* <div className="absolute top-0 w-[100%] left-1/2 transform -translate-x-1/2 h-full">
-          <Lightning
-            hue={lightningHue}
-            xOffset={0}
-            speed={1.9}
-            intensity={1.9}
-            size={2}
-          />
-        </div> */}
-      {/* </motion.div> */}
+      {/* Main Content Layout (z-10) */}
+      <div className="relative z-10 w-full flex-1 flex flex-col justify-between max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-10 lg:py-14">
+        {/* Navigation spacer */}
+        <div className="h-2" />
+
+        {/* Center Hero Block */}
+        <div className="flex-1 flex flex-col items-center justify-start text-center">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="text-white/80 text-xs md:text-sm font-bold uppercase tracking-widest mb-3"
+          >
+            7 AI Tools. One Platform.
+          </motion.span>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <span className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-semibold tracking-tighter leading-[0.9] sm:leading-[0.85] flex flex-col items-center">
+              Generate
+            </span>
+          </motion.h1>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter leading-[0.9] sm:leading-[0.85] flex flex-col items-center"
+          >
+            <ShinyText text="Next-Gen Content." />
+          </motion.h1>
+
+          {/* Supporting subtext */}
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.0 }}
+            className="text-white/70 text-xs sm:text-base md:text-lg max-w-[280px] sm:max-w-xl mt-4 leading-relaxed"
+          >
+            Images, videos, chatbot, resume analysis, and more — all in one
+            place, completely free to start.
+          </motion.p>
+
+          {/* Animated Beam Graphics Container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 1.2 }}
+            ref={containerRef}
+            className="relative flex w-full max-w-lg md:max-w-2xl items-center justify-between gap-8 md:gap-16 px-4 py-6 mt-4 mx-auto"
+          >
+            {/* Left Column Nodes (Inputs) */}
+            <div className="flex flex-col gap-5 md:gap-7">
+              <Circle
+                ref={left1Ref}
+                title="Text to Image"
+                className="border-blue-500/30 bg-blue-950/20 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.15)] hover:border-blue-400/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]"
+              >
+                <ImageIcon className="h-6 w-6 md:h-7 md:w-7" />
+              </Circle>
+              <Circle
+                ref={left2Ref}
+                title="Text to Video"
+                className="border-purple-500/30 bg-purple-950/20 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.15)] hover:border-purple-400/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.25)]"
+              >
+                <Video className="h-6 w-6 md:h-7 md:w-7" />
+              </Circle>
+              <Circle
+                ref={left3Ref}
+                title="AI Chatbot"
+                className="border-cyan-500/30 bg-cyan-950/20 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.25)]"
+              >
+                <MessageSquare className="h-6 w-6 md:h-7 md:w-7" />
+              </Circle>
+            </div>
+
+            {/* Center Column Node (Studio Hub) */}
+            <div className="flex flex-col items-center justify-center">
+              <div
+                ref={centerRef}
+                className="z-10 flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full border-2 border-white bg-white text-black shadow-2xl shadow-[#3D81E3]/30 hover:scale-105 transition-transform duration-300"
+              >
+                <div className="flex h-12 w-12 md:h-15 md:w-15 items-center justify-center rounded-full bg-black/5 text-[#3D81E3]">
+                  <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-[#3D81E3] animate-pulse" />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column Nodes (Outputs) */}
+            <div className="flex flex-col gap-5 md:gap-7">
+              <Circle
+                ref={right1Ref}
+                title="Resume Analyzer"
+                className="border-emerald-500/30 bg-emerald-950/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:border-emerald-400/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"
+              >
+                <FileText className="h-6 w-6 md:h-7 md:w-7" />
+              </Circle>
+              <Circle
+                ref={right2Ref}
+                title="BG Remover"
+                className="border-amber-500/30 bg-amber-950/20 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)] hover:border-amber-400/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.25)]"
+              >
+                <Scissors className="h-6 w-6 md:h-7 md:w-7" />
+              </Circle>
+              <Circle
+                ref={right3Ref}
+                title="Text to Speech"
+                className="border-rose-500/30 bg-rose-950/20 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.15)] hover:border-rose-400/50 hover:shadow-[0_0_20px_rgba(244,63,94,0.25)]"
+              >
+                <Mic className="h-6 w-6 md:h-7 md:w-7" />
+              </Circle>
+            </div>
+
+            {/* Animated Beams connecting inputs -> center -> outputs with vibrant custom paths */}
+            <AnimatedBeam
+              containerRef={containerRef}
+              fromRef={left1Ref}
+              toRef={centerRef}
+              duration={3.2}
+              delay={0}
+              pathColor="rgba(255,255,255,0.08)"
+              pathWidth={3}
+              pathOpacity={0.3}
+              gradientStartColor="#3b82f6"
+              gradientStopColor="#ffffff"
+            />
+            <AnimatedBeam
+              containerRef={containerRef}
+              fromRef={left2Ref}
+              toRef={centerRef}
+              duration={3.2}
+              delay={0.6}
+              pathColor="rgba(255,255,255,0.08)"
+              pathWidth={3}
+              pathOpacity={0.3}
+              gradientStartColor="#a855f7"
+              gradientStopColor="#ffffff"
+            />
+            <AnimatedBeam
+              containerRef={containerRef}
+              fromRef={left3Ref}
+              toRef={centerRef}
+              duration={3.2}
+              delay={1.2}
+              pathColor="rgba(255,255,255,0.08)"
+              pathWidth={3}
+              pathOpacity={0.3}
+              gradientStartColor="#06b6d4"
+              gradientStopColor="#ffffff"
+            />
+            <AnimatedBeam
+              containerRef={containerRef}
+              fromRef={centerRef}
+              toRef={right1Ref}
+              duration={3.6}
+              delay={0.3}
+              pathColor="rgba(255,255,255,0.08)"
+              pathWidth={3}
+              pathOpacity={0.3}
+              gradientStartColor="#ffffff"
+              gradientStopColor="#10b981"
+            />
+            <AnimatedBeam
+              containerRef={containerRef}
+              fromRef={centerRef}
+              toRef={right2Ref}
+              duration={3.6}
+              delay={0.9}
+              pathColor="rgba(255,255,255,0.08)"
+              pathWidth={3}
+              pathOpacity={0.3}
+              gradientStartColor="#ffffff"
+              gradientStopColor="#f59e0b"
+            />
+            <AnimatedBeam
+              containerRef={containerRef}
+              fromRef={centerRef}
+              toRef={right3Ref}
+              duration={3.6}
+              delay={1.5}
+              pathColor="rgba(255,255,255,0.08)"
+              pathWidth={3}
+              pathOpacity={0.3}
+              gradientStartColor="#ffffff"
+              gradientStopColor="#f43f5e"
+            />
+          </motion.div>
+
+          {/* CTA Action Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.4 }}
+            className="mt-6"
+          >
+            <Link href="/dashboard" className="group">
+              <button className="inline-flex items-center gap-2 rounded-full bg-black hover:bg-gray-900 border border-white/10 text-white font-medium text-sm md:text-base px-6 md:px-8 py-3 md:py-4 transition-all active:scale-[0.98]  cursor-pointer shadow-lg">
+                <span>Get Started Free</span>
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
+              </button>
+            </Link>
+          </motion.div>
+        </div>
+      </div>
     </div>
   );
 };
