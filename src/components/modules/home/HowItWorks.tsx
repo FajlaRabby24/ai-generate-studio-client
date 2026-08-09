@@ -12,8 +12,9 @@ const steps = [
     description: "Describe your creative vision in natural text, or select from built-in style presets and prompt enhancers.",
     icon: Type,
     gradient: "from-blue-500 to-cyan-500",
-    glow: "group-hover:shadow-blue-500/20",
+    glow: "hover:shadow-[0_0_30px_rgba(59,130,246,0.12)] hover:border-blue-500/30",
     badge: "Step 1",
+    accent: "text-blue-400 bg-blue-950/20 border-blue-500/20",
   },
   {
     step: "02",
@@ -22,8 +23,9 @@ const steps = [
     description: "Select from 10+ state-of-the-art AI engines tailored for high-resolution images, 4K videos, or human voiceovers.",
     icon: Cpu,
     gradient: "from-purple-500 to-pink-500",
-    glow: "group-hover:shadow-purple-500/20",
+    glow: "hover:shadow-[0_0_30px_rgba(168,85,247,0.12)] hover:border-purple-500/30",
     badge: "Step 2",
+    accent: "text-purple-400 bg-purple-950/20 border-purple-500/20",
   },
   {
     step: "03",
@@ -32,8 +34,9 @@ const steps = [
     subtitle: "Instant 4K Download",
     icon: Download,
     gradient: "from-emerald-500 to-teal-500",
-    glow: "group-hover:shadow-emerald-500/20",
+    glow: "hover:shadow-[0_0_30px_rgba(16,185,129,0.12)] hover:border-emerald-500/30",
     badge: "Step 3",
+    accent: "text-emerald-400 bg-emerald-950/20 border-emerald-500/20",
   },
 ];
 
@@ -42,14 +45,14 @@ export function HowItWorks() {
     <section className="py-24 px-4 max-w-7xl mx-auto relative z-10">
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto mb-16">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4">
-          <Sparkles className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-white/80 mb-4">
+          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
           <span>Simple 3-Step Process</span>
         </div>
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4 leading-tight">
           From Prompt to Masterpiece in Seconds
         </h2>
-        <p className="text-muted-foreground text-base sm:text-lg">
+        <p className="text-white/60 text-base sm:text-lg">
           Our intelligent studio engine handles all technical rendering so you can focus purely on imagination.
         </p>
       </div>
@@ -65,32 +68,32 @@ export function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
-              className={`group relative p-8 rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md flex flex-col justify-between transition-all duration-300 hover:border-primary/50 hover:-translate-y-1.5 shadow-lg ${item.glow}`}
+              className={`group relative p-8 rounded-2xl border border-white/5 bg-[#0c0c0c]/80 backdrop-blur-md flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-xl ${item.glow}`}
             >
               <div>
                 {/* Top Badge & Number */}
                 <div className="flex items-center justify-between mb-8">
-                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${item.gradient} text-white shadow-md`}>
+                  <div className={`p-3 md:p-3.5 rounded-full border ${item.accent} shadow-md`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-4xl font-extrabold text-muted-foreground/30 font-mono">
+                  <span className="text-5xl font-black text-white/10 font-mono tracking-tighter">
                     {item.step}
                   </span>
                 </div>
 
                 {/* Content */}
-                <span className="text-xs font-semibold text-primary uppercase tracking-wider mb-1 block">
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 block">
                   {item.badge} • {item.subtitle}
                 </span>
-                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-white transition-colors">
                   {item.title}
                 </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                <p className="text-white/70 text-sm leading-relaxed mb-6">
                   {item.description}
                 </p>
               </div>
 
-              <div className="flex items-center text-xs font-semibold text-foreground group-hover:text-primary transition-colors gap-1.5 pt-4 border-t border-border/40">
+              <div className="flex items-center text-xs font-semibold text-white/85 group-hover:text-white transition-colors gap-1.5 pt-4 border-t border-white/10">
                 <span>Learn more</span>
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
               </div>

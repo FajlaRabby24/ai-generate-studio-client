@@ -53,30 +53,30 @@ export function PromptPlayground() {
     <section className="py-24 px-4 max-w-7xl mx-auto relative z-10">
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto mb-12">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4">
-          <Wand2 className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-white/80 mb-4">
+          <Wand2 className="w-3.5 h-3.5 text-blue-400" />
           <span>Interactive Playground</span>
         </div>
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4 leading-tight">
           Try the AI Prompt Playground
         </h2>
-        <p className="text-muted-foreground text-base sm:text-lg">
+        <p className="text-white/60 text-base sm:text-lg">
           Click any style preset below to see how our AI engine translates prompts into high-resolution visuals.
         </p>
       </div>
 
-      {/* Style Presets Chips */}
-      <div className="flex flex-wrap justify-center gap-3 mb-10">
+      {/* Style Presets Chips (Rounded pill dock style) */}
+      <div className="flex flex-wrap justify-center gap-2 border border-gray-700/60 rounded-full p-1.5 bg-black/40 backdrop-blur-md max-w-fit mx-auto mb-12 shadow-lg">
         {presets.map((preset) => {
           const isActive = activeTab.id === preset.id;
           return (
             <button
               key={preset.id}
               onClick={() => setActiveTab(preset)}
-              className={`px-5 py-2.5 rounded-full text-xs font-semibold transition-all duration-300 cursor-pointer ${
+              className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-300 cursor-pointer ${
                 isActive
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105"
-                  : "bg-card/60 text-muted-foreground border border-border/50 hover:bg-card hover:text-foreground"
+                  ? "bg-white text-black shadow-md scale-105"
+                  : "text-white/80 hover:text-white hover:bg-white/5"
               }`}
             >
               {preset.label}
@@ -86,7 +86,7 @@ export function PromptPlayground() {
       </div>
 
       {/* Playground Preview Card */}
-      <div className="relative rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md overflow-hidden p-6 md:p-8 max-w-5xl mx-auto shadow-2xl">
+      <div className="relative rounded-2xl border border-white/10 bg-[#0c0c0c]/80 backdrop-blur-md overflow-hidden p-6 md:p-8 max-w-5xl mx-auto shadow-2xl">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab.id}
@@ -100,18 +100,18 @@ export function PromptPlayground() {
             <div className="md:col-span-7 flex flex-col justify-between h-full space-y-6">
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
+                  <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white/80">
                     Model: {activeTab.model}
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium border border-border/40">
+                  <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/80">
                     Aspect Ratio: {activeTab.aspect}
                   </span>
                 </div>
                 
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                <h3 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-2.5">
                   Prompt Input Text
                 </h3>
-                <div className="p-4 rounded-xl bg-background/80 border border-border/50 text-foreground text-sm leading-relaxed font-mono relative">
+                <div className="p-4 rounded-xl bg-black/60 border border-blue-500/20 text-cyan-400 text-sm leading-relaxed font-mono relative shadow-[0_0_15px_rgba(59,130,246,0.04)]">
                   "{activeTab.prompt}"
                 </div>
               </div>
@@ -120,14 +120,14 @@ export function PromptPlayground() {
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <button
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground border border-border/50 hover:bg-secondary/80 text-xs font-semibold transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 text-white/80 hover:text-white hover:bg-white/5 text-xs font-semibold transition-all cursor-pointer"
                 >
                   {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                   <span>{copied ? "Prompt Copied!" : "Copy Prompt"}</span>
                 </button>
 
-                <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold shadow-md hover:shadow-primary/25 transition-all cursor-pointer">
-                  <Sparkles className="w-4 h-4" />
+                <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white text-black text-xs font-bold shadow-md hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer">
+                  <Sparkles className="w-4 h-4 text-blue-500" />
                   <span>Generate Variations</span>
                   <ArrowRight className="w-4 h-4 ml-0.5" />
                 </button>
@@ -136,7 +136,7 @@ export function PromptPlayground() {
 
             {/* Right Result Preview */}
             <div className="md:col-span-5 relative group">
-              <div className="relative rounded-xl overflow-hidden border border-border/60 aspect-square shadow-xl">
+              <div className="relative rounded-xl overflow-hidden border border-white/10 aspect-square shadow-xl">
                 <img
                   src={activeTab.image}
                   alt={activeTab.label}
