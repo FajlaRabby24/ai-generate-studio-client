@@ -56,3 +56,13 @@ export const getRecentGenerationServiceTextToSpeech = async () => {
   );
   return res;
 };
+
+export const deleteTextToSpeechService = async (id: string) =>
+  catchAsync(async () => {
+    const authHeaders = await generalService.getHeaders();
+    const res = await httpClient.delete<any>(
+      `/text-to-speech/${id}`,
+      authHeaders,
+    );
+    return res;
+  });

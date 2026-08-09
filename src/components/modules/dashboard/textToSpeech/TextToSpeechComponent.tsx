@@ -2,28 +2,32 @@
 
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/ui/magic-card";
+import { GenerationStatus, GenerationType } from "@/config/constant";
 import {
-  Sparkles,
-  Volume2,
-  Music,
-  Play,
-  Pause,
-  Download,
-  Clock,
-  History,
-  Trash2,
-  Sliders,
-  RefreshCw,
-} from "lucide-react";
-import { useState, useRef, useEffect } from "react";
-import { toast } from "sonner";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getVoicesService, getRecentGenerationServiceTextToSpeech } from "@/services/dashboard/text-to-speech/textToSpeech.service";
-import { IVoiceItem } from "@/types/textToSpeech.types";
-import { GenerationStatus } from "@/config/constant";
+  deleteTextToSpeechService,
+  getRecentGenerationServiceTextToSpeech,
+  getVoicesService,
+  textToSpeechService,
+} from "@/services/dashboard/text-to-speech/textToSpeech.service";
 import { IGetRecentTextToSpeechResponse } from "@/types/dashboard.types";
-
-
+import { IVoiceItem } from "@/types/textToSpeech.types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Clock,
+  Download,
+  History,
+  Music,
+  Pause,
+  Play,
+  RefreshCw,
+  Sliders,
+  Sparkles,
+  Trash2,
+  Volume2,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import Swal from "sweetalert2";
 
 const TextToSpeechComponent = () => {
   const [prompt, setPrompt] = useState("");
@@ -32,14 +36,14 @@ const TextToSpeechComponent = () => {
   const [selectedVoice, setSelectedVoice] = useState("");
   const [speed, setSpeed] = useState("0%");
   const [pitch, setPitch] = useState("0%");
-  const [isGenerating, setIsGenerating] = useState(false);
 
-   const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   // Fetch real voices from backend
   const { data: voicesRes, isLoading: isLoadingVoices } = useQuery({
     queryKey: ["voices", languageFilter, genderFilter],
-    queryFn: () => getVoicesService({ lang: languageFilter, gender: genderFilter }),
+    queryFn: () =>
+      getVoicesService({ lang: languageFilter, gender: genderFilter }),
   });
 
   const voicesList = voicesRes?.data || [];
@@ -98,27 +102,81 @@ const TextToSpeechComponent = () => {
     }
   };
 
-  const handleGenerate = () => {
+  const { mutateAsync: generateSpeech, isPending: isGenerating } = useMutation({
+    mutationFn: textToSpeechService,
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success("Speech synthesized successfully!");
+        setPrompt("");
+        queryClient.invalidateQueries({ queryKey: ["recentTextToSpeech"] });
+      } else {
+        toast.error(data?.message || "Failed to synthesize speech.");
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to synthesize speech.");
+    },
+  });
+
+  const handleGenerate = async () => {
     if (!prompt.trim()) {
       toast.error("Please enter some text to synthesize.");
       return;
     }
+    if (!selectedVoice) {
+      toast.error("Please select a voice.");
+      return;
+    }
 
-    setIsGenerating(true);
-    setTimeout(() => {
-      setIsGenerating(false);
-      setPrompt("");
-      queryClient.invalidateQueries({ queryKey: ["recentTextToSpeech"] });
-      toast.success("Speech synthesized successfully!");
-    }, 2000);
+    await generateSpeech({
+      prompt: prompt.trim(),
+      voiceId: selectedVoice,
+      rate: speed === "0%" ? undefined : speed,
+      pitch: pitch === "0%" ? undefined : pitch.replace("%", "Hz"),
+      type: GenerationType.TEXT_TO_SPEECH,
+    });
   };
 
+  const { mutateAsync: deleteItem } = useMutation({
+    mutationFn: deleteTextToSpeechService,
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success("History item deleted successfully!");
+        queryClient.invalidateQueries({ queryKey: ["recentTextToSpeech"] });
+      } else {
+        toast.error(data?.message || "Failed to delete history item.");
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to delete history item.");
+    },
+  });
+
   const handleDeleteHistory = (id: string) => {
-    if (playingId === id) {
-      audioPlayersRef.current[id]?.pause();
-      setPlayingId(null);
-    }
-    toast.success("History item deleted.");
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this! The creation will be removed from your history.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#8b5cf6",
+      cancelButtonColor: "#ef4444",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      background: document.documentElement.classList.contains("dark")
+        ? "#171717"
+        : "#ffffff",
+      color: document.documentElement.classList.contains("dark")
+        ? "#ffffff"
+        : "#000000",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        if (playingId === id) {
+          audioPlayersRef.current[id]?.pause();
+          setPlayingId(null);
+        }
+        await deleteItem(id);
+      }
+    });
   };
 
   const getVoiceDisplayName = (voiceId: string) => {
@@ -146,7 +204,8 @@ const TextToSpeechComponent = () => {
           </span>
         </h1>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl">
-          Convert written text into natural, expressive human-like speech. Choose from a variety of voices, languages, and settings.
+          Convert written text into natural, expressive human-like speech.
+          Choose from a variety of voices, languages, and settings.
         </p>
       </div>
 
@@ -211,7 +270,9 @@ const TextToSpeechComponent = () => {
             {/* Filter controls */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Language</label>
+                <label className="text-sm font-semibold text-foreground">
+                  Language
+                </label>
                 <select
                   value={languageFilter}
                   onChange={(e) => setLanguageFilter(e.target.value)}
@@ -239,7 +300,9 @@ const TextToSpeechComponent = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Gender</label>
+                <label className="text-sm font-semibold text-foreground">
+                  Gender
+                </label>
                 <select
                   value={genderFilter}
                   onChange={(e) => setGenderFilter(e.target.value)}
@@ -254,10 +317,13 @@ const TextToSpeechComponent = () => {
 
             {/* Voice Dropdown */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Select Voice</label>
+              <label className="text-sm font-semibold text-foreground">
+                Select Voice
+              </label>
               {isLoadingVoices ? (
                 <div className="w-full p-3.5 rounded-xl border border-border/60 bg-background/50 text-muted-foreground text-sm flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4 animate-spin" /> Loading voices...
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Loading
+                  voices...
                 </div>
               ) : (
                 <select
@@ -269,8 +335,12 @@ const TextToSpeechComponent = () => {
                   {voicesList.length === 0 ? (
                     <option value="">No voices found</option>
                   ) : (
-                    voicesList.map((voice : IVoiceItem) => (
-                      <option key={voice.id} value={voice.id} className="bg-card text-foreground">
+                    voicesList.map((voice: IVoiceItem) => (
+                      <option
+                        key={voice.id}
+                        value={voice.id}
+                        className="bg-card text-foreground"
+                      >
                         {voice.name} ({voice.gender}) - {voice.language}
                       </option>
                     ))
@@ -282,8 +352,12 @@ const TextToSpeechComponent = () => {
             {/* Speed Option */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-semibold text-foreground">Speed (Rate)</label>
-                <span className="text-xs font-semibold text-primary">{speed}</span>
+                <label className="text-sm font-semibold text-foreground">
+                  Speed (Rate)
+                </label>
+                <span className="text-xs font-semibold text-primary">
+                  {speed}
+                </span>
               </div>
               <input
                 type="range"
@@ -307,8 +381,12 @@ const TextToSpeechComponent = () => {
             {/* Pitch Option */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-semibold text-foreground">Pitch</label>
-                <span className="text-xs font-semibold text-primary">{pitch}</span>
+                <label className="text-sm font-semibold text-foreground">
+                  Pitch
+                </label>
+                <span className="text-xs font-semibold text-primary">
+                  {pitch}
+                </span>
               </div>
               <input
                 type="range"
@@ -342,23 +420,29 @@ const TextToSpeechComponent = () => {
         </div>
 
         {isLoadingHistory ? (
-           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
-             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
-             <p className="text-muted-foreground text-center">Loading recent audio generations...</p>
-           </div>
+          <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
+            <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
+            <p className="text-muted-foreground text-center">
+              Loading recent audio generations...
+            </p>
+          </div>
         ) : recentGenerations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground text-center">No audio conversions yet.</p>
+            <p className="text-muted-foreground text-center">
+              No audio conversions yet.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {recentGenerations.map((item: IGetRecentTextToSpeechResponse) => {
               const speechRecord = item.textToSpeeches?.[0];
               if (!speechRecord) return null;
-              
-              const isCompleted = speechRecord.status === GenerationStatus.COMPLETED && speechRecord.audioUrl;
-              
+
+              const isCompleted =
+                speechRecord.status === GenerationStatus.COMPLETED &&
+                speechRecord.audioUrl;
+
               return (
                 <div
                   key={item.id}
@@ -385,7 +469,9 @@ const TextToSpeechComponent = () => {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handlePlayPause(item.id, speechRecord.audioUrl)}
+                          onClick={() =>
+                            handlePlayPause(item.id, speechRecord.audioUrl)
+                          }
                           className="rounded-full w-9 h-9 p-0 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer"
                         >
                           {playingId === item.id ? (
@@ -395,7 +481,9 @@ const TextToSpeechComponent = () => {
                           )}
                         </Button>
                         <span className="text-xs text-muted-foreground">
-                          {playingId === item.id ? "Playing..." : "Listen audio"}
+                          {playingId === item.id
+                            ? "Playing..."
+                            : "Listen audio"}
                         </span>
                       </div>
                     ) : (
@@ -407,8 +495,17 @@ const TextToSpeechComponent = () => {
 
                     <div className="flex items-center gap-2">
                       {isCompleted && (
-                        <a href={speechRecord.audioUrl} download target="_blank" rel="noopener noreferrer">
-                          <Button size="sm" variant="ghost" className="rounded-xl hover:bg-muted/50 p-2 h-auto text-muted-foreground hover:text-foreground">
+                        <a
+                          href={speechRecord.audioUrl}
+                          download
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="rounded-xl hover:bg-muted/50 p-2 h-auto text-muted-foreground hover:text-foreground"
+                          >
                             <Download className="w-4 h-4" />
                           </Button>
                         </a>
