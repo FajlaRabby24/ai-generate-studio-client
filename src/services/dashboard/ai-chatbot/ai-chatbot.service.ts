@@ -28,24 +28,25 @@ export const aiChatBotService = async (payload: IAiChatBotPayload) =>
     return res;
   });
 
-export const getPreviousConversation = catchAsync(async () => {
-  const headers = await generalService.getHeaders();
-  const res = await httpClient.get<IAiChatTitleResponse>(
-    "/ai-chat-bot/conversations",
-    headers,
-  );
+export const getPreviousConversation = async () =>
+  catchAsync(async () => {
+    const headers = await generalService.getHeaders();
+    const res = await httpClient.get<IAiChatTitleResponse>(
+      "/ai-chat-bot/conversations",
+      headers,
+    );
 
-  return res;
-});
+    console.log("conversations title", res);
+    return res;
+  });
 
-export const getConversationChatsById = catchAsync(
-  async (conversationId: string) => {
+export const getConversationChatsById = async (conversationId: string) =>
+  catchAsync(async () => {
     const headers = await generalService.getHeaders();
     const res = await httpClient.get<IGetConversationChatsById>(
       `/ai-chat-bot/conversations/${conversationId}`,
       headers,
     );
-
+console.log("conversation by id", res)
     return res;
-  },
-);
+  });

@@ -1,13 +1,30 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { MagicCard } from "@/components/ui/magic-card";
 import { GenerationType } from "@/config/constant";
-import { aiChatBotService } from "@/services/dashboard/ai-chatbot/ai-chatbot.service";
-import { useMutation } from "@tanstack/react-query";
+import { envVars } from "@/config/env";
+import {
+  getConversationChatsById,
+  getPreviousConversation,
+} from "@/services/dashboard/ai-chatbot/ai-chatbot.service";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bot, Send, User } from "lucide-react";
+import {
+  Bot,
+  ChevronDown,
+  History,
+  MessageSquarePlus,
+  Send,
+  User,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -20,16 +37,20 @@ export function ChatBotContainer() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<
+    string | null
+  >(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Mutation for sending message to AI Chatbot
-  const { mutateAsync: sendMessage, isPending } = useMutation({
-    mutationFn: (payload: {
-      message: string;
-      type: GenerationType;
-      chatHistory: ChatMessage[];
-    }) => aiChatBotService(payload),
-  });
+  // Fetch previous conversations
+  const { data: previousConversationsRes, isLoading: isLoadingConversations } =
+    useQuery({
+      queryKey: ["previousConversations"],
+      queryFn: () => getPreviousConversation(),
+    });
+
+  const previousConversations = previousConversationsRes?.data || [];
+  const [isPending, setIsPending] = useState(false);
 
   // Scroll to bottom whenever messages or typing state changes
   useEffect(() => {
@@ -51,32 +72,84 @@ export function ChatBotContainer() {
       parts: [{ text: userMessageText }],
     };
     const updatedHistory = [...messages, userMessage];
-    setMessages(updatedHistory);
+
+    // Instantly show user message and an empty bot message
+    setMessages([...updatedHistory, { role: "model", parts: [{ text: "" }] }]);
+    setIsPending(true);
 
     try {
-      // 2. Call chatbot API
-      const res = await sendMessage({
-        message: userMessageText,
-        chatHistory: messages,
-        type: GenerationType.AI_CHATBOT,
-      });
-
-      if (res?.success && res.data) {
-        // 3. Add bot message to local state
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "model",
-            parts: [{ text: res.data.response }],
+      const response = await fetch(
+        `${envVars.API_BASE_URL}/ai-chat-bot/stream`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        ]);
-      } else {
-        toast.error(
-          res?.message || "Failed to generate AI response. Please try again.",
-        );
+          credentials: "include",
+          body: JSON.stringify({
+            message: userMessageText,
+            type: GenerationType.AI_CHATBOT,
+            ...(activeConversationId && {
+              conversationId: activeConversationId,
+            }),
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send message");
+      }
+
+      setIsPending(false); // Stream starting
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      if (!reader) throw new Error("No reader available");
+
+      let currentText = "";
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        let boundary = buffer.indexOf("\n\n");
+        while (boundary !== -1) {
+          const messageChunk = buffer.slice(0, boundary);
+          buffer = buffer.slice(boundary + 2);
+
+          if (messageChunk.startsWith("data: ")) {
+            const dataStr = messageChunk.slice(6);
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.done) {
+                if (data.conversationId && !activeConversationId) {
+                  setActiveConversationId(data.conversationId);
+                }
+              } else if (data.chunk) {
+                currentText += data.chunk;
+                setMessages((prev) => {
+                  const newMessages = [...prev];
+                  newMessages[newMessages.length - 1].parts[0].text =
+                    currentText;
+                  return newMessages;
+                });
+              }
+            } catch (err) {
+              // Ignore parse errors from partial chunks
+            }
+          }
+          boundary = buffer.indexOf("\n\n");
+        }
       }
     } catch (err: any) {
       toast.error(err?.message || "Failed to process chatbot request");
+      setIsPending(false);
+      // Remove the empty bot message if request failed completely
+      setMessages((prev) => prev.slice(0, -1));
     }
   };
 
@@ -90,14 +163,86 @@ export function ChatBotContainer() {
               <Bot className="w-8 h-8 text-primary" />
               AI Chat Studio
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
-              Gemini 3.6 Flash
-            </span>
           </div>
           <p className="text-muted-foreground text-sm">
             Engage in seamless conversational intelligence with our advanced
             chatbot model.
           </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={
+                "flex items-center gap-2 border border-border rounded-xl px-2 py-1 cursor-pointer"
+              }
+            >
+              {/* <button className="gap-2 rounded-xl"> */}
+              <History className="w-4 h-4" />
+              Conversations
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              {/* </button> */}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuItem
+                className="gap-2 text-primary focus:text-primary font-medium"
+                onClick={() => {
+                  setActiveConversationId(null);
+                  setMessages([]);
+                }}
+              >
+                <MessageSquarePlus className="w-4 h-4" />
+                New Chat
+              </DropdownMenuItem>
+              {previousConversations.length > 0 && (
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase">
+                  Previous Chats
+                </div>
+              )}
+              {isLoadingConversations ? (
+                <div className="px-4 py-2 text-sm text-muted-foreground">
+                  Loading...
+                </div>
+              ) : (
+                <div className="max-h-60 overflow-y-auto">
+                  {/* @ts-ignore - response type mismatch */}
+                  {previousConversations.map((conv: any) => (
+                    <DropdownMenuItem
+                      key={conv.id}
+                      className={`gap-2 truncate cursor-pointer ${
+                        activeConversationId === conv.id
+                          ? "bg-accent/50 text-accent-foreground"
+                          : ""
+                      }`}
+                      onClick={async () => {
+                        setActiveConversationId(conv.id);
+                        try {
+                          const chatRes = await getConversationChatsById(
+                            conv.id,
+                          );
+                          if (chatRes?.success && chatRes.data?.chatHistory) {
+                            // The server pushes arrays of [userMessage, botMessage] to the DB,
+                            // so we need to flatten the history before displaying.
+                            const history = chatRes.data.chatHistory;
+                            const flatHistory = Array.isArray(history[0])
+                              ? history.flat(Infinity)
+                              : history;
+                            setMessages(flatHistory as any[]);
+                          }
+                        } catch (error) {
+                          toast.error("Failed to load conversation history");
+                        }
+                      }}
+                    >
+                      <Bot className="w-4 h-4 shrink-0 opacity-70" />
+                      <span className="truncate">
+                        {conv.title || "New Conversation"}
+                      </span>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -162,7 +307,7 @@ export function ChatBotContainer() {
                             : "bg-muted/80 dark:bg-muted/30 border border-border/20 text-foreground rounded-tl-none"
                         }`}
                       >
-                        {msg.parts[0]?.text}
+                        {msg?.parts[0]?.text}
                       </div>
                     </motion.div>
                   );
