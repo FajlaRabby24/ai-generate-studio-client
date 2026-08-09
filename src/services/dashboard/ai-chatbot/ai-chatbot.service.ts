@@ -36,7 +36,6 @@ export const getPreviousConversation = async () =>
       headers,
     );
 
-    console.log("conversations title", res);
     return res;
   });
 
@@ -47,6 +46,5 @@ export const getConversationChatsById = async (conversationId: string) =>
       `/ai-chat-bot/conversations/${conversationId}`,
       headers,
     );
-console.log("conversation by id", res)
     return res;
   });

@@ -1,11 +1,7 @@
-import EmptyState from "@/components/shared/EmptyState";
+import TextToVideoComponent from "@/components/modules/dashboard/textToVideo/TextToVideoComponent";
 
 const TextToVideoPage = () => {
-  return (
-    <div>
-      <EmptyState title="Text to Video Generator" />
-    </div>
-  );
+  return <TextToVideoComponent />;
 };
 
 export default TextToVideoPage;
