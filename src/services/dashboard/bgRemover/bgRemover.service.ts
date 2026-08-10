@@ -2,7 +2,7 @@
 
 import { httpClient } from "@/lib/httpClient";
 import { generalService } from "@/services/general.service";
-import { IBackgroundRemoveResponse } from "@/types/backgroundRemove.types";
+import { IBackgroundRemoveResponse, IGetRecentImageToVideoResponse } from "@/types/backgroundRemove.types";
 import { catchAsync } from "@/utils/catchAsync";
 
 export const bgRemoverService = async (formData: FormData) =>
@@ -21,3 +21,13 @@ export const bgRemoverService = async (formData: FormData) =>
 
     return res;
   });
+
+export const getRecentGenerationService = async () => {
+  const authHeaders = await generalService.getHeaders();
+  const res = await httpClient.get<IGetRecentImageToVideoResponse[]>(
+    "/background-remove/recent",
+    authHeaders,
+  );
+
+  return res;
+};

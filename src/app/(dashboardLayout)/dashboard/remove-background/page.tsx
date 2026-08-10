@@ -1,11 +1,8 @@
+import RemoveBackgroundComponent from "@/components/modules/dashboard/removeBackground/RemoveBackgroundComponent";
 import EmptyState from "@/components/shared/EmptyState";
 
 const RemoveBackgroundPage = () => {
-  return (
-    <div>
-      <EmptyState title="Remove Background" />
-    </div>
-  );
+  return <RemoveBackgroundComponent />
 };
 
 export default RemoveBackgroundPage;
