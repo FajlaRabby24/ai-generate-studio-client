@@ -2,26 +2,26 @@
 
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/ui/magic-card";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  UploadCloud,
-  History,
-  X,
-  Sparkles,
-  Download,
-  RefreshCw,
-  Image as ImageIcon,
-  CheckCircle2,
-  Undo2,
-} from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { GenerationType } from "@/config/constant";
 import {
   bgRemoverService,
   getRecentGenerationService,
 } from "@/services/dashboard/bgRemover/bgRemover.service";
 import { IGetRecentImageToVideoResponse } from "@/types/backgroundRemove.types";
-import { GenerationStatus, GenerationType } from "@/config/constant";
+import { handleDownload } from "@/utils/handleDownload";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Download,
+  History,
+  Image as ImageIcon,
+  RefreshCw,
+  Sparkles,
+  Undo2,
+  UploadCloud,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const RemoveBackgroundComponent = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -60,21 +60,24 @@ const RemoveBackgroundComponent = () => {
     setOutputUrl(null);
   };
 
-  const { mutateAsync: removeBackground, isPending: isProcessing } = useMutation({
-    mutationFn: bgRemoverService,
-    onSuccess: (data) => {
-      if (data?.success && data.data?.secureUrl) {
-        toast.success(data?.message || "Background removed successfully!");
-        setOutputUrl(data.data.secureUrl);
-        queryClient.invalidateQueries({ queryKey: ["recentBackgroundRemover"] });
-      } else {
-        toast.error(data?.message || "Failed to remove background.");
-      }
-    },
-    onError: (err: any) => {
-      toast.error(err?.message || "Something went wrong.");
-    },
-  });
+  const { mutateAsync: removeBackground, isPending: isProcessing } =
+    useMutation({
+      mutationFn: bgRemoverService,
+      onSuccess: (data) => {
+        if (data?.success && data.data?.secureUrl) {
+          toast.success(data?.message || "Background removed successfully!");
+          setOutputUrl(data.data.secureUrl);
+          queryClient.invalidateQueries({
+            queryKey: ["recentBackgroundRemover"],
+          });
+        } else {
+          toast.error(data?.message || "Failed to remove background.");
+        }
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Something went wrong.");
+      },
+    });
 
   const handleProcess = async () => {
     if (!file) {
@@ -104,7 +107,8 @@ const RemoveBackgroundComponent = () => {
           </span>
         </h1>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl">
-          Instantly remove backgrounds from images with professional precision. Clean transparency in just one click.
+          Instantly remove backgrounds from images with professional precision.
+          Clean transparency in just one click.
         </p>
       </div>
 
@@ -116,7 +120,6 @@ const RemoveBackgroundComponent = () => {
           className="w-full p-1 rounded-3xl border border-border/40 bg-card/10 backdrop-blur-md shadow-2xl"
         >
           <div className="p-6 md:p-8 flex flex-col gap-6">
-            
             {/* File Upload / Image Preview Section */}
             {!filePreview ? (
               <div className="relative border-2 border-dashed border-border/60 rounded-2xl p-12 flex flex-col items-center justify-center gap-4 hover:border-primary/50 transition-all bg-background/30 group">
@@ -173,12 +176,12 @@ const RemoveBackgroundComponent = () => {
                       {isProcessing ? (
                         <div className="flex flex-col items-center justify-center gap-3 text-center p-6">
                           <RefreshCw className="w-8 h-8 text-primary animate-spin" />
-                          <p className="text-xs text-muted-foreground font-semibold">Removing background...</p>
+                          <p className="text-xs text-muted-foreground font-semibold">
+                            Removing background...
+                          </p>
                         </div>
                       ) : outputUrl ? (
-                        <div 
-                          className="w-full h-full flex items-center justify-center bg-[linear-gradient(45deg,#ccc_25%,transparent_25%),linear-gradient(-45deg,#ccc_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#ccc_75%),linear-gradient(-45deg,transparent_75%,#ccc_75%)] bg-[size:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] bg-neutral-200 dark:bg-neutral-800"
-                        >
+                        <div className="w-full h-full flex items-center justify-center bg-[linear-gradient(45deg,#ccc_25%,transparent_25%),linear-gradient(-45deg,#ccc_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#ccc_75%),linear-gradient(-45deg,transparent_75%,#ccc_75%)] bg-[size:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0] bg-neutral-200 dark:bg-neutral-800">
                           <img
                             src={outputUrl}
                             alt="Background Removed Result"
@@ -206,11 +209,14 @@ const RemoveBackgroundComponent = () => {
                       >
                         <Undo2 className="w-4 h-4" /> Start Over
                       </Button>
-                      <a href={outputUrl} download target="_blank" rel="noopener noreferrer">
-                        <Button className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 flex items-center gap-2 shadow-lg shadow-emerald-600/20">
-                          <Download className="w-4 h-4" /> Download Result
-                        </Button>
-                      </a>
+                      <Button
+                        onClick={() =>
+                          handleDownload(outputUrl, "background-removed.png")
+                        }
+                        className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 flex items-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer animate-in fade-in zoom-in duration-300"
+                      >
+                        <Download className="w-4 h-4" /> Download Result
+                      </Button>
                     </>
                   ) : (
                     <>
@@ -229,7 +235,8 @@ const RemoveBackgroundComponent = () => {
                       >
                         {isProcessing ? (
                           <>
-                            <RefreshCw className="w-4 h-4 animate-spin" /> Removing...
+                            <RefreshCw className="w-4 h-4 animate-spin" />{" "}
+                            Removing...
                           </>
                         ) : (
                           <>
@@ -258,12 +265,16 @@ const RemoveBackgroundComponent = () => {
         {isLoadingHistory ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
-            <p className="text-muted-foreground text-center">Loading recent creations...</p>
+            <p className="text-muted-foreground text-center">
+              Loading recent creations...
+            </p>
           </div>
         ) : recentGenerations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground text-center">No recent creations to display.</p>
+            <p className="text-muted-foreground text-center">
+              No recent creations to display.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -287,16 +298,20 @@ const RemoveBackgroundComponent = () => {
                   </div>
                   <div className="p-4 flex flex-col gap-2 bg-muted/10">
                     <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                      <span>{new Date(bgRecord.createdAt).toLocaleDateString()}</span>
-                      <a
-                        href={bgRecord.outputUrls}
-                        download
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-primary font-bold hover:underline"
+                      <span>
+                        {new Date(bgRecord.createdAt).toLocaleDateString()}
+                      </span>
+                      <button
+                        onClick={() =>
+                          handleDownload(
+                            bgRecord.outputUrls,
+                            `removed-bg-${bgRecord.id}.png`,
+                          )
+                        }
+                        className="flex items-center gap-1 text-primary font-bold hover:underline cursor-pointer bg-transparent border-none p-0 outline-none"
                       >
                         <Download className="w-3.5 h-3.5" /> Download
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>

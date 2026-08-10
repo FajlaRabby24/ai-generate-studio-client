@@ -28,6 +28,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
+import { handleDownload } from "@/utils/handleDownload";
 
 const TextToSpeechComponent = () => {
   const [prompt, setPrompt] = useState("");
@@ -495,20 +496,19 @@ const TextToSpeechComponent = () => {
 
                     <div className="flex items-center gap-2">
                       {isCompleted && (
-                        <a
-                          href={speechRecord.audioUrl}
-                          download
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            handleDownload(
+                              speechRecord.audioUrl,
+                              `speech-${speechRecord.id}.mp3`
+                            )
+                          }
+                          className="rounded-xl hover:bg-muted/50 p-2 h-auto text-muted-foreground hover:text-foreground cursor-pointer"
                         >
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="rounded-xl hover:bg-muted/50 p-2 h-auto text-muted-foreground hover:text-foreground"
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </a>
+                          <Download className="w-4 h-4" />
+                        </Button>
                       )}
                       <Button
                         size="sm"

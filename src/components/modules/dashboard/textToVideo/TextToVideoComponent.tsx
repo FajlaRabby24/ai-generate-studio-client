@@ -2,12 +2,24 @@
 
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/ui/magic-card";
-import { Sparkles, Video, Wand2, History, Settings2, Download, Clock, Play } from "lucide-react";
+import { GenerationStatus, GenerationType } from "@/config/constant";
+import {
+  getRecentGenerationService,
+  textToVideoService,
+} from "@/services/dashboard/text-to-video/textToVideo.service";
+import { handleDownload } from "@/utils/handleDownload";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Clock,
+  Download,
+  History,
+  Settings2,
+  Sparkles,
+  Video,
+  Wand2,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { textToVideoService, getRecentGenerationService } from "@/services/dashboard/text-to-video/textToVideo.service";
-import { GenerationStatus, GenerationType } from "@/config/constant";
 
 const TextToVideoComponent = () => {
   const [prompt, setPrompt] = useState("");
@@ -18,14 +30,16 @@ const TextToVideoComponent = () => {
     queryKey: ["recentTextToVideo"],
     queryFn: getRecentGenerationService,
   });
-  
+
   const recentGenerations = recentRes?.data || [];
 
   const { mutateAsync: generateVideo, isPending } = useMutation({
     mutationFn: textToVideoService,
     onSuccess: (data) => {
       if (data?.success) {
-        toast.success("Video generation started! Please wait for it to process.");
+        toast.success(
+          "Video generation started! Please wait for it to process.",
+        );
         setPrompt("");
         // Invalidate query to refetch pending items
         queryClient.invalidateQueries({ queryKey: ["recentTextToVideo"] });
@@ -61,7 +75,8 @@ const TextToVideoComponent = () => {
           </span>
         </h1>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl">
-          Transform your imagination into stunning videos. Just type a prompt, and our AI will start crafting your video in the background.
+          Transform your imagination into stunning videos. Just type a prompt,
+          and our AI will start crafting your video in the background.
         </p>
       </div>
 
@@ -101,10 +116,14 @@ const TextToVideoComponent = () => {
                         : "border-border/40 bg-muted/20 hover:bg-muted/40"
                     }`}
                   >
-                    <div className={`text-sm font-medium ${aspectRatio === "16:9" ? "text-primary" : "text-foreground"}`}>
+                    <div
+                      className={`text-sm font-medium ${aspectRatio === "16:9" ? "text-primary" : "text-foreground"}`}
+                    >
                       16:9
                     </div>
-                    <div className={`text-xs mt-0.5 ${aspectRatio === "16:9" ? "text-primary/70" : "text-muted-foreground"}`}>
+                    <div
+                      className={`text-xs mt-0.5 ${aspectRatio === "16:9" ? "text-primary/70" : "text-muted-foreground"}`}
+                    >
                       Landscape
                     </div>
                   </div>
@@ -116,10 +135,14 @@ const TextToVideoComponent = () => {
                         : "border-border/40 bg-muted/20 hover:bg-muted/40"
                     }`}
                   >
-                    <div className={`text-sm font-medium ${aspectRatio === "9:16" ? "text-primary" : "text-foreground"}`}>
+                    <div
+                      className={`text-sm font-medium ${aspectRatio === "9:16" ? "text-primary" : "text-foreground"}`}
+                    >
                       9:16
                     </div>
-                    <div className={`text-xs mt-0.5 ${aspectRatio === "9:16" ? "text-primary/70" : "text-muted-foreground"}`}>
+                    <div
+                      className={`text-xs mt-0.5 ${aspectRatio === "9:16" ? "text-primary/70" : "text-muted-foreground"}`}
+                    >
                       Vertical
                     </div>
                   </div>
@@ -157,25 +180,31 @@ const TextToVideoComponent = () => {
             Recent Generations
           </h3>
         </div>
-        
+
         {isLoadingHistory ? (
-           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
-             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
-             <p className="text-muted-foreground text-center">Loading recent generations...</p>
-           </div>
+          <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
+            <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
+            <p className="text-muted-foreground text-center">
+              Loading recent generations...
+            </p>
+          </div>
         ) : recentGenerations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground text-center">No recent generations to display.</p>
+            <p className="text-muted-foreground text-center">
+              No recent generations to display.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentGenerations.map((item) => {
               const videoRecord = item.textToVideos?.[0];
               if (!videoRecord) return null;
-              
-              const isCompleted = videoRecord.status === GenerationStatus.COMPLETED && videoRecord.outputUrl;
-              
+
+              const isCompleted =
+                videoRecord.status === GenerationStatus.COMPLETED &&
+                videoRecord.outputUrl;
+
               return (
                 <div
                   key={item.id}
@@ -192,6 +221,33 @@ const TextToVideoComponent = () => {
                         />
                         <div className="absolute inset-0 pointer-events-none bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                       </div>
+                      {/* here */}
+                      <div className="p-4 bg-muted/10 border-t border-border/10 flex flex-col gap-2">
+                        <p className="text-xs text-foreground/80 line-clamp-2 leading-relaxed italic">
+                          "{videoRecord.prompt}"
+                        </p>
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/10">
+                          <span>
+                            {new Date(
+                              videoRecord.createdAt,
+                            ).toLocaleDateString()}
+                          </span>
+                          {isCompleted && (
+                            <button
+                              onClick={() =>
+                                handleDownload(
+                                  videoRecord.outputUrl,
+                                  `ai-video-${videoRecord.id}.mp4`,
+                                )
+                              }
+                              className="flex items-center gap-1 text-primary font-bold hover:underline cursor-pointer bg-transparent border-none p-0 outline-none"
+                            >
+                              <Download className="w-3.5 h-3.5" /> Download
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      {/* here */}
                     </>
                   ) : (
                     <div className="flex flex-col h-full border border-dashed border-primary/30 rounded-2xl bg-primary/5">
@@ -199,8 +255,12 @@ const TextToVideoComponent = () => {
                         <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-2 animate-pulse">
                           <Clock className="w-6 h-6 text-primary" />
                         </div>
-                        <span className="text-sm font-bold text-primary">Generating Video...</span>
-                        <span className="text-xs text-muted-foreground">This usually takes a few minutes.</span>
+                        <span className="text-sm font-bold text-primary">
+                          Generating Video...
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          This usually takes a few minutes.
+                        </span>
                       </div>
                       <div className="p-4 border-t border-primary/20 bg-primary/10">
                         <p className="text-sm text-foreground/80 line-clamp-2 leading-relaxed italic">

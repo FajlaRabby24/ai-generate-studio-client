@@ -1,26 +1,28 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { GenerationStatus, GenerationType } from "@/config/constant";
 import {
   generateTextToImageService,
   getRecentGenerationServiceTextToImage,
   IGenerateTextToImagePayload,
 } from "@/services/dashboard/text-to-image/text-to-image.service";
+import { handleDownload } from "@/utils/handleDownload";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   AlertCircle,
+  Clock,
   Download,
+  History,
   Image as ImageIcon,
   Maximize2,
   RefreshCw,
   Sparkles,
-  History,
-  Clock,
 } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 
 export function TextToImageContainer() {
   const [prompt, setPrompt] = useState("");
@@ -32,7 +34,7 @@ export function TextToImageContainer() {
     queryKey: ["recentTextToImage"],
     queryFn: getRecentGenerationServiceTextToImage,
   });
-  
+
   const recentGenerations = recentRes?.data || [];
 
   const { mutateAsync, isPending } = useMutation({
@@ -183,9 +185,11 @@ export function TextToImageContainer() {
               /* Generated Result Display State */
               <div className="w-full h-full flex flex-col justify-between space-y-4">
                 <div className="relative w-full aspect-square md:aspect-[4/3] rounded-xl overflow-hidden border border-border/60 shadow-lg group">
-                  <img
+                  <Image
                     src={generatedImage}
                     alt="AI Generated Output"
+                    width={500}
+                    height={500}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-xs">
@@ -203,16 +207,14 @@ export function TextToImageContainer() {
                 {/* Result Control Toolbar */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                   <div className="flex items-center gap-2">
-                    <a
-                      href={generatedImage}
-                      download="ai-generated-image.jpg"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 shadow-md hover:shadow-primary/25 transition-all cursor-pointer"
+                    <Button
+                      onClick={() =>
+                        handleDownload(generatedImage, "ai-generated-image.jpg")
+                      }
+                      className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 flex items-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer animate-in fade-in zoom-in duration-300"
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Download</span>
-                    </a>
+                      <Download className="w-4 h-4" /> Download
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -248,25 +250,31 @@ export function TextToImageContainer() {
             Recent Generations
           </h3>
         </div>
-        
+
         {isLoadingHistory ? (
-           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
-             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
-             <p className="text-muted-foreground text-center">Loading recent generations...</p>
-           </div>
+          <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
+            <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
+            <p className="text-muted-foreground text-center">
+              Loading recent generations...
+            </p>
+          </div>
         ) : recentGenerations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground text-center">No recent generations to display.</p>
+            <p className="text-muted-foreground text-center">
+              No recent generations to display.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {recentGenerations.map((item) => {
               const imageRecord = item.textToImages?.[0];
               if (!imageRecord) return null;
-              
-              const isCompleted = imageRecord.status === GenerationStatus.COMPLETED && imageRecord.outputUrl;
-              
+
+              const isCompleted =
+                imageRecord.status === GenerationStatus.COMPLETED &&
+                imageRecord.outputUrl;
+
               return (
                 <div
                   key={item.id}
@@ -275,16 +283,34 @@ export function TextToImageContainer() {
                   {isCompleted ? (
                     <>
                       <div className="aspect-square relative overflow-hidden bg-black/5">
-                        <img
+                        <Image
                           src={imageRecord.outputUrl}
                           alt={imageRecord.prompt}
+                          width={500}
+                          height={500}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 pointer-events-none bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-                        <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-1.5 flex items-center justify-center">
-                           <a href={imageRecord.outputUrl} target="_blank" rel="noopener noreferrer">
-                             <Maximize2 className="w-4 h-4 text-white" />
-                           </a>
+                        <div className="absolute top-2 right-2 flex items-center gap-4  ">
+                          <a
+                            href={imageRecord.outputUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-white hover:text-primary transition-colors bg-black/50 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-1.5 z-20"
+                          >
+                            <Maximize2 className="w-4 h-4" />
+                          </a>
+                          <button
+                            onClick={() =>
+                              handleDownload(
+                                imageRecord.outputUrl,
+                                `ai-image-${imageRecord.id}.jpg`,
+                              )
+                            }
+                            className="text-white hover:text-primary bg-black/50 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-1.5 z-20 cursor-pointer"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     </>
@@ -294,7 +320,9 @@ export function TextToImageContainer() {
                         <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-2 animate-pulse">
                           <Clock className="w-6 h-6 text-primary" />
                         </div>
-                        <span className="text-sm font-bold text-primary">Generating...</span>
+                        <span className="text-sm font-bold text-primary">
+                          Generating...
+                        </span>
                       </div>
                       <div className="p-4 border-t border-primary/20 bg-primary/10 flex-1">
                         <p className="text-xs text-foreground/80 line-clamp-3 leading-relaxed italic">
