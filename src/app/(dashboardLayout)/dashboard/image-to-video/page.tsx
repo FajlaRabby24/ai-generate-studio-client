@@ -1,11 +1,7 @@
-import EmptyState from "@/components/shared/EmptyState";
+import ImageToVideoComponent from "@/components/modules/dashboard/imageToVideo/ImageToVideoComponent";
 
 const ImageToVideoPage = () => {
-  return (
-    <div>
-      <EmptyState title="Image to Video Generator" />
-    </div>
-  );
+  return <ImageToVideoComponent />;
 };
 
 export default ImageToVideoPage;

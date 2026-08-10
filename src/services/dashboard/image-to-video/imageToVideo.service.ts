@@ -2,7 +2,10 @@
 
 import { httpClient } from "@/lib/httpClient";
 import { generalService } from "@/services/general.service";
-import { IImageToVideoResponse } from "@/types/imageToVideo.types";
+import {
+  IGetRecentImageToVideoResponse,
+  IImageToVideoResponse,
+} from "@/types/imageToVideo.types";
 import { catchAsync } from "@/utils/catchAsync";
 
 export const imageToVideoService = async (formData: FormData) =>
@@ -21,3 +24,13 @@ export const imageToVideoService = async (formData: FormData) =>
 
     return res;
   });
+
+export const getRecentGenerationService = async () => {
+  const authHeaders = await generalService.getHeaders();
+  const res = await httpClient.get<IGetRecentImageToVideoResponse[]>(
+    "/image-to-video/recent",
+    authHeaders,
+  );
+
+  return res;
+};
