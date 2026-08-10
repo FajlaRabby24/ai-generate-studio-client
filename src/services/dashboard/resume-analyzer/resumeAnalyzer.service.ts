@@ -6,6 +6,7 @@ import {
   IAnalyzeResumeResponse,
   IGeneratePdfPayload,
   IGeneratePdfResponse,
+  IGetRecentResumeAnalyzerResponse,
 } from "@/types/resumeAnalyzer.types";
 import { catchAsync } from "@/utils/catchAsync";
 import { ResumeAnalyzerValidation } from "@/zod-schema/dashboard/resume-analyzer/zod";
@@ -29,10 +30,11 @@ export const analyzeResumeService = async (formData: FormData) =>
 
 export const generateResumePdfService = async (payload: IGeneratePdfPayload) =>
   catchAsync(async () => {
-    const validatedPayload = generalService.validateRequest<IGeneratePdfPayload>(
-      payload,
-      ResumeAnalyzerValidation.generatePdfValidationSchema,
-    );
+    const validatedPayload =
+      generalService.validateRequest<IGeneratePdfPayload>(
+        payload,
+        ResumeAnalyzerValidation.generatePdfValidationSchema,
+      );
 
     const authHeaders = await generalService.getHeaders();
     const res = await httpClient.post<IGeneratePdfResponse>(
@@ -43,3 +45,13 @@ export const generateResumePdfService = async (payload: IGeneratePdfPayload) =>
 
     return res;
   });
+
+export const getRecentGenerationService = async () => {
+  const authHeaders = await generalService.getHeaders();
+  const res = await httpClient.get<IGetRecentResumeAnalyzerResponse[]>(
+    "/resume-analyzer/recent",
+    authHeaders,
+  );
+
+  return res;
+};

@@ -2,9 +2,13 @@ import { GenerationType } from "@/config/constant";
 import { z } from "zod";
 
 const analyzeValidationSchema = z.object({
-  prompt: z.string().optional(),
+  prompt: z
+    .string({
+      error: "Prompt must be a string",
+    })
+    .optional(),
   type: z.nativeEnum(GenerationType, {
-    message: "Invalid generation type",
+    error: "Invalid generation type",
   }),
   isGenerateResume: z.preprocess((val) => {
     if (val === "true") return true;

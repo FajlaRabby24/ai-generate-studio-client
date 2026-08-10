@@ -62,6 +62,11 @@ export const userNavItems: NavSection[] = [
         icon: "MdOutlineSurfing",
       },
       {
+        title: "Resume Analyzer",
+        href: "/dashboard/resume-analyzer",
+        icon: "MdOutlineComputer",
+      },
+      {
         title: "Image to Video",
         href: "/dashboard/image-to-video",
         icon: "MdOutlineVideoLibrary",
