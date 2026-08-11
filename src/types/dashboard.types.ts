@@ -77,16 +77,10 @@ export interface IUserDashboardStatsResponse {
     type: GenerationType;
     status: GenerationStatus;
     prompt: string | null;
-    projectId: string | null;
-    outputUrls: string | null;
-    isPublic: boolean;
-    isFeatured: boolean;
-    isDeleted: boolean;
+    outputUrl: string | null;
     createdAt: Date;
     updatedAt: Date;
-    _count: {
-      likes: number;
-    };
+    isDeleted: boolean;
   }[];
 }
 

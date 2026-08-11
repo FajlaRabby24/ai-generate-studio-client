@@ -3,7 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/ui/magic-card";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { GenerationType } from "@/config/constant";
 import { getDashboardStatsService } from "@/services/dashboard/stats/UserDashboardStats.service";
+import { handleDownload } from "@/utils/handleDownload";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
@@ -14,13 +16,12 @@ import {
   Crown,
   Download,
   FileText,
+  Film,
   Image as ImageIcon,
   MessageSquare,
-  RefreshCw,
   ScanFace,
   Share2,
   Sparkles,
-  Terminal,
   Volume2,
   Zap,
 } from "lucide-react";
@@ -35,6 +36,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { toast } from "sonner";
 
 const quickActions = [
   {
@@ -44,7 +46,6 @@ const quickActions = [
     icon: ImageIcon,
     color:
       "text-purple-500 dark:text-purple-400 bg-purple-500/10 border-purple-500/20",
-    badge: "Popular",
   },
   {
     title: "AI Chatbot",
@@ -53,7 +54,6 @@ const quickActions = [
     icon: MessageSquare,
     color:
       "text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    badge: "New",
   },
   {
     title: "Remove Background",
@@ -69,13 +69,12 @@ const quickActions = [
     icon: FileText,
     color:
       "text-amber-500 dark:text-amber-400 bg-amber-500/10 border-amber-500/20",
-    badge: "Pro",
   },
   {
-    title: "Code Checker",
-    description: "Scan code for bugs and security flaws",
-    href: "/dashboard/code-checker",
-    icon: Terminal,
+    title: "Text to Video",
+    description: "Generate video from text",
+    href: "/dashboard/text-to-video",
+    icon: Film,
     color: "text-red-500 dark:text-red-400 bg-red-500/10 border-red-500/20",
   },
   {
@@ -101,6 +100,7 @@ const UserDashboardPage = () => {
   const { data: userDashboardStats, isLoading } = useQuery({
     queryKey: ["userDashboardStats"],
     queryFn: () => getDashboardStatsService(),
+    refetchOnWindowFocus: false
   });
 
   const stats = userDashboardStats?.data;
@@ -136,13 +136,13 @@ const UserDashboardPage = () => {
     stats.quotas?.map((q: any) => ({
       ...q,
       icon:
-        q.name === "Text to Image"
+        q.name === GenerationType.TEXT_TO_IMAGE
           ? ImageIcon
-          : q.name === "AI Chatbot"
+          : q.name === GenerationType.TEXT_TO_VIDEO
             ? MessageSquare
-            : q.name === "Remove Background"
+            : q.name === GenerationType.IMAGE_BACKGROUND_REMOVER
               ? ScanFace
-              : q.name === "Resume Analyzer"
+              : q.name === GenerationType.RESUME_ANALYZER
                 ? FileText
                 : ImageIcon,
     })) || [];
@@ -151,17 +151,18 @@ const UserDashboardPage = () => {
     stats.recentGenerations?.map((gen: any) => ({
       id: gen.id,
       type:
-        gen.type === "TEXT_TO_IMAGE"
+        gen.type === GenerationType.TEXT_TO_IMAGE
           ? "Image"
-          : gen.type === "AI_CHATBOT"
-            ? "Chat"
-            : gen.type === "IMAGE_BACKGROUND_REMOVER"
+          : gen.type === GenerationType.TEXT_TO_VIDEO
+            ? "Text to Video"
+            : gen.type === GenerationType.IMAGE_BACKGROUND_REMOVER
               ? "Background Removal"
               : gen.type.replace(/_/g, " "),
+      rawType: gen.type,
       prompt: gen.prompt || "No prompt provided",
       status: gen.status,
       time: new Date(gen.createdAt).toLocaleDateString(),
-      url: gen.outputUrls,
+      url: gen.outputUrl,
     })) || [];
 
   // Container stagger transition variants
@@ -448,11 +449,6 @@ const UserDashboardPage = () => {
                         <span className="font-semibold text-sm text-neutral-800 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
                           {action.title}
                         </span>
-                        {action.badge && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400 border border-violet-500/20">
-                            {action.badge}
-                          </span>
-                        )}
                       </div>
                       <p className="text-neutral-500 dark:text-neutral-400 text-xs mt-1 leading-snug">
                         {action.description}
@@ -476,12 +472,14 @@ const UserDashboardPage = () => {
           <h2 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-white">
             Recent Generations
           </h2>
-          <Button
-            variant="ghost"
-            className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
-          >
-            View All History <ArrowRight className="h-3 w-3 ml-1" />
-          </Button>
+          <Link href="/dashboard/history">
+            <Button
+              variant="ghost"
+              className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
+            >
+              View All History <ArrowRight className="h-3 w-3 ml-1" />
+            </Button>
+          </Link>
         </div>
 
         {displayGenerations.length === 0 ? (
@@ -509,7 +507,7 @@ const UserDashboardPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {displayGenerations.map((gen: any, idx: number) => (
+            {displayGenerations?.map((gen: any, idx: number) => (
               <div
                 key={idx}
                 className="flex flex-col justify-between overflow-hidden bg-white dark:bg-neutral-900/35 border border-neutral-200 dark:border-neutral-800/80 rounded-xl p-5 hover:border-neutral-300 dark:hover:border-neutral-700/80 transition-colors shadow-sm dark:shadow-none"
@@ -529,12 +527,21 @@ const UserDashboardPage = () => {
                   </p>
 
                   {gen.url && (
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4 border border-neutral-200 dark:border-neutral-800">
-                      <img
-                        src={gen.url}
-                        alt={gen.prompt}
-                        className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
-                      />
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4 border border-neutral-200 dark:border-neutral-800 bg-neutral-950 flex items-center justify-center">
+                      {gen.rawType === GenerationType.IMAGE_TO_VIDEO ||
+                      gen.rawType === GenerationType.TEXT_TO_VIDEO ? (
+                        <video
+                          src={gen.url}
+                          controls
+                          className="object-cover h-full w-full"
+                        />
+                      ) : (
+                        <img
+                          src={gen.url}
+                          alt={gen.prompt}
+                          className="object-cover h-full w-full hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
                     </div>
                   )}
                 </div>
@@ -550,25 +557,32 @@ const UserDashboardPage = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                        onClick={() => {
+                          const ext =
+                            gen.rawType === GenerationType.IMAGE_TO_VIDEO ||
+                            gen.rawType === GenerationType.TEXT_TO_VIDEO
+                              ? "mp4"
+                              : "jpg";
+                          handleDownload(gen.url, `creation-${gen.id}.${ext}`);
+                        }}
+                        className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer"
                       >
                         <Download className="h-4 w-4" />
                       </Button>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
+                    {gen.url && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          navigator.clipboard.writeText(gen.url);
+                          toast.success("Generation URL copied to clipboard!");
+                        }}
+                        className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
