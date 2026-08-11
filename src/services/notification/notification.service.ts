@@ -10,10 +10,11 @@ import { catchAsync } from "@/utils/catchAsync";
 import { generalService } from "../general.service";
 
 // 1. Get user notifications
-export const getMyNotificationsService = async () =>
+export const getMyNotificationsService = async (all?: boolean) =>
   catchAsync(async () => {
     const options = await generalService.getHeaders();
-    const res = await httpClient.get<INotification[]>("/notification", options);
+    const url = all ? "/notification?all=true" : "/notification";
+    const res = await httpClient.get<INotification[]>(url, options);
     return res;
   });
 
