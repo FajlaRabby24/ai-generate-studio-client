@@ -27,11 +27,11 @@ export const getCommonNavItems = (role: UserRole): NavSection[] => {
           href: `/dashboard/billing`,
           icon: "CreditCard",
         },
-        {
-          title: "Settings",
-          href: `/dashboard/settings`,
-          icon: "Settings",
-        },
+        // {
+        //   title: "Settings",
+        //   href: `/dashboard/settings`,
+        //   icon: "Settings",
+        // },
       ],
     },
   ];
