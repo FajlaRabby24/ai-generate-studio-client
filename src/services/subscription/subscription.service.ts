@@ -23,6 +23,11 @@ export const getMyBillingService = async () =>
 // 2. Create Checkout Session
 export const createCheckoutSessionService = async (plan: SubscriptionPlan) =>
   catchAsync(async () => {
+    // const validatedPayload = generalService.validateRequest<SubscriptionPlan>(
+    //   plan,
+    //   SubscriptionValidation.checkoutSchema,
+    // );
+
     const options = await generalService.getHeaders();
     const res = await httpClient.post<{
       sessionId: string;

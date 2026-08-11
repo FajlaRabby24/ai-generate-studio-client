@@ -1,6 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { SubscriptionPlan, SubscriptionStatus } from "@/config/constant";
+import {
+  cancelSubscriptionService,
+  createCheckoutSessionService,
+  createCustomerPortalService,
+  getMyBillingService,
+} from "@/services/subscription/subscription.service";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   ArrowUpRight,
@@ -14,50 +22,6 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-// Mock User Subscription State
-const mockSubscription = {
-  planName: "Pro Creator",
-  amount: 15.0,
-  billingCycle: "yearly",
-  nextBillingDate: "September 12, 2026",
-  status: "Active",
-  paymentMethod: {
-    brand: "Visa",
-    last4: "8842",
-    expDate: "12/28",
-  },
-  usages: [
-    {
-      label: "Images Generated",
-      current: 840,
-      limit: 1500,
-      unit: "images",
-      color: "from-violet-500 to-indigo-500",
-    },
-    {
-      label: "AI Video Seconds",
-      current: 120,
-      limit: 300,
-      unit: "seconds",
-      color: "from-pink-500 to-rose-500",
-    },
-    {
-      label: "Text-to-Speech Characters",
-      current: 18400,
-      limit: 50000,
-      unit: "chars",
-      color: "from-sky-500 to-blue-500",
-    },
-    {
-      label: "Chatbot Tokens",
-      current: 245000,
-      limit: 500000,
-      unit: "tokens",
-      color: "from-emerald-500 to-teal-500",
-    },
-  ],
-};
-
 // Mock Pricing Plans
 const plans = [
   {
@@ -66,7 +30,7 @@ const plans = [
     priceMonthly: 0,
     priceYearly: 0,
     features: [
-      "100 high-fidelity images/mo",
+      "3 high-fidelity images/mo",
       "Standard generation speeds",
       "Access to base chatbot styles",
       "Standard quality speech synthesis",
@@ -79,10 +43,10 @@ const plans = [
   {
     name: "Pro Creator",
     description: "Designed for content creators needing premium features.",
-    priceMonthly: 19,
-    priceYearly: 15,
+    priceMonthly: 10,
+    priceYearly: 99.99,
     features: [
-      "1,500 priority images/mo",
+      "5 priority images/mo",
       "300 priority video seconds/mo",
       "50,000 text-to-speech characters/mo",
       "Unlimited chatbot sessions",
@@ -93,70 +57,131 @@ const plans = [
     popular: true,
     color: "violet",
   },
-  {
-    name: "Studio Agency",
-    description: "Optimized for collaborative studio teams and agencies.",
-    priceMonthly: 49,
-    priceYearly: 39,
-    features: [
-      "10,000 priority images/mo",
-      "1,200 priority video seconds/mo",
-      "250,000 text-to-speech characters/mo",
-      "Uncapped generation speeds",
-      "Commercial usage license",
-      "Dedicated API key access",
-      "24/7 dedicated success manager",
-    ],
-    cta: "Contact Sales",
-    popular: false,
-    color: "indigo",
-  },
-];
-
-// Mock Invoices
-const mockInvoices = [
-  {
-    id: "INV-2026-004",
-    date: "Aug 12, 2026",
-    amount: "$15.00",
-    status: "Paid",
-  },
-  {
-    id: "INV-2026-003",
-    date: "Jul 12, 2026",
-    amount: "$15.00",
-    status: "Paid",
-  },
-  {
-    id: "INV-2026-002",
-    date: "Jun 12, 2026",
-    amount: "$15.00",
-    status: "Paid",
-  },
-  {
-    id: "INV-2026-001",
-    date: "May 12, 2026",
-    amount: "$19.00",
-    status: "Paid",
-  },
 ];
 
 export default function BillingComponent() {
   const [isYearly, setIsYearly] = useState(true);
-  const [selectedPlan, setSelectedPlan] = useState<string>("Pro Creator");
 
-  const handlePlanSelect = (planName: string) => {
+  // Fetch billing data
+  const {
+    data: billingRes,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["myBilling"],
+    queryFn: () => getMyBillingService(),
+    refetchOnWindowFocus: false,
+  });
+
+  const billingData = billingRes?.data;
+  const subscription = billingData?.subscription;
+  const payments = billingData?.payments || [];
+  const usages = billingData?.usages || [];
+
+  // Determine active plan name & billing details
+  const activePlanName =
+    subscription?.plan === SubscriptionPlan.YEARLY
+      ? "Yearly Pro"
+      : subscription?.plan === SubscriptionPlan.MONTHLY
+        ? "Monthly Pro"
+        : "Free Tier";
+
+  const billingCycleText =
+    subscription?.plan === SubscriptionPlan.YEARLY
+      ? "yearly"
+      : subscription?.plan === SubscriptionPlan.MONTHLY
+        ? "monthly"
+        : "none";
+
+  const planAmountText =
+    subscription?.plan === SubscriptionPlan.YEARLY
+      ? "99.99"
+      : subscription?.plan === SubscriptionPlan.MONTHLY
+        ? "10"
+        : "0";
+
+  const nextBillingDateText = subscription?.currentPeriodEnd
+    ? new Date(subscription.currentPeriodEnd).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "Never";
+
+  const handlePlanSelect = async (planName: string) => {
     if (planName === "Starter") {
       toast.info("You are already on the basic creative tools tier.");
       return;
     }
-    setSelectedPlan(planName);
-    toast.success(`Redirecting to Stripe checkout for the ${planName} plan...`);
+
+    const planEnum = isYearly
+      ? SubscriptionPlan.YEARLY
+      : SubscriptionPlan.MONTHLY;
+
+    try {
+      toast.loading("Redirecting to Stripe checkout...");
+      const res = await createCheckoutSessionService(planEnum);
+      toast.dismiss();
+      if (res?.success && res.data?.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
+      } else {
+        toast.error(res?.message || "Failed to create checkout session");
+      }
+    } catch (err: any) {
+      toast.dismiss();
+      toast.error(err?.message || "Failed to direct to payment gateway.");
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    try {
+      toast.loading("Scheduling cancellation...");
+      const res = await cancelSubscriptionService();
+      toast.dismiss();
+      if (res?.success) {
+        toast.success(
+          "Subscription scheduled to cancel at the end of current billing cycle.",
+        );
+        refetch();
+      } else {
+        toast.error(res?.message || "Failed to cancel subscription");
+      }
+    } catch (err: any) {
+      toast.dismiss();
+      toast.error(err?.message || "Failed to cancel subscription.");
+    }
+  };
+
+  const handleUpdatePayment = async () => {
+    try {
+      toast.loading("Opening Stripe portal...");
+      const res = await createCustomerPortalService();
+      toast.dismiss();
+      if (res?.success && res.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        toast.error(res?.message || "Failed to create portal session");
+      }
+    } catch (err: any) {
+      toast.dismiss();
+      toast.error(err?.message || "Failed to open Stripe portal.");
+    }
   };
 
   const handleDownloadInvoice = (id: string) => {
     toast.success(`Downloading invoice ${id} as PDF...`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <p className="text-sm text-neutral-500 animate-pulse">
+          Loading billing settings...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 px-4 md:px-6 pb-12 text-neutral-900 dark:text-white transition-colors duration-300">
@@ -185,17 +210,19 @@ export default function BillingComponent() {
               </span>
               <span className="flex items-center gap-1 text-xs text-emerald-500 font-semibold bg-emerald-500/10 dark:bg-emerald-500/20 px-2.5 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                {mockSubscription.status}
+                {subscription ? subscription.status : SubscriptionStatus.ACTIVE}
               </span>
             </div>
 
             <div>
               <h3 className="text-2xl font-extrabold tracking-tight text-neutral-900 dark:text-white">
-                {mockSubscription.planName}
+                {activePlanName}
               </h3>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                Billed {mockSubscription.billingCycle} • $
-                {mockSubscription.amount}/month
+                Billed {billingCycleText} • ${planAmountText}/
+                {subscription?.plan === SubscriptionPlan.YEARLY
+                  ? "year"
+                  : "month"}
               </p>
             </div>
 
@@ -204,27 +231,46 @@ export default function BillingComponent() {
                 Next Renewal Date
               </p>
               <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mt-0.5">
-                {mockSubscription.nextBillingDate}
+                {nextBillingDateText}
               </p>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-6">
-            <Button
-              onClick={() => handlePlanSelect("Studio Agency")}
-              className="flex-1 rounded-xl bg-violet-600 hover:bg-violet-750 text-white font-semibold text-xs py-2 shadow-xs cursor-pointer transition-all duration-200"
-            >
-              Upgrade Subscription
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() =>
-                toast.info("Contacting support desk to cancel subscription...")
-              }
-              className="flex-1 rounded-xl border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-900 font-semibold text-xs py-2 cursor-pointer transition-all duration-200"
-            >
-              Cancel Tier
-            </Button>
+            {subscription && subscription.plan !== SubscriptionPlan.FREE ? (
+              <>
+                <Button
+                  onClick={handleUpdatePayment}
+                  className="flex-grow rounded-xl bg-violet-600 hover:bg-violet-750 text-white font-semibold text-xs py-2 shadow-xs cursor-pointer transition-all duration-200"
+                >
+                  Manage Subscription
+                </Button>
+                {!subscription.cancelAtPeriodEnd ? (
+                  <Button
+                    variant="outline"
+                    onClick={handleCancelSubscription}
+                    className="rounded-xl border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-900 font-semibold text-xs py-2 cursor-pointer transition-all duration-200 text-rose-500 hover:text-rose-600 hover:border-rose-500/30"
+                  >
+                    Cancel Plan
+                  </Button>
+                ) : (
+                  <Button
+                    disabled
+                    variant="outline"
+                    className="rounded-xl border border-neutral-200 dark:border-neutral-800 font-semibold text-xs py-2 text-amber-500"
+                  >
+                    Cancels at period end
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Button
+                onClick={() => handlePlanSelect("Pro Creator")}
+                className="w-full rounded-xl bg-violet-600 hover:bg-violet-750 text-white font-semibold text-xs py-2 shadow-xs cursor-pointer transition-all duration-200"
+              >
+                Upgrade to Pro
+              </Button>
+            )}
           </div>
         </div>
 
@@ -240,9 +286,10 @@ export default function BillingComponent() {
               </p>
             </div>
             <button
-              onClick={() =>
-                toast.success("Usage stats synced with database logs.")
-              }
+              onClick={() => {
+                refetch();
+                toast.success("Usage stats synced with database logs.");
+              }}
               className="p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-white bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl transition cursor-pointer"
             >
               <RefreshCw className="h-3.5 w-3.5" />
@@ -250,7 +297,7 @@ export default function BillingComponent() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-            {mockSubscription.usages.map((usage, idx) => {
+            {usages.map((usage: any, idx: number) => {
               const percent = Math.min(
                 100,
                 Math.round((usage.current / usage.limit) * 100),
@@ -337,7 +384,16 @@ export default function BillingComponent() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {plans.map((plan, idx) => {
             const price = isYearly ? plan.priceYearly : plan.priceMonthly;
-            const isCurrent = plan.name === mockSubscription.planName;
+            const planEnum =
+              plan.name === "Starter"
+                ? "FREE"
+                : isYearly
+                  ? "YEARLY"
+                  : "MONTHLY";
+
+            const isCurrent = subscription
+              ? subscription.plan === planEnum
+              : planEnum === "FREE";
 
             return (
               <div
@@ -370,7 +426,7 @@ export default function BillingComponent() {
                       ${price}
                     </span>
                     <span className="text-xs text-neutral-400 font-semibold">
-                      /month
+                      {isYearly && price > 0 ? "/year" : "/month"}
                     </span>
                   </div>
 
@@ -428,34 +484,45 @@ export default function BillingComponent() {
             Configure primary payment methods and view billing accounts.
           </p>
 
-          <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 p-4 flex items-center justify-between bg-neutral-50 dark:bg-neutral-950/40">
-            <div className="flex items-center gap-3">
-              <div className="px-2.5 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs font-black uppercase text-neutral-600 dark:text-neutral-300">
-                {mockSubscription.paymentMethod.brand}
+          {subscription && subscription.stripeSubscriptionId ? (
+            <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 p-4 flex items-center justify-between bg-neutral-50 dark:bg-neutral-950/40">
+              <div className="flex items-center gap-3">
+                <div className="px-2.5 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs font-black uppercase text-neutral-600 dark:text-neutral-300">
+                  Stripe
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                    Secure Stripe Billing
+                  </p>
+                  <p className="text-[10px] text-neutral-400">
+                    Auto-renewal setup
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
-                  •••• {mockSubscription.paymentMethod.last4}
-                </p>
-                <p className="text-[10px] text-neutral-400">
-                  Expires {mockSubscription.paymentMethod.expDate}
-                </p>
-              </div>
+              <span className="text-[10px] font-bold text-violet-500 dark:text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">
+                Primary
+              </span>
             </div>
-            <span className="text-[10px] font-bold text-violet-500 dark:text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">
-              Primary
-            </span>
-          </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-neutral-250 dark:border-neutral-800 p-4 text-center bg-neutral-50/50 dark:bg-neutral-950/20">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-normal">
+                No active card setup. Upgraded plans are processed securely via
+                Stripe.
+              </p>
+            </div>
+          )}
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Button
-              onClick={() => toast.info("Opening Stripe billing portal...")}
-              variant="outline"
-              className="flex-grow rounded-xl border border-neutral-200 dark:border-neutral-800 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-900 py-2 cursor-pointer transition"
-            >
-              Update Payment Card
-            </Button>
-          </div>
+          {subscription && subscription.stripeSubscriptionId && (
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <Button
+                onClick={handleUpdatePayment}
+                variant="outline"
+                className="flex-grow rounded-xl border border-neutral-200 dark:border-neutral-800 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-900 py-2 cursor-pointer transition"
+              >
+                Update Payment Card
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Invoice table */}
@@ -466,7 +533,10 @@ export default function BillingComponent() {
               Invoice History
             </h3>
             <button
-              onClick={() => toast.success("Billing history updated.")}
+              onClick={() => {
+                refetch();
+                toast.success("Billing history updated.");
+              }}
               className="text-xs font-bold text-violet-500 dark:text-violet-400 hover:underline cursor-pointer bg-transparent border-0"
             >
               View All
@@ -482,39 +552,48 @@ export default function BillingComponent() {
                   <th className="pb-3">Billing Date</th>
                   <th className="pb-3">Amount</th>
                   <th className="pb-3">Status</th>
-                  <th className="pb-3 text-right pr-1">Download</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800/50">
-                {mockInvoices.map((inv, idx) => (
-                  <tr
-                    key={idx}
-                    className="text-xs hover:bg-neutral-50/50 dark:hover:bg-neutral-900/20 transition-colors"
-                  >
-                    <td className="py-3.5 pl-1 font-mono font-semibold text-neutral-700 dark:text-neutral-300">
-                      {inv.id}
-                    </td>
-                    <td className="py-3.5 text-neutral-500 dark:text-neutral-400">
-                      {inv.date}
-                    </td>
-                    <td className="py-3.5 font-semibold text-neutral-800 dark:text-neutral-200">
-                      {inv.amount}
-                    </td>
-                    <td className="py-3.5">
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                        {inv.status}
-                      </span>
-                    </td>
-                    <td className="py-3.5 text-right pr-1">
-                      <button
-                        onClick={() => handleDownloadInvoice(inv.id)}
-                        className="p-1.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-lg transition cursor-pointer"
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                      </button>
+                {payments.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="text-center py-8 text-neutral-400 text-xs"
+                    >
+                      No invoices found.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  payments.map((pay: any, idx: number) => (
+                    <tr
+                      key={idx}
+                      className="text-xs hover:bg-neutral-50/50 dark:hover:bg-neutral-900/20 transition-colors"
+                    >
+                      <td className="py-3.5 pl-1 font-mono font-semibold text-neutral-700 dark:text-neutral-300">
+                        {pay.transactionId || pay.id.substring(0, 12)}
+                      </td>
+                      <td className="py-3.5 text-neutral-500 dark:text-neutral-400">
+                        {new Date(pay.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-3.5 font-semibold text-neutral-800 dark:text-neutral-200">
+                        ${pay.amount.toFixed(2)} {pay.currency.toUpperCase()}
+                      </td>
+                      <td className="py-3.5">
+                        <span
+                          className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                            pay.status === "SUCCESS"
+                              ? "text-emerald-500 bg-emerald-500/10"
+                              : "text-rose-500 bg-rose-500/10"
+                          }`}
+                        >
+                          {pay.status}
+                        </span>
+                      </td>
+                    
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

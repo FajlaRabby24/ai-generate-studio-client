@@ -5,6 +5,12 @@ import {
   SubscriptionPlan,
   SubscriptionStatus,
 } from "@/config/constant";
+import { SubscriptionValidation } from "@/zod-schema/subscription/subscription.zod";
+import { z } from "zod";
+
+export type ICheckoutPayload = z.infer<
+  typeof SubscriptionValidation.checkoutSchema
+>;
 
 export interface IGetMyBillings {
   subscription: {
