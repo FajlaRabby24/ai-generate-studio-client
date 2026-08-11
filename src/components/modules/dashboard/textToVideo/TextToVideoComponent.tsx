@@ -7,11 +7,9 @@ import {
   getRecentGenerationService,
   textToVideoService,
 } from "@/services/dashboard/text-to-video/textToVideo.service";
-import { handleDownload } from "@/utils/handleDownload";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Clock,
-  Download,
   History,
   Settings2,
   Sparkles,
@@ -31,7 +29,7 @@ const TextToVideoComponent = () => {
     queryFn: getRecentGenerationService,
   });
 
-  const recentGenerations = recentRes?.data || [];
+  const recentGenerations = recentRes?.data;
 
   const { mutateAsync: generateVideo, isPending } = useMutation({
     mutationFn: textToVideoService,
@@ -188,7 +186,9 @@ const TextToVideoComponent = () => {
               Loading recent generations...
             </p>
           </div>
-        ) : recentGenerations.length === 0 ? (
+        ) : !recentGenerations ||
+          !recentGenerations.textToVideos ||
+          recentGenerations.textToVideos.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground text-center">
@@ -197,17 +197,14 @@ const TextToVideoComponent = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentGenerations.map((item) => {
-              const videoRecord = item.textToVideos?.[0];
-              if (!videoRecord) return null;
-
+            {recentGenerations.textToVideos.map((videoRecord) => {
               const isCompleted =
                 videoRecord.status === GenerationStatus.COMPLETED &&
                 videoRecord.outputUrl;
 
               return (
                 <div
-                  key={item.id}
+                  key={videoRecord.id}
                   className="group relative rounded-2xl overflow-hidden border border-border/40 bg-card/40 backdrop-blur-sm transition-all hover:shadow-xl hover:border-primary/30"
                 >
                   {isCompleted ? (
@@ -221,7 +218,6 @@ const TextToVideoComponent = () => {
                         />
                         <div className="absolute inset-0 pointer-events-none bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                       </div>
-                      {/* here */}
                       <div className="p-4 bg-muted/10 border-t border-border/10 flex flex-col gap-2">
                         <p className="text-xs text-foreground/80 line-clamp-2 leading-relaxed italic">
                           "{videoRecord.prompt}"
@@ -232,7 +228,7 @@ const TextToVideoComponent = () => {
                               videoRecord.createdAt,
                             ).toLocaleDateString()}
                           </span>
-                          {isCompleted && (
+                          {/* {isCompleted && (
                             <button
                               onClick={() =>
                                 handleDownload(
@@ -244,10 +240,9 @@ const TextToVideoComponent = () => {
                             >
                               <Download className="w-3.5 h-3.5" /> Download
                             </button>
-                          )}
+                          )} */}
                         </div>
                       </div>
-                      {/* here */}
                     </>
                   ) : (
                     <div className="flex flex-col h-full border border-dashed border-primary/30 rounded-2xl bg-primary/5">

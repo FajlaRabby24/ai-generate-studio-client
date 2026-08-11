@@ -24,7 +24,7 @@ export const bgRemoverService = async (formData: FormData) =>
 
 export const getRecentGenerationService = async () => {
   const authHeaders = await generalService.getHeaders();
-  const res = await httpClient.get<IGetRecentImageToVideoResponse[]>(
+  const res = await httpClient.get<IGetRecentImageToVideoResponse>(
     "/background-remove/recent",
     authHeaders,
   );

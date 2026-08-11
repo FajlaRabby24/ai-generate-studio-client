@@ -53,7 +53,7 @@ export const getGenerationLeftCountService = async (
 
 export const getRecentGenerationServiceTextToImage = async () => {
   const authHeaders = await generalService.getHeaders();
-  const res = await httpClient.get<IGetRecentTextToImageResponse[]>(
+  const res = await httpClient.get<IGetRecentTextToImageResponse>(
     "/text-to-image/recent",
     authHeaders,
   );

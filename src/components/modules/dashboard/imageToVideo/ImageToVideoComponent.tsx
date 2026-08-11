@@ -40,7 +40,7 @@ const ImageToVideoComponent = () => {
     queryFn: getRecentGenerationService,
   });
 
-  const recentGenerations = recentRes?.data || [];
+  const recentGenerations = recentRes?.data;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -260,7 +260,9 @@ const ImageToVideoComponent = () => {
               Loading recent creations...
             </p>
           </div>
-        ) : recentGenerations.length === 0 ? (
+        ) : !recentGenerations ||
+          !recentGenerations.imageToVideos ||
+          recentGenerations.imageToVideos.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground text-center">
@@ -269,17 +271,14 @@ const ImageToVideoComponent = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentGenerations.map((item: IGetRecentImageToVideoResponse) => {
-              const videoRecord = item.imageToVideos?.[0];
-              if (!videoRecord) return null;
-
+            {recentGenerations.imageToVideos.map((videoRecord) => {
               const isCompleted =
                 videoRecord.status === GenerationStatus.COMPLETED &&
                 videoRecord.outputUrl;
 
               return (
                 <div
-                  key={item.id}
+                  key={videoRecord.id}
                   className="group relative rounded-2xl overflow-hidden border border-border/40 bg-card/40 backdrop-blur-sm transition-all hover:shadow-xl hover:border-primary/30 flex flex-col justify-between"
                 >
                   <div className="relative aspect-video overflow-hidden bg-black/90 flex items-center justify-center border-b border-border/20">
@@ -318,7 +317,7 @@ const ImageToVideoComponent = () => {
                       <span>
                         {new Date(videoRecord.createdAt).toLocaleDateString()}
                       </span>
-                      {isCompleted && (
+                      {/* {isCompleted && (
                         <button
                           onClick={() =>
                             handleDownload(
@@ -330,7 +329,7 @@ const ImageToVideoComponent = () => {
                         >
                           <Download className="w-3.5 h-3.5" /> Download
                         </button>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 </div>

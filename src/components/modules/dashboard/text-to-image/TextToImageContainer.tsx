@@ -35,7 +35,7 @@ export function TextToImageContainer() {
     queryFn: getRecentGenerationServiceTextToImage,
   });
 
-  const recentGenerations = recentRes?.data || [];
+  const recentGenerations = recentRes?.data;
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: IGenerateTextToImagePayload) =>
@@ -258,7 +258,9 @@ export function TextToImageContainer() {
               Loading recent generations...
             </p>
           </div>
-        ) : recentGenerations.length === 0 ? (
+        ) : !recentGenerations ||
+          !recentGenerations.textToImages ||
+          recentGenerations.textToImages.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground text-center">
@@ -267,17 +269,14 @@ export function TextToImageContainer() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {recentGenerations.map((item) => {
-              const imageRecord = item.textToImages?.[0];
-              if (!imageRecord) return null;
-
+            {recentGenerations.textToImages.map((imageRecord) => {
               const isCompleted =
                 imageRecord.status === GenerationStatus.COMPLETED &&
                 imageRecord.outputUrl;
 
               return (
                 <div
-                  key={item.id}
+                  key={imageRecord.id}
                   className="group relative rounded-2xl overflow-hidden border border-border/40 bg-card/40 backdrop-blur-sm transition-all hover:shadow-xl hover:border-primary/30 flex flex-col"
                 >
                   {isCompleted ? (

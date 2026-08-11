@@ -27,7 +27,7 @@ export const imageToVideoService = async (formData: FormData) =>
 
 export const getRecentGenerationService = async () => {
   const authHeaders = await generalService.getHeaders();
-  const res = await httpClient.get<IGetRecentImageToVideoResponse[]>(
+  const res = await httpClient.get<IGetRecentImageToVideoResponse>(
     "/image-to-video/recent",
     authHeaders,
   );
