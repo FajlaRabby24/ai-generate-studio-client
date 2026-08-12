@@ -33,6 +33,7 @@ import {
   markAllNotificationsAsReadService,
   markNotificationAsReadService,
 } from "@/services/notification/notification.service";
+import { UserRole } from "@/utils/authUtils";
 import { getCookie } from "@/utils/cookieUtils";
 import { jwtUtils } from "@/utils/jwtUtils";
 
@@ -40,6 +41,7 @@ export default function DashboardTopBar() {
   const handleLogout = useLogout();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [decodedUser, setDecodedUser] = useState<any>(null);
+  const [role, setRole] = useState<UserRole>(UserRole.USER);
 
   // 1. Fetch unread count for badge
   const { data: unreadRes, refetch: refetchUnread } = useQuery({
@@ -76,6 +78,9 @@ export default function DashboardTopBar() {
         const decoded = jwtUtils.decodedToken(token);
         if (decoded) {
           setDecodedUser(decoded);
+          if (decoded.role) {
+            setRole(decoded.role as UserRole);
+          }
         }
       }
     };
@@ -273,18 +278,23 @@ export default function DashboardTopBar() {
             <DropdownMenuSeparator className="my-1.5" />
 
             {/* Quick Actions Links */}
-            <Link href="/dashboard/profile" className="w-full">
+            <Link
+              href={`/${role === UserRole.ADMIN ? "admin/" : ""}dashboard/profile`}
+              className="w-full"
+            >
               <DropdownMenuItem className="rounded-lg cursor-pointer">
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile Settings</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/dashboard/billing" className="w-full">
-              <DropdownMenuItem className="rounded-lg cursor-pointer">
-                <CreditCard className="mr-2 h-4 w-4" />
-                <span>Billing</span>
-              </DropdownMenuItem>
-            </Link>
+            {role === UserRole.USER && (
+              <Link href="/dashboard/billing" className="w-full">
+                <DropdownMenuItem className="rounded-lg cursor-pointer">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  <span>Billing</span>
+                </DropdownMenuItem>
+              </Link>
+            )}
 
             <DropdownMenuSeparator className="my-1.5" />
 

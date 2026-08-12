@@ -14,19 +14,9 @@ export const getCommonNavItems = (role: UserRole): NavSection[] => {
         },
         {
           title: "My Profile",
-          href: `/dashboard/my-profile`,
+          href: `/${role === UserRole.ADMIN ? "admin/" : ""}dashboard/my-profile`,
           icon: "User",
         },
-        // {
-        //   title: "History",
-        //   href: `/dashboard/history`,
-        //   icon: "History",
-        // },
-        // {
-        //   title: "Billing",
-        //   href: `/dashboard/billing`,
-        //   icon: "CreditCard",
-        // },
         // {
         //   title: "Settings",
         //   href: `/dashboard/settings`,
