@@ -1,5 +1,7 @@
+import UserManagementComponent from "@/components/modules/admin/userManagement/UserManagementComponent";
+
 const AdminUsersPage = () => {
-  return <div>AdminUsersPage</div>;
+  return <UserManagementComponent />;
 };
 
 export default AdminUsersPage;

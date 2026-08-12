@@ -1,9 +1,7 @@
+import PaymentManagementComponent from "@/components/modules/admin/payment/PaymentManagementComponent";
+
 const PaymentLogPage = () => {
-  return (
-    <div>
-      <h1>Payment Log</h1>
-    </div>
-  );
+  return <PaymentManagementComponent />;
 };
 
 export default PaymentLogPage;
