@@ -1,21 +1,11 @@
 "use client";
 
-import { Menu, Moon, Sparkles, Sun, User, CreditCard, LogOut, LayoutDashboard } from "lucide-react";
-import { useTheme } from "next-themes";
+import { CreditCard, LayoutDashboard, LogOut, Menu, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +13,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { getCookie } from "@/utils/cookieUtils";
 import { jwtUtils } from "@/utils/jwtUtils";
@@ -37,14 +34,11 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [decodedUser, setDecodedUser] = useState<any>(null);
 
   // Avoid hydration mismatch by rendering theme toggle only on the client
   useEffect(() => {
-    setMounted(true);
-
     const fetchToken = async () => {
       const token = await getCookie("accessToken");
       if (token) {
@@ -95,7 +89,6 @@ export default function Navbar() {
 
         {/* Right Side: Desktop Actions & Theme Toggle */}
         <div className="hidden md:flex items-center gap-3">
-   
           {decodedUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -107,7 +100,9 @@ export default function Navbar() {
                   />
                 }
               >
-                {decodedUser.name ? decodedUser.name.substring(0, 1).toUpperCase() : "U"}
+                {decodedUser.name
+                  ? decodedUser.name.substring(0, 1).toUpperCase()
+                  : "U"}
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
@@ -165,15 +160,15 @@ export default function Navbar() {
             </DropdownMenu>
           ) : (
             <>
-              <Link 
-                href="/auth/login" 
+              <Link
+                href="/auth/login"
                 className="rounded-full px-4 h-9 flex items-center justify-center text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-all duration-200"
               >
                 Login
               </Link>
 
-              <Link 
-                href="/auth/register" 
+              <Link
+                href="/auth/register"
                 className="rounded-full px-5 h-9 flex items-center justify-center text-sm font-semibold text-black bg-white hover:bg-white/90 active:scale-[0.97] transition-all shadow-md duration-200"
               >
                 Register
@@ -184,7 +179,6 @@ export default function Navbar() {
 
         {/* Mobile Responsive Header Actions */}
         <div className="flex md:hidden items-center gap-2">
-   
           {/* Sheet Mobile Menu */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger
@@ -245,7 +239,9 @@ export default function Navbar() {
                 <div className="flex flex-col gap-3 mt-auto p-2 border-t border-border/40 pt-4">
                   <div className="flex items-center gap-3 px-1">
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white font-semibold text-base shadow-inner">
-                      {decodedUser.name ? decodedUser.name.substring(0, 1).toUpperCase() : "U"}
+                      {decodedUser.name
+                        ? decodedUser.name.substring(0, 1).toUpperCase()
+                        : "U"}
                     </div>
                     <div className="flex-grow min-w-0">
                       <p className="text-sm font-semibold text-foreground truncate">

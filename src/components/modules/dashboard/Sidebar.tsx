@@ -106,8 +106,8 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
           href={"/"}
           className="flex h-16 items-center px-6 border-b border-border/40 gap-2"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md">
-            <Sparkles className="h-4.5 w-4.5 text-white" />
+         <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white relative shrink-0 group-hover:scale-105 transition-all duration-300">
+            <div className="h-2.5 w-2.5 rounded-full bg-white" />
           </div>
           <span className="font-bold text-base bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
             AI Generate Studio
