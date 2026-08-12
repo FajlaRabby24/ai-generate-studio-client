@@ -17,16 +17,16 @@ export const getCommonNavItems = (role: UserRole): NavSection[] => {
           href: `/dashboard/my-profile`,
           icon: "User",
         },
-        {
-          title: "History",
-          href: `/dashboard/history`,
-          icon: "History",
-        },
-        {
-          title: "Billing",
-          href: `/dashboard/billing`,
-          icon: "CreditCard",
-        },
+        // {
+        //   title: "History",
+        //   href: `/dashboard/history`,
+        //   icon: "History",
+        // },
+        // {
+        //   title: "Billing",
+        //   href: `/dashboard/billing`,
+        //   icon: "CreditCard",
+        // },
         // {
         //   title: "Settings",
         //   href: `/dashboard/settings`,
@@ -75,6 +75,43 @@ export const userNavItems: NavSection[] = [
         title: "Remove Background",
         href: "/dashboard/remove-background",
         icon: "MdOutlineDeleteOutline",
+      },
+    ],
+  },
+];
+
+export const UserFinalNavItems = [
+  {
+    title: "History & Billing",
+    items: [
+      {
+        title: "History",
+        href: `/dashboard/history`,
+        icon: "History",
+      },
+      {
+        title: "Billing",
+        href: `/dashboard/billing`,
+        icon: "CreditCard",
+      },
+    ],
+  },
+  ...userNavItems,
+];
+
+export const adminNavItems: NavSection[] = [
+  {
+    title: "Administration",
+    items: [
+      {
+        title: "User Accounts",
+        href: "/admin/dashboard/users",
+        icon: "Users",
+      },
+      {
+        title: "Payments Log",
+        href: "/admin/dashboard/payments",
+        icon: "CreditCard",
       },
     ],
   },

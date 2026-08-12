@@ -12,6 +12,7 @@ import {
   Settings,
   Sparkles,
   User,
+  Users,
   Video,
 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -21,12 +22,16 @@ import { useEffect, useState } from "react";
 
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
+import { useLogout } from "@/hooks/useLogout";
 import { cn } from "@/lib/utils";
 import { UserRole } from "@/utils/authUtils";
-import { useLogout } from "@/hooks/useLogout";
 import { getCookie } from "@/utils/cookieUtils";
 import { jwtUtils } from "@/utils/jwtUtils";
-import { getCommonNavItems, userNavItems } from "@/utils/sidebarNavitems";
+import {
+  adminNavItems,
+  getCommonNavItems,
+  UserFinalNavItems,
+} from "@/utils/sidebarNavitems";
 
 const getIcon = (iconName: string) => {
   switch (iconName) {
@@ -50,6 +55,8 @@ const getIcon = (iconName: string) => {
       return Film;
     case "MdOutlineChat":
       return MessageSquare;
+    case "Users":
+      return Users;
     default:
       return Sparkles;
   }
@@ -88,8 +95,8 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
   }, []);
 
   const commonLinks = getCommonNavItems(role);
-  const generatorLinks = role === UserRole.USER ? userNavItems : [];
-  const sidebarLinks = [...commonLinks, ...generatorLinks];
+  const otherLinks = role === UserRole.USER ? UserFinalNavItems : adminNavItems;
+  const sidebarLinks = [...commonLinks, ...otherLinks];
 
   return (
     <div className="flex flex-col h-full bg-card/65 backdrop-blur-md">
