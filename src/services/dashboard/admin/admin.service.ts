@@ -44,6 +44,7 @@ export const getAdminUsersService = async (params: {
       `/admin/users?${query.toString()}`,
       options,
     );
+
     return res;
   });
 
@@ -78,12 +79,14 @@ export const updateUserPlanService = async (userId: string, plan: Plan) =>
 export const getAdminPaymentsService = async (params: {
   page?: number;
   limit?: number;
+  search?: string;
 }) =>
   catchAsync(async () => {
     const options = await generalService.getHeaders();
     const query = new URLSearchParams();
     if (params.page) query.append("page", String(params.page));
     if (params.limit) query.append("limit", String(params.limit));
+    if (params.search) query.append("search", params.search);
 
     const res = await httpClient.get<IAdminPaymentsResult>(
       `/admin/payments?${query.toString()}`,

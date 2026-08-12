@@ -8,6 +8,7 @@ import {
   updateUserPlanService,
   updateUserStatusService,
 } from "@/services/dashboard/admin/admin.service";
+import { IAdminUsersResult } from "@/types/admin.types";
 import { UserStatus } from "@/utils/authUtils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -87,7 +88,7 @@ export default function UserManagementComponent() {
 
   // Note: the backend wraps the paginated items in result.data and result.meta
   // Let's type-cast and parse response objects
-  const rawData = usersRes?.data as any;
+  const rawData = usersRes?.data as IAdminUsersResult[];
   const usersList = Array.isArray(rawData) ? rawData : [];
   const meta = (usersRes as any)?.meta || { total: 0, totalPages: 1 };
 
@@ -223,25 +224,24 @@ export default function UserManagementComponent() {
                   </td>
                 </tr>
               ) : (
-                usersList.map((item: any) => {
-                  const user = item?.user;
+                usersList.map((item: IAdminUsersResult) => {
                   return (
                     <tr
-                      key={user?.id}
+                      key={item?.id}
                       className="hover:bg-neutral-50/40 dark:hover:bg-neutral-950/10 transition-colors"
                     >
                       {/* Name / Email */}
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white font-bold flex items-center justify-center shadow-xs">
-                            {user?.name?.substring(0, 1)?.toUpperCase()}
+                            {item?.name?.substring(0, 1)?.toUpperCase()}
                           </div>
                           <div className="flex flex-col text-left">
                             <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
-                              {user?.name}
+                              {item?.name}
                             </span>
                             <span className="text-[10px] text-neutral-450 dark:text-neutral-500 mt-0.5">
-                              {user?.email}
+                              {item?.email}
                             </span>
                           </div>
                         </div>
@@ -251,16 +251,16 @@ export default function UserManagementComponent() {
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2">
                           <select
-                            value={user?.plan}
+                            value={item?.plan}
                             disabled={updatePlanMutation.isPending}
                             onChange={(e) =>
                               updatePlanMutation.mutate({
-                                userId: user.id,
+                                userId: item.id,
                                 plan: e.target.value as Plan,
                               })
                             }
                             className={`h-8 text-[11px] font-black rounded-lg border px-2.5 outline-hidden cursor-pointer transition-all ${
-                              user?.plan === "PRO"
+                              item?.plan === "PRO"
                                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                                 : "bg-neutral-100 border-neutral-250 dark:bg-neutral-850 dark:border-neutral-800 text-neutral-600 dark:text-neutral-450"
                             }`}
@@ -273,7 +273,7 @@ export default function UserManagementComponent() {
 
                       {/* Joined Date */}
                       <td className="py-4 px-6 text-xs text-neutral-600 dark:text-neutral-400 font-medium">
-                        {new Date(user?.createdAt).toLocaleDateString(
+                        {new Date(item?.createdAt).toLocaleDateString(
                           undefined,
                           {
                             year: "numeric",
@@ -287,31 +287,31 @@ export default function UserManagementComponent() {
                       <td className="py-4 px-6">
                         <span
                           className={`text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 border ${
-                            user?.status === "ACTIVE"
+                            item?.status === "ACTIVE"
                               ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/10"
-                              : user?.status === "BANNED"
+                              : item?.status === "BANNED"
                                 ? "text-red-500 bg-red-500/10 border-red-500/10"
                                 : "text-neutral-500 bg-neutral-100 border-neutral-250 dark:bg-neutral-850 dark:border-neutral-800 dark:text-neutral-400"
                           }`}
                         >
-                          {user?.status === "ACTIVE" && (
+                          {item?.status === "ACTIVE" && (
                             <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
                           )}
-                          {user?.status}
+                          {item?.status}
                         </span>
                       </td>
 
                       {/* Actions */}
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {user?.status === "BANNED" ? (
+                          {item?.status === "BANNED" ? (
                             <Button
                               size="sm"
                               variant="ghost"
                               disabled={updateStatusMutation?.isPending}
                               onClick={() =>
                                 updateStatusMutation.mutate({
-                                  userId: user.id,
+                                  userId: item.id,
                                   status: UserStatus.ACTIVE,
                                 })
                               }
@@ -327,11 +327,11 @@ export default function UserManagementComponent() {
                               onClick={() => {
                                 if (
                                   confirm(
-                                    `Are you sure you want to ban user ${user?.name}?`,
+                                    `Are you sure you want to ban user ${item?.name}?`,
                                   )
                                 ) {
                                   updateStatusMutation.mutate({
-                                    userId: user?.id,
+                                    userId: item?.id,
                                     status: UserStatus?.BANNED,
                                   });
                                 }

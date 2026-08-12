@@ -210,7 +210,47 @@ export interface IUsers {
 }
 
 export interface IAdminUsersResult {
-  user: IUsers;
+  id: string;
+  name: string;
+  email: string;
+  image: null;
+  role: UserRole;
+  plan: Plan;
+  planExpiresAt: string;
+  lastResetDate: string;
+  stripeCustomerId: string;
+  stripeSubId: string;
+  createdAt: string;
+  updatedAt: string;
+  emailVerified: boolean;
+  phone: string;
+  status: UserStatus;
+  isDeleted: boolean;
+  deletedAt: string;
+  textToImage: number;
+  aiChatbot: number;
+  codeChecker: number;
+  imageBackgroundRemover: number;
+  imageCaptionGenerator: number;
+  resumeAnalyzer: number;
+  languageTranslator: number;
+  grammarChecker: number;
+  textToSpeech: number;
+  speechToText: number;
+  imageToVideo: number;
+  textToVideo: number;
+  textToImageLastRefreshAT: string;
+  aiChatbotLastRefreshAT: string;
+  codeCheckerLastRefreshAT: string;
+  imageBackgroundRemoverLastRefreshAT: string;
+  imageCaptionGeneratorLastRefreshAT: string;
+  resumeAnalyzerLastRefreshAT: string;
+  languageTranslatorLastRefreshAT: string;
+  grammarCheckerLastRefreshAT: string;
+  textToSpeechLastRefreshAT: string;
+  speechToTextLastRefreshAT: string;
+  imageToVideoLastRefreshAT: string;
+  textToVideoLastRefreshAT: string;
   subscription: {
     id: string;
     userId: string;
