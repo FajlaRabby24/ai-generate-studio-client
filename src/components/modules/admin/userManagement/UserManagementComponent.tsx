@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import Swal from "sweetalert2";
 
 export default function UserManagementComponent() {
   const queryClient = useQueryClient();
@@ -84,6 +85,58 @@ export default function UserManagementComponent() {
     setSelectedPlan("ALL");
     setSelectedStatus("ALL");
     setPage(1);
+  };
+
+  const banUser = (name: string, userId: string) => {
+    Swal.fire({
+      title: "Ban User?",
+      text: `Are you sure you want to ban user ${name}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#8b5cf6",
+      cancelButtonColor: "#ef4444",
+      confirmButtonText: "Yes, ban user!",
+      cancelButtonText: "Cancel",
+      background: document.documentElement.classList.contains("dark")
+        ? "#171717"
+        : "#ffffff",
+      color: document.documentElement.classList.contains("dark")
+        ? "#ffffff"
+        : "#000000",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        updateStatusMutation.mutate({
+          userId,
+          status: UserStatus?.BANNED,
+        });
+      }
+    });
+  };
+
+  const unbanUser = (name: string, userId: string) => {
+    Swal.fire({
+      title: "Unban User?",
+      text: `Are you sure you want to unban user ${name}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#8b5cf6",
+      cancelButtonColor: "#ef4444",
+      confirmButtonText: "Yes, unban user!",
+      cancelButtonText: "Cancel",
+      background: document.documentElement.classList.contains("dark")
+        ? "#171717"
+        : "#ffffff",
+      color: document.documentElement.classList.contains("dark")
+        ? "#ffffff"
+        : "#000000",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        updateStatusMutation.mutate({
+          userId,
+          status: UserStatus?.ACTIVE,
+        });
+      }
+    });
   };
 
   // Note: the backend wraps the paginated items in result.data and result.meta
@@ -260,13 +313,13 @@ export default function UserManagementComponent() {
                               })
                             }
                             className={`h-8 text-[11px] font-black rounded-lg border px-2.5 outline-hidden cursor-pointer transition-all ${
-                              item?.plan === "PRO"
+                              item?.plan === Plan.PRO
                                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                                 : "bg-neutral-100 border-neutral-250 dark:bg-neutral-850 dark:border-neutral-800 text-neutral-600 dark:text-neutral-450"
                             }`}
                           >
-                            <option value="FREE">FREE</option>
-                            <option value="PRO">PRO</option>
+                            <option value={Plan.FREE}>{Plan.FREE}</option>
+                            <option value={Plan.PRO}>{Plan.PRO}</option>
                           </select>
                         </div>
                       </td>
@@ -287,14 +340,14 @@ export default function UserManagementComponent() {
                       <td className="py-4 px-6">
                         <span
                           className={`text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 border ${
-                            item?.status === "ACTIVE"
+                            item?.status === UserStatus.ACTIVE
                               ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/10"
-                              : item?.status === "BANNED"
+                              : item?.status === UserStatus.BANNED
                                 ? "text-red-500 bg-red-500/10 border-red-500/10"
                                 : "text-neutral-500 bg-neutral-100 border-neutral-250 dark:bg-neutral-850 dark:border-neutral-800 dark:text-neutral-400"
                           }`}
                         >
-                          {item?.status === "ACTIVE" && (
+                          {item?.status === UserStatus.ACTIVE && (
                             <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
                           )}
                           {item?.status}
@@ -304,17 +357,12 @@ export default function UserManagementComponent() {
                       {/* Actions */}
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {item?.status === "BANNED" ? (
+                          {item?.status === UserStatus.BANNED ? (
                             <Button
                               size="sm"
                               variant="ghost"
                               disabled={updateStatusMutation?.isPending}
-                              onClick={() =>
-                                updateStatusMutation.mutate({
-                                  userId: item.id,
-                                  status: UserStatus.ACTIVE,
-                                })
-                              }
+                              onClick={() => unbanUser(item.name, item.id)}
                               className="h-8 rounded-lg font-bold text-[10px] px-3.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 hover:bg-emerald-500/20 cursor-pointer inline-flex items-center gap-1.5"
                             >
                               <Unlock className="w-3.5 h-3.5" /> Unlock Account
@@ -324,18 +372,7 @@ export default function UserManagementComponent() {
                               size="sm"
                               variant="ghost"
                               disabled={updateStatusMutation?.isPending}
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    `Are you sure you want to ban user ${item?.name}?`,
-                                  )
-                                ) {
-                                  updateStatusMutation.mutate({
-                                    userId: item?.id,
-                                    status: UserStatus?.BANNED,
-                                  });
-                                }
-                              }}
+                              onClick={() => banUser(item.name, item.id)}
                               className="h-8 rounded-lg font-bold text-[10px] px-3.5 bg-red-500/10 text-red-500 border border-red-500/10 hover:bg-red-500/20 cursor-pointer inline-flex items-center gap-1.5"
                             >
                               <Lock className="w-3.5 h-3.5" /> Restrict User
