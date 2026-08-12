@@ -37,17 +37,49 @@ import { UserRole } from "@/utils/authUtils";
 import { getCookie } from "@/utils/cookieUtils";
 import { jwtUtils } from "@/utils/jwtUtils";
 
+const SEARCH_ITEMS = [
+  { title: "Text to Image", href: "/dashboard/text-to-image", description: "Generate beautiful images from prompts", roles: [UserRole.USER] },
+  { title: "AI Chatbot", href: "/dashboard/ai-chatbot", description: "Chat with state-of-the-art AI model", roles: [UserRole.USER] },
+  { title: "Text to Video", href: "/dashboard/text-to-video", description: "Create cinematic videos from description", roles: [UserRole.USER] },
+  { title: "Text to Speech", href: "/dashboard/text-to-speech", description: "Convert script or text to high-fidelity audio", roles: [UserRole.USER] },
+  { title: "Resume Analyzer", href: "/dashboard/resume-analyzer", description: "Review and score resume files", roles: [UserRole.USER] },
+  { title: "Image to Video", href: "/dashboard/image-to-video", description: "Turn static photos into dynamic videos", roles: [UserRole.USER] },
+  { title: "Remove Background", href: "/dashboard/remove-background", description: "Instantly clean background from images", roles: [UserRole.USER] },
+  { title: "History Logs", href: "/dashboard/history", description: "View your generation logs and assets history", roles: [UserRole.USER] },
+  { title: "Billing Ledger", href: "/dashboard/billing", description: "Manage subscription plans and Stripe portal", roles: [UserRole.USER] },
+  { title: "Profile Settings", href: "/dashboard/my-profile", description: "View account settings and security sessions", roles: [UserRole.USER] },
+  // Admin items
+  { title: "Admin Management", href: "/admin/dashboard", description: "Platform revenue analytics dashboard", roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
+  { title: "User Accounts", href: "/admin/dashboard/users", description: "Search users, ban accounts, override tiers", roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
+  { title: "Payments Log", href: "/admin/dashboard/payments", description: "Stripe payments and invoices ledger", roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
+  { title: "Profile Settings (Admin)", href: "/admin/dashboard/my-profile", description: "Admin settings and active sessions", roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
+];
+
 export default function DashboardTopBar() {
   const handleLogout = useLogout();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [decodedUser, setDecodedUser] = useState<any>(null);
   const [role, setRole] = useState<UserRole>(UserRole.USER);
+  const [globalSearch, setGlobalSearch] = useState("");
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
+  const filteredSearchItems = SEARCH_ITEMS.filter((item) => {
+    const hasRoleAccess = item.roles.includes(role);
+    if (!hasRoleAccess) return false;
+
+    if (!globalSearch.trim()) return false;
+    const matchStr = globalSearch.toLowerCase();
+    return (
+      item.title.toLowerCase().includes(matchStr) ||
+      item.description.toLowerCase().includes(matchStr)
+    );
+  });
 
   // 1. Fetch unread count for badge
   const { data: unreadRes, refetch: refetchUnread } = useQuery({
     queryKey: ["unreadCount"],
     queryFn: () => getMyNotificationsService(),
-    refetchInterval: 15000,
+    refetchInterval: 30000,
   });
   const unreadCount = unreadRes?.data?.length || 0;
 
@@ -124,15 +156,49 @@ export default function DashboardTopBar() {
       </div>
 
       {/* Center/Left (Desktop): Search Bar */}
-      <div className="hidden md:flex flex-grow max-w-xs mr-4">
+      <div className="hidden md:flex flex-grow max-w-xs mr-4 relative">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search tools, history..."
-            className="pl-9 h-9 rounded-xl border-border/40 bg-muted/20 focus-visible:border-violet-500/70"
+            placeholder="Search tools, settings..."
+            value={globalSearch}
+            onChange={(e) => {
+              setGlobalSearch(e.target.value);
+              setShowSearchDropdown(true);
+            }}
+            onFocus={() => setShowSearchDropdown(true)}
+            onBlur={() => {
+              setTimeout(() => setShowSearchDropdown(false), 200);
+            }}
+            className="pl-9 h-9 rounded-xl border-border/40 bg-muted/20 focus-visible:border-violet-500/70 text-xs"
           />
         </div>
+
+        {showSearchDropdown && filteredSearchItems.length > 0 && (
+          <div className="absolute top-11 left-0 right-0 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-xl z-[999] overflow-hidden max-h-[300px] overflow-y-auto">
+            <div className="p-2 space-y-1">
+              {filteredSearchItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => {
+                    setGlobalSearch("");
+                    setShowSearchDropdown(false);
+                  }}
+                  className="flex flex-col gap-0.5 p-2.5 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-850/50 transition-colors text-left"
+                >
+                  <span className="text-xs font-bold text-neutral-850 dark:text-neutral-200">
+                    {item.title}
+                  </span>
+                  <span className="text-[10px] text-neutral-450 dark:text-neutral-500">
+                    {item.description}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Right: Actions & Profile Dropdown */}
