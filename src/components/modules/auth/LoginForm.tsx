@@ -139,16 +139,6 @@ export default function LoginForm() {
           )}
         </div>
 
-        {/* Forgot Password Link */}
-        <div className="flex justify-end -mt-2">
-          <Link
-            href="/auth/forgot-password"
-            className="font-mono text-[11px] tracking-[0.18em] uppercase text-white/62 hover:text-white hover:underline underline-offset-4 transition-colors outline-none focus-visible:outline focus-visible:outline-white/70 focus-visible:outline-offset-2"
-          >
-            Forgot password?
-          </Link>
-        </div>
-
         {/* Demo Quick Login */}
         <div className="mt-2 flex flex-col gap-2 p-3 border border-white/10 bg-white/5 rounded-none">
           <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-white/62 text-center select-none">
