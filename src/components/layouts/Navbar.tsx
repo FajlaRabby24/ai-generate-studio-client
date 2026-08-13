@@ -56,9 +56,12 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left Side: Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white relative shrink-0 group-hover:scale-105 transition-all duration-300">
+          {/* <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white relative shrink-0 group-hover:scale-105 transition-all duration-300">
             <div className="h-2.5 w-2.5 rounded-full bg-white" />
-          </div>
+          </div> */}
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                AI
+              </div>
           <span className="text-xl font-bold tracking-tight text-white">
             AI Generate Studio
           </span>
@@ -200,9 +203,12 @@ export default function Navbar() {
               <div className="flex flex-col gap-6">
                 <SheetHeader className="p-0 text-left">
                   <SheetTitle className="flex items-center gap-2">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white relative shrink-0">
+                    {/* <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white relative shrink-0">
                       <div className="h-2.5 w-2.5 rounded-full bg-white" />
-                    </div>
+                    </div> */}
+                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                AI
+              </div>
                     <span className="font-bold text-lg text-white">
                       AI Generate Studio
                     </span>

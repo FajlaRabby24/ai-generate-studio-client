@@ -13,6 +13,9 @@ const poppins = Roboto({
 export const metadata: Metadata = {
   title: "AI Genarate Studio",
   description: "AI Genarate Studio",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 export default function RootLayout({
   children,

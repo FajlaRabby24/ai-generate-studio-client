@@ -146,10 +146,13 @@ export default function DashboardTopBar() {
 
         {/* Mobile Brand Link */}
         <Link href="/" className="flex items-center gap-1.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md">
+          {/* <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md">
             <Sparkles className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-bold text-sm text-foreground">
+          </div> */}
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                AI
+              </div>
+          <span className="font-bold text-sm text-foreground hidden sm:block">
             AI Generate Studio
           </span>
         </Link>
