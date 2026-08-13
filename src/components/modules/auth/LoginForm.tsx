@@ -25,6 +25,7 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -32,6 +33,18 @@ export default function LoginForm() {
       password: "",
     },
   });
+
+  const handleDemoLogin = async (role: "admin" | "user") => {
+    const email =
+      role === "admin"
+        ? "aigeneratestudio@gmail.com"
+        : "fajlarabby.dev@gmail.com";
+    const password =
+      role === "admin" ? "AIgenerateSTUDIO_admin_PASS" : "fajla123";
+    setValue("email", email);
+    setValue("password", password);
+    await onSubmit({ email, password });
+  };
 
   const onSubmit = async (data: ILoginPayload) => {
     try {
@@ -138,6 +151,29 @@ export default function LoginForm() {
           >
             Forgot password?
           </Link>
+        </div>
+
+        {/* Demo Quick Login */}
+        <div className="mt-2 flex flex-col gap-2 p-3 border border-white/10 bg-white/5 rounded-none">
+          <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-white/62 text-center select-none">
+            Recruiter Quick Access (Demo)
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleDemoLogin("admin")}
+              className="flex-1 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white py-2 px-3 font-mono text-[11px] uppercase tracking-[0.14em] border border-white/10 transition-all cursor-pointer outline-none focus-visible:outline focus-visible:outline-white/70"
+            >
+              Demo Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoLogin("user")}
+              className="flex-1 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white py-2 px-3 font-mono text-[11px] uppercase tracking-[0.14em] border border-white/10 transition-all cursor-pointer outline-none focus-visible:outline focus-visible:outline-white/70"
+            >
+              Demo User
+            </button>
+          </div>
         </div>
 
         {/* Action Buttons */}
