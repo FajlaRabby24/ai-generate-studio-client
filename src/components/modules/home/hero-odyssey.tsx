@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import React, { useRef } from "react";
 import { AnimatedBeam } from "@/components/ui/animated-beam";
+import Image from "next/image";
 
 interface ShinyTextProps {
   text: string;
@@ -170,8 +171,16 @@ export const HeroSection: React.FC = () => {
                 ref={centerRef}
                 className="z-10 flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full border-2 border-white bg-white text-black shadow-2xl shadow-[#3D81E3]/30 hover:scale-105 transition-transform duration-300"
               >
-                <div className="flex h-12 w-12 md:h-15 md:w-15 items-center justify-center rounded-full bg-black/5 text-[#3D81E3]">
-                  <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-[#3D81E3] animate-pulse" />
+                <div className="flex relative h-12 w-12 md:h-17 md:w-17 items-center justify-center rounded-full bg-black/5 text-[#3D81E3]">
+                  {/* <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-[#3D81E3] animate-pulse" /> */}
+                  <Image
+                    src="/icon.svg"
+                    alt="logo"
+                    fill
+                    // width={100}
+                    // height={100}
+                    className="text-[#3D81E3] rounded-full"
+                  />
                 </div>
               </div>
             </div>

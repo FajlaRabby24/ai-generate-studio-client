@@ -8,6 +8,8 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 
+export const dynamic = "force-dynamic";
+
 const HistoryPage = async ({ searchParams }: PageProps) => {
   const { queryObject } = await parseSearchParams(searchParams);
 
