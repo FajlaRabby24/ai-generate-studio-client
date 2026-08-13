@@ -34,13 +34,9 @@ export default function LoginForm() {
     },
   });
 
-  const handleDemoLogin = async (role: "admin" | "user") => {
-    const email =
-      role === "admin"
-        ? "aigeneratestudio@gmail.com"
-        : "fajlarabby.dev@gmail.com";
-    const password =
-      role === "admin" ? "AIgenerateSTUDIO_admin_PASS" : "fajla123";
+  const handleDemoLogin = async () => {
+    const email = "fajlarabby.dev@gmail.com";
+    const password = "fajla123";
     setValue("email", email);
     setValue("password", password);
     await onSubmit({ email, password });
@@ -161,14 +157,7 @@ export default function LoginForm() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => handleDemoLogin("admin")}
-              className="flex-1 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white py-2 px-3 font-mono text-[11px] uppercase tracking-[0.14em] border border-white/10 transition-all cursor-pointer outline-none focus-visible:outline focus-visible:outline-white/70"
-            >
-              Demo Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoLogin("user")}
+              onClick={handleDemoLogin}
               className="flex-1 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white py-2 px-3 font-mono text-[11px] uppercase tracking-[0.14em] border border-white/10 transition-all cursor-pointer outline-none focus-visible:outline focus-visible:outline-white/70"
             >
               Demo User
