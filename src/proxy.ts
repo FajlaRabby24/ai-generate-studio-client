@@ -59,7 +59,7 @@ export default async function proxy(request: NextRequest) {
 
   const role = (decoded?.role as UserRole) || UserRole.USER;
 
-  // Prevent authenticated users from visiting auth routes (login/register)
+  // Prevent authenticated users from visiting auth routes (login/register) or callback page
   if (isAuth) {
     const defaultRoute = getDefaultDashboardRoute(role);
     return NextResponse.redirect(new URL(defaultRoute, request.url));

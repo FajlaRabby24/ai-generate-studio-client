@@ -16,7 +16,7 @@ export const betterAuthSessionCookieName = isProduction
   ? "__Secure-better-auth.session_token"
   : "better-auth.session_token";
 
-export const authRoutes = ["/auth/login", "/auth/register"];
+export const authRoutes = ["/auth/login", "/auth/register", "/google-callback"];
 
 export const isAuthRoute = (pathName: string): boolean => {
   return authRoutes.some((route) => route === pathName);

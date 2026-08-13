@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plan } from "@/config/constant";
@@ -286,9 +287,15 @@ export default function UserManagementComponent() {
                       {/* Name / Email */}
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white font-bold flex items-center justify-center shadow-xs">
-                            {item?.name?.substring(0, 1)?.toUpperCase()}
-                          </div>
+                          <Avatar>
+                            <AvatarImage
+                              src={item?.image || undefined}
+                              referrerPolicy="no-referrer"
+                            />
+                            <AvatarFallback>
+                              {item?.name.substring(0, 1).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
                           <div className="flex flex-col text-left">
                             <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
                               {item?.name}
