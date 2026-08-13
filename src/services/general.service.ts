@@ -1,3 +1,4 @@
+import { envVars } from "@/config/env";
 import { betterAuthSessionCookieName } from "@/utils/authUtils";
 import { ZodType } from "zod";
 import { getTokens } from "./auth/getMe.service";
@@ -28,7 +29,7 @@ const getHeaders = async () => {
 
 const homePageCall = async () => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_FOR_HOME}`).then((r) =>
+    const res = await fetch(`${envVars.API_BASE_URL_FOR_HOME}`).then((r) =>
       r.text(),
     );
     return res;

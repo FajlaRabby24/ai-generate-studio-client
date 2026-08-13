@@ -152,7 +152,7 @@ export default function LoginForm() {
           </button>
 
           {/* Google SSO Button */}
-      <GoogleLogin />
+          <GoogleLogin />
         </div>
 
         {/* Redirect Referral Link */}

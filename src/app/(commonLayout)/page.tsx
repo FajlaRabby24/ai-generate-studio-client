@@ -7,7 +7,7 @@ import { ToolsSuite } from "@/components/modules/home/ToolsSuite";
 import { generalService } from "@/services/general.service";
 
 export default async function Home() {
-  const res = await generalService.homePageCall();
+  await generalService.homePageCall();
 
   return (
     <main className="flex flex-col flex-1 bg-background font-sans">
