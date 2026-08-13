@@ -63,9 +63,6 @@ const TextToVideoComponent = () => {
     <div className="flex-1 flex flex-col p-4 md:p-8 max-w-6xl mx-auto w-full gap-8">
       {/* Header */}
       <div className="flex flex-col items-center justify-center text-center gap-3 shrink-0 pt-4">
-        <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-primary/10 border border-primary/20 mb-2">
-          <Video className="w-8 h-8 text-primary" />
-        </div>
         <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
           Text to Video AI
           <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary align-middle uppercase tracking-widest">

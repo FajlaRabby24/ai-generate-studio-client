@@ -53,7 +53,7 @@ export default function GoogleCallbackPage({
           router.push(`/auth/login?error=token_sync_failed`);
         }
       } catch (err) {
-        console.error("Sync error:", err);
+        // console.error("Sync error:", err);
         setStatus("error");
         router.push(`/auth/login?error=token_sync_failed`);
       }

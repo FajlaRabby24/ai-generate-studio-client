@@ -115,7 +115,6 @@ const ResumeAnalyzerComponent = () => {
         editedResumeJson: editableResume,
       });
     } catch (e: any) {
-      console.error(e);
       toast.error(e?.message || "Failed to generate PDF.");
     }
   };

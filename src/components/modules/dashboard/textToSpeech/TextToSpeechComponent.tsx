@@ -11,6 +11,7 @@ import {
 } from "@/services/dashboard/text-to-speech/textToSpeech.service";
 import { IGetRecentTextToSpeechResponse } from "@/types/dashboard.types";
 import { IVoiceItem } from "@/types/textToSpeech.types";
+import { handleDownload } from "@/utils/handleDownload";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Clock,
@@ -23,12 +24,10 @@ import {
   Sliders,
   Sparkles,
   Trash2,
-  Volume2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
-import { handleDownload } from "@/utils/handleDownload";
 
 const TextToSpeechComponent = () => {
   const [prompt, setPrompt] = useState("");
@@ -195,9 +194,6 @@ const TextToSpeechComponent = () => {
     <div className="flex-1 flex flex-col p-4 md:p-8 max-w-6xl mx-auto w-full gap-8">
       {/* Header */}
       <div className="flex flex-col items-center justify-center text-center gap-3 shrink-0 pt-4">
-        <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-primary/10 border border-primary/20 mb-2">
-          <Volume2 className="w-8 h-8 text-primary" />
-        </div>
         <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
           Text to Speech AI
           <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary align-middle uppercase tracking-widest">
@@ -502,7 +498,7 @@ const TextToSpeechComponent = () => {
                           onClick={() =>
                             handleDownload(
                               speechRecord.audioUrl,
-                              `speech-${speechRecord.id}.mp3`
+                              `speech-${speechRecord.id}.mp3`,
                             )
                           }
                           className="rounded-xl hover:bg-muted/50 p-2 h-auto text-muted-foreground hover:text-foreground cursor-pointer"

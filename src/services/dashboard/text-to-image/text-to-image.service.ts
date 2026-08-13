@@ -37,19 +37,19 @@ export const generateTextToImageService = async (
     return res;
   });
 
-export const getGenerationLeftCountService = async (
-  generationType: GenerationType,
-) =>
-  catchAsync(async () => {
-    const options = await generalService.getHeaders();
+// export const getGenerationLeftCountService = async (
+//   generationType: GenerationType,
+// ) =>
+//   catchAsync(async () => {
+//     const options = await generalService.getHeaders();
 
-    const res = await httpClient.get<IGetGenerationLeftCountResponse>(
-      `/auth/generation-left?type=${generationType}`,
-      options,
-    );
+//     const res = await httpClient.get<IGetGenerationLeftCountResponse>(
+//       `/auth/generation-left?type=${generationType}`,
+//       options,
+//     );
 
-    return res;
-  });
+//     return res;
+//   });
 
 export const getRecentGenerationServiceTextToImage = async () => {
   const authHeaders = await generalService.getHeaders();
