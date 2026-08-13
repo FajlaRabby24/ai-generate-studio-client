@@ -17,7 +17,7 @@ const ProfileDropdown = ({ decodedUser }: { decodedUser: any }) => {
     <DropdownMenu>
       <DropdownMenuTrigger className={"cursor-pointer"}>
         <Avatar>
-          <AvatarImage src={decodedUser?.image} />
+          <AvatarImage src={decodedUser?.image} referrerPolicy="no-referrer" />
           <AvatarFallback>
             {decodedUser?.name.substring(0, 1).toUpperCase()}
           </AvatarFallback>
@@ -46,7 +46,7 @@ const ProfileDropdown = ({ decodedUser }: { decodedUser: any }) => {
 
         {/* Quick Actions Links */}
         <Link
-          href={`/${decodedUser?.role === UserRole.ADMIN ? "admin/" : ""}dashboard/profile`}
+          href={`/${decodedUser?.role === UserRole.ADMIN ? "admin/" : ""}dashboard/my-profile`}
           className="w-full"
         >
           <DropdownMenuItem className="rounded-lg cursor-pointer">
