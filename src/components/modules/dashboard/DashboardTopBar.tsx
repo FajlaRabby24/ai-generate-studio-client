@@ -1,18 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  Bell,
-  Check,
-  CheckCheck,
-  CreditCard,
-  Inbox,
-  LogOut,
-  Menu,
-  Search,
-  Sparkles,
-  User,
-} from "lucide-react";
+import { Bell, Check, CheckCheck, Inbox, Menu, Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -21,13 +10,11 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useLogout } from "@/hooks/useLogout";
 import {
   getMyNotificationsService,
   markAllNotificationsAsReadService,
@@ -36,27 +23,97 @@ import {
 import { UserRole } from "@/utils/authUtils";
 import { getCookie } from "@/utils/cookieUtils";
 import { jwtUtils } from "@/utils/jwtUtils";
+import ProfileDropdown from "./my-profile/ProfileDropdown";
 
 const SEARCH_ITEMS = [
-  { title: "Text to Image", href: "/dashboard/text-to-image", description: "Generate beautiful images from prompts", roles: [UserRole.USER] },
-  { title: "AI Chatbot", href: "/dashboard/ai-chatbot", description: "Chat with state-of-the-art AI model", roles: [UserRole.USER] },
-  { title: "Text to Video", href: "/dashboard/text-to-video", description: "Create cinematic videos from description", roles: [UserRole.USER] },
-  { title: "Text to Speech", href: "/dashboard/text-to-speech", description: "Convert script or text to high-fidelity audio", roles: [UserRole.USER] },
-  { title: "Resume Analyzer", href: "/dashboard/resume-analyzer", description: "Review and score resume files", roles: [UserRole.USER] },
-  { title: "Image to Video", href: "/dashboard/image-to-video", description: "Turn static photos into dynamic videos", roles: [UserRole.USER] },
-  { title: "Remove Background", href: "/dashboard/remove-background", description: "Instantly clean background from images", roles: [UserRole.USER] },
-  { title: "History Logs", href: "/dashboard/history", description: "View your generation logs and assets history", roles: [UserRole.USER] },
-  { title: "Billing Ledger", href: "/dashboard/billing", description: "Manage subscription plans and Stripe portal", roles: [UserRole.USER] },
-  { title: "Profile Settings", href: "/dashboard/my-profile", description: "View account settings and security sessions", roles: [UserRole.USER] },
+  {
+    title: "Text to Image",
+    href: "/dashboard/text-to-image",
+    description: "Generate beautiful images from prompts",
+    roles: [UserRole.USER],
+  },
+  {
+    title: "AI Chatbot",
+    href: "/dashboard/ai-chatbot",
+    description: "Chat with state-of-the-art AI model",
+    roles: [UserRole.USER],
+  },
+  {
+    title: "Text to Video",
+    href: "/dashboard/text-to-video",
+    description: "Create cinematic videos from description",
+    roles: [UserRole.USER],
+  },
+  {
+    title: "Text to Speech",
+    href: "/dashboard/text-to-speech",
+    description: "Convert script or text to high-fidelity audio",
+    roles: [UserRole.USER],
+  },
+  {
+    title: "Resume Analyzer",
+    href: "/dashboard/resume-analyzer",
+    description: "Review and score resume files",
+    roles: [UserRole.USER],
+  },
+  {
+    title: "Image to Video",
+    href: "/dashboard/image-to-video",
+    description: "Turn static photos into dynamic videos",
+    roles: [UserRole.USER],
+  },
+  {
+    title: "Remove Background",
+    href: "/dashboard/remove-background",
+    description: "Instantly clean background from images",
+    roles: [UserRole.USER],
+  },
+  {
+    title: "History Logs",
+    href: "/dashboard/history",
+    description: "View your generation logs and assets history",
+    roles: [UserRole.USER],
+  },
+  {
+    title: "Billing Ledger",
+    href: "/dashboard/billing",
+    description: "Manage subscription plans and Stripe portal",
+    roles: [UserRole.USER],
+  },
+  {
+    title: "Profile Settings",
+    href: "/dashboard/my-profile",
+    description: "View account settings and security sessions",
+    roles: [UserRole.USER],
+  },
   // Admin items
-  { title: "Admin Management", href: "/admin/dashboard", description: "Platform revenue analytics dashboard", roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
-  { title: "User Accounts", href: "/admin/dashboard/users", description: "Search users, ban accounts, override tiers", roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
-  { title: "Payments Log", href: "/admin/dashboard/payments", description: "Stripe payments and invoices ledger", roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
-  { title: "Profile Settings (Admin)", href: "/admin/dashboard/my-profile", description: "Admin settings and active sessions", roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
+  {
+    title: "Admin Management",
+    href: "/admin/dashboard",
+    description: "Platform revenue analytics dashboard",
+    roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
+  },
+  {
+    title: "User Accounts",
+    href: "/admin/dashboard/users",
+    description: "Search users, ban accounts, override tiers",
+    roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
+  },
+  {
+    title: "Payments Log",
+    href: "/admin/dashboard/payments",
+    description: "Stripe payments and invoices ledger",
+    roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
+  },
+  {
+    title: "Profile Settings (Admin)",
+    href: "/admin/dashboard/my-profile",
+    description: "Admin settings and active sessions",
+    roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
+  },
 ];
 
 export default function DashboardTopBar() {
-  const handleLogout = useLogout();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [decodedUser, setDecodedUser] = useState<any>(null);
   const [role, setRole] = useState<UserRole>(UserRole.USER);
@@ -110,9 +167,7 @@ export default function DashboardTopBar() {
         const decoded = jwtUtils.decodedToken(token);
         if (decoded) {
           setDecodedUser(decoded);
-          if (decoded.role) {
-            setRole(decoded.role as UserRole);
-          }
+          setRole(decoded.role);
         }
       }
     };
@@ -150,8 +205,8 @@ export default function DashboardTopBar() {
             <Sparkles className="h-4 w-4 text-white" />
           </div> */}
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                AI
-              </div>
+            AI
+          </div>
           <span className="font-bold text-sm text-foreground hidden sm:block">
             AI Generate Studio
           </span>
@@ -311,73 +366,7 @@ export default function DashboardTopBar() {
         </DropdownMenu>
 
         {/* User Profile Dropdown Menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                className="rounded-full size-9 p-0 cursor-pointer overflow-hidden border border-border/40 bg-gradient-to-br from-violet-600 to-indigo-600 text-white font-semibold text-sm flex items-center justify-center shadow-inner active:scale-95 transition-all"
-                aria-label="User profile menu"
-              />
-            }
-          >
-            {decodedUser?.name
-              ? decodedUser.name.substring(0, 1).toUpperCase()
-              : "U"}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-56 mt-1 rounded-xl p-1.5 border border-border/40 bg-popover shadow-lg"
-          >
-            {/* User Profile Info Summary */}
-            <div className="flex flex-col space-y-1.5 p-2.5">
-              <p className="text-sm font-semibold text-foreground leading-none">
-                {decodedUser?.name || "Demo User"}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {decodedUser?.email || "demo@studio.com"}
-              </p>
-              {decodedUser?.role && (
-                <div className="mt-1 inline-flex w-fit items-center rounded-full bg-violet-500/10 px-2.5 py-0.5 text-[10px] font-medium text-violet-500 dark:bg-violet-400/10 dark:text-violet-400">
-                  {decodedUser.role}
-                </div>
-              )}
-            </div>
-
-            <DropdownMenuSeparator className="my-1.5" />
-
-            {/* Quick Actions Links */}
-            <Link
-              href={`/${role === UserRole.ADMIN ? "admin/" : ""}dashboard/profile`}
-              className="w-full"
-            >
-              <DropdownMenuItem className="rounded-lg cursor-pointer">
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile Settings</span>
-              </DropdownMenuItem>
-            </Link>
-            {role === UserRole.USER && (
-              <Link href="/dashboard/billing" className="w-full">
-                <DropdownMenuItem className="rounded-lg cursor-pointer">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  <span>Billing</span>
-                </DropdownMenuItem>
-              </Link>
-            )}
-
-            <DropdownMenuSeparator className="my-1.5" />
-
-            {/* Sign Out Trigger */}
-            <DropdownMenuItem
-              variant="destructive"
-              className="rounded-lg cursor-pointer"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProfileDropdown decodedUser={decodedUser} />
       </div>
     </header>
   );
