@@ -1,10 +1,8 @@
 "use server";
 
-import { GenerationType } from "@/config/constant";
 import { httpClient } from "@/lib/httpClient";
 import { generalService } from "@/services/general.service";
 import {
-  IGetGenerationLeftCountResponse,
   IGetRecentTextToImageResponse,
   TextToImageResponse,
 } from "@/types/dashboard.types";
@@ -53,7 +51,7 @@ export const generateTextToImageService = async (
 
 export const getRecentGenerationServiceTextToImage = async () => {
   const authHeaders = await generalService.getHeaders();
-  const res = await httpClient.get<IGetRecentTextToImageResponse>(
+  const res = await httpClient.get<IGetRecentTextToImageResponse[]>(
     "/text-to-image/recent",
     authHeaders,
   );

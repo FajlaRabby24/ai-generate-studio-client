@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { GenerationStatus, GenerationType } from "@/config/constant";
+import { ITextToImageResponse } from "@/types/dashboard.types";
 import {
   generateTextToImageService,
   getRecentGenerationServiceTextToImage,
@@ -36,6 +37,7 @@ export function TextToImageContainer() {
   });
 
   const recentGenerations = recentRes?.data;
+  const allImages = recentGenerations?.flatMap((gen) => gen.textToImages) || [];
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: IGenerateTextToImagePayload) =>
@@ -258,9 +260,7 @@ export function TextToImageContainer() {
               Loading recent generations...
             </p>
           </div>
-        ) : !recentGenerations ||
-          !recentGenerations.textToImages ||
-          recentGenerations.textToImages.length === 0 ? (
+        ) : !recentGenerations || allImages.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground text-center">
@@ -269,7 +269,7 @@ export function TextToImageContainer() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {recentGenerations.textToImages.map((imageRecord) => {
+            {allImages.map((imageRecord: ITextToImageResponse) => {
               const isCompleted =
                 imageRecord.status === GenerationStatus.COMPLETED &&
                 imageRecord.outputUrl;
