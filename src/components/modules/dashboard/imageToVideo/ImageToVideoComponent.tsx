@@ -7,12 +7,10 @@ import {
   getRecentGenerationService,
   imageToVideoService,
 } from "@/services/dashboard/image-to-video/imageToVideo.service";
-import { IGetRecentImageToVideoResponse } from "@/types/imageToVideo.types";
-import { handleDownload } from "@/utils/handleDownload";
+import { IImageToVideoRecord } from "@/types/imageToVideo.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Clock,
-  Download,
   History,
   Image as ImageIcon,
   Monitor,
@@ -41,6 +39,7 @@ const ImageToVideoComponent = () => {
   });
 
   const recentGenerations = recentRes?.data;
+  const allVideos = recentGenerations?.flatMap((gen) => gen.imageToVideos) || [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -260,9 +259,7 @@ const ImageToVideoComponent = () => {
               Loading recent creations...
             </p>
           </div>
-        ) : !recentGenerations ||
-          !recentGenerations.imageToVideos ||
-          recentGenerations.imageToVideos.length === 0 ? (
+        ) : !recentGenerations || allVideos.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground text-center">
@@ -271,7 +268,7 @@ const ImageToVideoComponent = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentGenerations.imageToVideos.map((videoRecord) => {
+            {allVideos.map((videoRecord: IImageToVideoRecord) => {
               const isCompleted =
                 videoRecord.status === GenerationStatus.COMPLETED &&
                 videoRecord.outputUrl;

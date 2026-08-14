@@ -12,6 +12,20 @@ export interface IImageToVideoResponse {
   polling_url?: string | undefined;
 }
 
+export interface IImageToVideoRecord {
+  id: string;
+  generatedId: string;
+  status: GenerationStatus;
+  prompt: string;
+  imageUrl: string;
+  requestId: string;
+  outputUrl: string;
+  isPublic: boolean;
+  isFeatured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IGetRecentImageToVideoResponse {
   type: GenerationType.IMAGE_TO_VIDEO;
   id: string;
@@ -19,17 +33,5 @@ export interface IGetRecentImageToVideoResponse {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
-  imageToVideos: {
-    prompt: string;
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    status: GenerationStatus;
-    imageUrl: string;
-    requestId: string;
-    outputUrl: string;
-    isPublic: boolean;
-    isFeatured: boolean;
-    generatedId: string;
-  }[];
+  imageToVideos: IImageToVideoRecord[];
 }
