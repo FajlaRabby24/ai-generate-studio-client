@@ -30,7 +30,7 @@ export const textToVideoService = async (payload: ITextToVideoPayload) =>
 
 export const getRecentGenerationService = async () => {
   const authHeaders = await generalService.getHeaders();
-  const res = await httpClient.get<IGetRecentTextToVideoResponse>(
+  const res = await httpClient.get<IGetRecentTextToVideoResponse[]>(
     "/text-to-video/recent",
     authHeaders,
   );

@@ -7,6 +7,7 @@ import {
   getRecentGenerationService,
   textToVideoService,
 } from "@/services/dashboard/text-to-video/textToVideo.service";
+import { ITextToVideoRecord } from "@/types/textToVideo.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Clock,
@@ -30,6 +31,7 @@ const TextToVideoComponent = () => {
   });
 
   const recentGenerations = recentRes?.data;
+  const allVideos = recentGenerations?.flatMap((gen) => gen.textToVideos) || [];
 
   const { mutateAsync: generateVideo, isPending } = useMutation({
     mutationFn: textToVideoService,
@@ -183,9 +185,7 @@ const TextToVideoComponent = () => {
               Loading recent generations...
             </p>
           </div>
-        ) : !recentGenerations ||
-          !recentGenerations.textToVideos ||
-          recentGenerations.textToVideos.length === 0 ? (
+        ) : !recentGenerations || allVideos.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground text-center">
@@ -194,7 +194,7 @@ const TextToVideoComponent = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentGenerations.textToVideos.map((videoRecord) => {
+            {allVideos.map((videoRecord: ITextToVideoRecord) => {
               const isCompleted =
                 videoRecord.status === GenerationStatus.COMPLETED &&
                 videoRecord.outputUrl;

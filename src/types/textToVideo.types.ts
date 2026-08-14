@@ -12,6 +12,19 @@ export interface ITextToVideoResponse {
   polling_url: string;
 }
 
+export interface ITextToVideoRecord {
+  id: string;
+  generatedId: string;
+  status: GenerationStatus;
+  prompt: string;
+  requestId: string;
+  outputUrl: string;
+  isPublic: boolean;
+  isFeatured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IGetRecentTextToVideoResponse {
   id: string;
   userId: string;
@@ -19,16 +32,5 @@ export interface IGetRecentTextToVideoResponse {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-  textToVideos: {
-    id: string;
-    generatedId: string;
-    status: GenerationStatus;
-    prompt: string;
-    requestId: string;
-    outputUrl: string;
-    isPublic: boolean;
-    isFeatured: boolean;
-    createdAt: string;
-    updatedAt: string;
-  }[];
+  textToVideos: ITextToVideoRecord[];
 }
