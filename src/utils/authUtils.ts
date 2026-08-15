@@ -12,9 +12,7 @@ export enum UserStatus {
 
 const isProduction = process.env.NODE_ENV === "production";
 
-export const betterAuthSessionCookieName = isProduction
-  ? "__Secure-better-auth.session_token"
-  : "better-auth.session_token";
+export const betterAuthSessionCookieName = "__Secure-better-auth.session_token";
 
 export const authRoutes = ["/auth/login", "/auth/register", "/google-callback"];
 
