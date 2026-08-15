@@ -1,4 +1,3 @@
-import { envVars } from "@/config/env";
 import { betterAuthSessionCookieName } from "@/utils/authUtils";
 import { ZodType } from "zod";
 import { getTokens } from "./auth/getMe.service";
@@ -27,20 +26,7 @@ const getHeaders = async () => {
   };
 };
 
-const homePageCall = async () => {
-  try {
-    const res = await fetch(`${envVars.API_BASE_URL_FOR_HOME}`).then((r) =>
-      r.text(),
-    );
-    return res;
-  } catch (error) {
-    console.error("Failed to fetch homePageCall:", error);
-    return null;
-  }
-};
-
 export const generalService = {
   validateRequest,
   getHeaders,
-  homePageCall,
 };
