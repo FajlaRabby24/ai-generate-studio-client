@@ -1,58 +1,76 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
-import { Image as ImageIcon, Video, Mic, Bot, Sparkles, ArrowRight } from "lucide-react";
 import { MagicCard } from "@/components/ui/magic-card";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Bot,
+  Image as ImageIcon,
+  Mic,
+  Sparkles,
+  Video,
+} from "lucide-react";
 
 const tools = [
   {
     id: "image",
     title: "Text to Image",
     subtitle: "High Resolution & Flux Models",
-    description: "Transform your text prompts into hyper-realistic 8K digital artwork and studio quality photography in seconds.",
+    description:
+      "Transform your text prompts into hyper-realistic 8K digital artwork and studio quality photography in seconds.",
     icon: ImageIcon,
     badge: "Popular",
     gradientFrom: "#3B82F6",
     gradientTo: "#06B6D4",
-    accent: "text-blue-400 bg-blue-950/20 border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)]",
-    cardGlow: "hover:border-blue-500/30 hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]",
+    accent:
+      "text-blue-400 bg-blue-950/20 border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)]",
+    cardGlow:
+      "hover:border-blue-500/30 hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]",
   },
   {
     id: "video",
     title: "Text to Video",
     subtitle: "4K Cinematic Motion",
-    description: "Generate fluid, high-frame-rate video clips with natural lighting, camera movements, and photorealistic dynamics.",
+    description:
+      "Generate fluid, high-frame-rate video clips with natural lighting, camera movements, and photorealistic dynamics.",
     icon: Video,
     badge: "Pro Engine",
     gradientFrom: "#A855F7",
     gradientTo: "#EC4899",
-    accent: "text-purple-400 bg-purple-950/20 border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]",
-    cardGlow: "hover:border-purple-500/30 hover:shadow-[0_0_30px_rgba(168,85,247,0.12)]",
+    accent:
+      "text-purple-400 bg-purple-950/20 border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]",
+    cardGlow:
+      "hover:border-purple-500/30 hover:shadow-[0_0_30px_rgba(168,85,247,0.12)]",
   },
   {
     id: "voice",
     title: "AI Voiceover",
     subtitle: "Natural Human Speech",
-    description: "Synthesize lifelike voiceovers in 40+ languages with emotion control, pitch tuning, and instant audio download.",
+    description:
+      "Synthesize lifelike voiceovers in 40+ languages with emotion control, pitch tuning, and instant audio download.",
     icon: Mic,
     badge: "Ultra Fast",
     gradientFrom: "#10B981",
     gradientTo: "#14B8A6",
-    accent: "text-emerald-400 bg-emerald-950/20 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]",
-    cardGlow: "hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(16,185,129,0.12)]",
+    accent:
+      "text-emerald-400 bg-emerald-950/20 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]",
+    cardGlow:
+      "hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(16,185,129,0.12)]",
   },
   {
     id: "assistant",
     title: "Smart AI Assistant",
     subtitle: "Creative Writing & Code",
-    description: "Chat with advanced LLM models tailored for storyboarding, scriptwriting, prompt optimization, and technical tasks.",
+    description:
+      "Chat with advanced LLM models tailored for storyboarding, scriptwriting, prompt optimization, and technical tasks.",
     icon: Bot,
     badge: "GPT-4o & Claude",
     gradientFrom: "#F59E0B",
     gradientTo: "#F97316",
-    accent: "text-amber-400 bg-amber-950/20 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.15)]",
-    cardGlow: "hover:border-amber-500/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.12)]",
+    accent:
+      "text-amber-400 bg-amber-950/20 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.15)]",
+    cardGlow:
+      "hover:border-amber-500/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.12)]",
   },
 ];
 
@@ -66,10 +84,11 @@ export function ToolsSuite() {
           <span>Complete AI Creation Suite</span>
         </div>
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4 leading-tight">
-          Everything You Need to Create Without Limits
+          Everything You Need to Create
         </h2>
         <p className="text-white/60 text-base sm:text-lg">
-          Explore powerful AI tools engineered for creators, designers, marketers, and developers.
+          Explore powerful AI tools engineered for creators, designers,
+          marketers, and developers.
         </p>
       </div>
 
@@ -94,7 +113,9 @@ export function ToolsSuite() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <div className={`p-3 md:p-3.5 rounded-full border ${tool.accent}`}>
+                    <div
+                      className={`p-3 md:p-3.5 rounded-full border ${tool.accent}`}
+                    >
                       <Icon className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
                     <span className="text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-full bg-white/5 text-white/80 border border-white/10">
