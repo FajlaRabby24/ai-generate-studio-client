@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { GenerationStatus, GenerationType } from "@/config/constant";
-import { ITextToImageResponse } from "@/types/dashboard.types";
 import {
   generateTextToImageService,
   getRecentGenerationServiceTextToImage,
   IGenerateTextToImagePayload,
 } from "@/services/dashboard/text-to-image/text-to-image.service";
+import { ITextToImageResponse } from "@/types/dashboard.types";
 import { handleDownload } from "@/utils/handleDownload";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -291,14 +292,14 @@ export function TextToImageContainer() {
                         />
                         <div className="absolute inset-0 pointer-events-none bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                         <div className="absolute top-2 right-2 flex items-center gap-4  ">
-                          <a
+                          <Link
                             href={imageRecord.outputUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-white hover:text-primary transition-colors bg-black/50 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-1.5 z-20"
                           >
                             <Maximize2 className="w-4 h-4" />
-                          </a>
+                          </Link>
                           <button
                             onClick={() =>
                               handleDownload(
