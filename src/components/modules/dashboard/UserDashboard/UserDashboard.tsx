@@ -25,9 +25,7 @@ import {
   Volume2,
   Zap,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -88,25 +86,16 @@ const quickActions = [
 ];
 
 const UserDashboardPage = () => {
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted && resolvedTheme === "dark";
-
   const { data: userDashboardStats, isLoading } = useQuery({
     queryKey: ["userDashboardStats"],
     queryFn: () => getDashboardStatsService(),
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 
   const stats = userDashboardStats?.data;
 
   // Render Skeleton Loader while fetching backend data
-  if (isLoading || !mounted || !stats) {
+  if (isLoading || !stats) {
     return (
       <div className="space-y-8 text-neutral-900 dark:text-white transition-colors duration-300 animate-pulse">
         {/* 1. Header Banner Skeleton */}
@@ -247,9 +236,7 @@ const UserDashboardPage = () => {
             <MagicCard
               key={idx}
               className="flex flex-col justify-between p-6 bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 rounded-xl hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors shadow-sm dark:shadow-none"
-              gradientColor={
-                isDark ? "rgba(139, 92, 246, 0.05)" : "rgba(124, 58, 237, 0.03)"
-              }
+              gradientColor={"rgba(139, 92, 246, 0.05)"}
             >
               <div className="flex justify-between items-start mb-4">
                 <span className="text-neutral-500 dark:text-neutral-400 font-medium text-sm">
@@ -331,23 +318,23 @@ const UserDashboardPage = () => {
                 </defs>
                 <XAxis
                   dataKey="day"
-                  stroke={isDark ? "#525252" : "#888888"}
+                  stroke={"#525252"}
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
                 />
                 <YAxis
-                  stroke={isDark ? "#525252" : "#888888"}
+                  stroke={"#525252"}
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: isDark ? "#171717" : "#ffffff",
-                    borderColor: isDark ? "#262626" : "#e5e5e5",
+                    backgroundColor: "#171717",
+                    borderColor: "#262626",
                     borderRadius: "8px",
-                    color: isDark ? "#ffffff" : "#171717",
+                    color: "#ffffff",
                   }}
                 />
                 <Area
@@ -402,12 +389,8 @@ const UserDashboardPage = () => {
 
           <div className="mt-8 space-y-3 relative z-10">
             <ShimmerButton
-              shimmerColor={isDark ? "#8b5cf6" : "#ffffff"}
-              background={
-                isDark
-                  ? "linear-gradient(to right, #6d28d9, #7c3aed)"
-                  : "linear-gradient(to right, #4f46e5, #6366f1)"
-              }
+              shimmerColor={"#8b5cf6"}
+              background={"linear-gradient(to right, #6d28d9, #7c3aed)"}
               className="w-full py-3 text-sm font-semibold rounded-xl text-center"
             >
               Upgrade Plan
@@ -434,11 +417,7 @@ const UserDashboardPage = () => {
               <Link href={action.href} key={idx}>
                 <MagicCard
                   className="group relative flex items-center justify-between p-6 bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800/80 rounded-xl cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-300 hover:-translate-y-0.5 shadow-sm dark:shadow-none"
-                  gradientColor={
-                    isDark
-                      ? "rgba(124, 58, 237, 0.05)"
-                      : "rgba(99, 102, 241, 0.03)"
-                  }
+                  gradientColor={"rgba(124, 58, 237, 0.05)"}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-lg border ${action.color}`}>

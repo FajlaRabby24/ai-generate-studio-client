@@ -15,12 +15,10 @@ import {
   Users,
   Video,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/hooks/useLogout";
 import { cn } from "@/lib/utils";
@@ -69,15 +67,12 @@ interface SidebarProps {
 export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
   const handleLogout = useLogout();
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+
   const [role, setRole] = useState<UserRole>(UserRole.USER);
   const [decodedUser, setDecodedUser] = useState<any>(null);
 
   // Avoid hydration mismatch for theme toggle
   useEffect(() => {
-    setMounted(true);
-
     const fetchToken = async () => {
       const token = await getCookie("accessToken");
       if (token) {
@@ -106,12 +101,12 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
           href={"/"}
           className="flex h-16 items-center px-6 border-b border-border/40 gap-2"
         >
-         {/* <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white relative shrink-0 group-hover:scale-105 transition-all duration-300">
+          {/* <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white relative shrink-0 group-hover:scale-105 transition-all duration-300">
             <div className="h-2.5 w-2.5 rounded-full bg-white" />
           </div> */}
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                AI
-              </div>
+            AI
+          </div>
           <span className="font-bold text-base bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
             AI Generate Studio
           </span>
@@ -182,16 +177,6 @@ export default function Sidebar({ onCloseMobileMenu }: SidebarProps) {
         {/* Action Row */}
         <div className="flex items-center justify-between gap-2 px-1">
           {/* Theme Toggle */}
-          {mounted ? (
-            <AnimatedThemeToggler
-              theme={theme as "light" | "dark"}
-              onThemeChange={(newTheme) => setTheme(newTheme)}
-              variant="circle"
-              className="rounded-xl size-8 cursor-pointer flex items-center justify-center hover:bg-muted/60 [&_svg]:h-4 [&_svg]:w-4 [&_svg]:text-amber-500 [&_svg]:dark:text-violet-500"
-            />
-          ) : (
-            <div className="h-8 w-8 rounded-xl bg-muted/40 animate-pulse" />
-          )}
 
           {/* Logout button */}
           <Button

@@ -16,20 +16,9 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 const MyProfileComponent = () => {
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted && resolvedTheme === "dark";
-
   const { isLoading, data: adminProfile } = useQuery({
     queryKey: ["userProfile"],
     queryFn: () => getMyProfileService(),
@@ -38,7 +27,7 @@ const MyProfileComponent = () => {
   const profile = adminProfile?.data;
 
   // Loading skeleton screen
-  if (isLoading || !mounted || !profile) {
+  if (isLoading || !profile) {
     return (
       <div className="space-y-8 text-neutral-900 dark:text-white transition-colors duration-300 animate-pulse">
         {/* Profile Card Header Skeleton */}
@@ -129,9 +118,7 @@ const MyProfileComponent = () => {
           {/* Admin Access Panel */}
           <MagicCard
             className="p-8 bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm dark:shadow-none transition-colors duration-300"
-            gradientColor={
-              isDark ? "rgba(139, 92, 246, 0.05)" : "rgba(124, 58, 237, 0.03)"
-            }
+            gradientColor={"rgba(139, 92, 246, 0.05)"}
           >
             <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-neutral-800 dark:text-white">
               <KeyRound className="h-5 w-5 text-violet-500" />
@@ -174,9 +161,7 @@ const MyProfileComponent = () => {
           {/* 3. Session Management */}
           <MagicCard
             className="p-8 bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm dark:shadow-none transition-colors duration-300"
-            gradientColor={
-              isDark ? "rgba(139, 92, 246, 0.05)" : "rgba(124, 58, 237, 0.03)"
-            }
+            gradientColor={"rgba(139, 92, 246, 0.05)"}
           >
             <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-neutral-800 dark:text-white">
               <Shield className="h-5 w-5 text-violet-500" />
@@ -219,9 +204,7 @@ const MyProfileComponent = () => {
         <motion.div variants={itemVariants} className="space-y-6">
           <MagicCard
             className="p-6 bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm dark:shadow-none transition-colors duration-300"
-            gradientColor={
-              isDark ? "rgba(139, 92, 246, 0.05)" : "rgba(124, 58, 237, 0.03)"
-            }
+            gradientColor={"rgba(139, 92, 246, 0.05)"}
           >
             <h2 className="text-lg font-bold flex items-center gap-2 text-neutral-800 dark:text-white">
               <Lock className="h-5 w-5 text-violet-500" />
