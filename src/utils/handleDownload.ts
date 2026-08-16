@@ -11,7 +11,7 @@ export const handleDownload = async (url: string, filename: string) => {
     document.body.removeChild(link);
     URL.revokeObjectURL(blobUrl);
   } catch (error) {
-    console.error("Download failed, opening fallback in new tab:", error);
+    // // console.error("Download failed, opening fallback in new tab:", error);
     window.open(url, "_blank");
   }
 };

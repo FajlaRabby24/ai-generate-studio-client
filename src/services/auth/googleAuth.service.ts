@@ -23,7 +23,7 @@ export const syncGoogleAuthAction = async (
 
     return { success: true };
   } catch (error) {
-    console.error("Failed to sync tokens:", error);
+    // // console.error("Failed to sync tokens:", error);
     return { success: false, message: "Token sync failed" };
   }
 };

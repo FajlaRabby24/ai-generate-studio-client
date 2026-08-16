@@ -96,7 +96,7 @@ const TextToSpeechComponent = () => {
     } else {
       audio.play().catch((e) => {
         toast.error("Failed to play audio.");
-        console.error(e);
+        // // console.error(e);
       });
       setPlayingId(id);
     }

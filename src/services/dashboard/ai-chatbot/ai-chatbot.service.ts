@@ -19,7 +19,7 @@ export const aiChatBotService = async (payload: IAiChatBotPayload) =>
     );
 
     const headers = await generalService.getHeaders();
-    console.log("headers", headers);
+    // // console.log("headers", headers);
     const res = await httpClient.post<IAIChatBotResponse>(
       "/ai-chat-bot/stream",
       validatePayload,

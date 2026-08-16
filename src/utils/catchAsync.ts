@@ -3,7 +3,7 @@ export const catchAsync = async (fn: Function) => {
     const result = await fn();
     return result;
   } catch (error: any) {
-    console.log("from catchAsync", error?.response?.data || error?.message);
+    // // console.log("from catchAsync", error?.response?.data || error?.message);
 
     return {
       success: false,

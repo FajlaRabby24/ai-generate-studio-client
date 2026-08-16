@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 export default function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -12,10 +13,14 @@ export default function BackgroundVideo() {
       video.defaultMuted = true;
       video.muted = true;
       video.play().catch((err) => {
-        console.warn(
-          "Autoplay failed or was blocked by browser policies:",
-          err,
-        );
+        toast.warning("Background video not supported in your browser", {
+          position: "top-center",
+          duration: 2000,
+        });
+        // // console.warn(
+        //   "Autoplay failed or was blocked by browser policies:",
+        //   err,
+        // );
       });
     }
   }, []);

@@ -136,7 +136,7 @@ const ResumeAnalyzerComponent = () => {
     try {
       await analyzeResume(formData);
     } catch (e: any) {
-      console.error(e);
+      // // console.error(e);
       toast.error(e?.message || "Failed to analyze resume.");
     }
   };

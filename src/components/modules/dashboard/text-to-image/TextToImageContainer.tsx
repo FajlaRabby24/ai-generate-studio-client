@@ -62,7 +62,7 @@ export function TextToImageContainer() {
 
     try {
       const res = await mutateAsync(payload);
-      console.log("response from mutate", res);
+      // // console.log("response from mutate", res);
       if (res?.success) {
         if (res?.data?.imageUrl) {
           setGeneratedImage(res.data.imageUrl);
@@ -70,11 +70,11 @@ export function TextToImageContainer() {
         queryClient.invalidateQueries({ queryKey: ["recentTextToImage"] });
         toast.success("Image generated successfully!");
       } else {
-        console.log("text to image response", res);
+        // // console.log("text to image response", res);
         toast.error(res?.message || "Failed to generate image");
       }
     } catch (err: any) {
-      console.log("text to image response Error", err);
+      // // console.log("text to image response Error", err);
       toast.error(err?.message || "Failed to process text to image request");
     }
   };

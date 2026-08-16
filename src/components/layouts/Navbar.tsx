@@ -148,8 +148,8 @@ export default function Navbar() {
             //       variant="destructive"
             //       className="rounded-lg cursor-pointer"
             //       onClick={() => {
-            //         // Refresh token cookie cleanup is handled by redirect / server, or direct console logs
-            //         console.log("Logged out from Navbar");
+            //         // Refresh token cookie cleanup is handled by redirect / server, or direct // console.logs
+            //         // console.log("Logged out from Navbar");
             //       }}
             //     >
             //       <LogOut className="mr-2 h-4 w-4" />
@@ -267,7 +267,6 @@ export default function Navbar() {
                     className="w-full h-11 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20 font-medium transition-all cursor-pointer"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
-                      console.log("Logged out from Mobile Navbar");
                     }}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
