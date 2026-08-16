@@ -15,6 +15,8 @@ import {
   getConversationChatsById,
   getPreviousConversation,
 } from "@/services/dashboard/ai-chatbot/ai-chatbot.service";
+import { betterAuthSessionCookieName } from "@/utils/authUtils";
+import { getCookie } from "@/utils/cookieUtils";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -78,12 +80,16 @@ export function ChatBotContainer() {
     setIsPending(true);
 
     try {
+      const token = await getCookie("accessToken");
+      const sessionToken = await getCookie(betterAuthSessionCookieName);
       const response = await fetch(
         `${envVars.API_BASE_URL}/ai-chat-bot/stream`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+            ...(sessionToken && { "x-session-token": sessionToken }),
           },
           credentials: "include",
           body: JSON.stringify({
