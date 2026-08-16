@@ -7,7 +7,7 @@ import {
   bgRemoverService,
   getRecentGenerationService,
 } from "@/services/dashboard/bgRemover/bgRemover.service";
-import { IGetRecentImageToVideoResponse } from "@/types/backgroundRemove.types";
+import { IBackgroundRemoveRecord } from "@/types/backgroundRemove.types";
 import { handleDownload } from "@/utils/handleDownload";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -37,6 +37,7 @@ const RemoveBackgroundComponent = () => {
   });
 
   const recentGenerations = recentRes?.data;
+  const allBgRemoves = recentGenerations?.flatMap((gen) => gen.backgroundRemoves) || [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -269,9 +270,7 @@ const RemoveBackgroundComponent = () => {
               Loading recent creations...
             </p>
           </div>
-        ) : !recentGenerations ||
-          !recentGenerations.backgroundRemoves ||
-          recentGenerations.backgroundRemoves.length === 0 ? (
+        ) : !recentGenerations || allBgRemoves.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <History className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground text-center">
@@ -280,7 +279,7 @@ const RemoveBackgroundComponent = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentGenerations.backgroundRemoves.map((bgRecord) => {
+            {allBgRemoves.map((bgRecord: IBackgroundRemoveRecord) => {
               return (
                 <div
                   key={bgRecord.id}
@@ -290,7 +289,7 @@ const RemoveBackgroundComponent = () => {
                     {/* Checkered transparency preview grid */}
                     <div className="absolute inset-0 bg-[linear-gradient(45deg,#ccc_25%,transparent_25%),linear-gradient(-45deg,#ccc_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#ccc_75%),linear-gradient(-45deg,transparent_75%,#ccc_75%)] bg-[size:10px_10px] bg-[position:0_0,0_5px,5px_-5px,-5px_0] bg-neutral-200 dark:bg-neutral-800" />
                     <img
-                      src={bgRecord.outputUrls}
+                      src={bgRecord.outputUrl}
                       alt="Output Preview"
                       className="w-full h-full object-contain relative z-10 p-2"
                     />
@@ -303,7 +302,7 @@ const RemoveBackgroundComponent = () => {
                       <button
                         onClick={() =>
                           handleDownload(
-                            bgRecord.outputUrls,
+                            bgRecord.outputUrl,
                             `removed-bg-${bgRecord.id}.png`,
                           )
                         }

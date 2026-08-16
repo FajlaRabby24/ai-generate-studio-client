@@ -10,6 +10,18 @@ export interface IBackgroundRemoveResponse {
   secureUrl: string;
 }
 
+export interface IBackgroundRemoveRecord {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  status: GenerationStatus;
+  imageUrl: string;
+  isPublic: boolean;
+  isFeatured: boolean;
+  generatedId: string;
+  outputUrl: string;
+}
+
 export interface IGetRecentImageToVideoResponse {
   type: GenerationType.IMAGE_BACKGROUND_REMOVER;
   id: string;
@@ -17,15 +29,5 @@ export interface IGetRecentImageToVideoResponse {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
-  backgroundRemoves: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    status: GenerationStatus;
-    imageUrl: string;
-    isPublic: boolean;
-    isFeatured: boolean;
-    generatedId: string;
-    outputUrls: string;
-  }[];
+  backgroundRemoves: IBackgroundRemoveRecord[];
 }
