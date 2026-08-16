@@ -42,8 +42,15 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-24 px-4 max-w-7xl mx-auto relative z-10">
-      {/* Header */}
+    <section className="relative w-full py-24 bg-background overflow-hidden ">
+      {/* Side Spotlight Beams (Framing Gradients as in reference image) */}
+      {/* Left Spotlight */}
+      <div className="absolute top-0 left-0 w-[80%] h-full pointer-events-none select-none z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,#ffffff12,transparent_70%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,#ffffff0d_0%,#ffffff03_35%,transparent_80%)]" />
+      </div>
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
+        {/* Header */}
       <div className="text-center max-w-3xl mx-auto mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-white/80 mb-4">
           <Sparkles className="w-3.5 h-3.5 text-purple-400" />
@@ -100,6 +107,7 @@ export function HowItWorks() {
             </motion.div>
           );
         })}
+      </div>
       </div>
     </section>
   );

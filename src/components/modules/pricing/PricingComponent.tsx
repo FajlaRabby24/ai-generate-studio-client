@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
 export const PricingComponent = () => {
   const freeFeatures = [
@@ -42,7 +41,11 @@ export const PricingComponent = () => {
 
   const itemVariants = {
     hidden: { y: 30, opacity: 0 },
-    show: { y: 0, opacity: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as any } },
+    show: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as any },
+    },
   } as any;
 
   return (
@@ -75,10 +78,9 @@ export const PricingComponent = () => {
 
       {/* Content wrapper */}
       <div className="relative z-10 w-full flex-1 flex flex-col justify-center max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 md:py-24">
-        
         {/* Header section */}
         <div className="text-center max-w-xl mx-auto mb-16 space-y-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -87,7 +89,7 @@ export const PricingComponent = () => {
             <Sparkles className="h-3.5 w-3.5 text-blue-400" />
             Pricing Plans
           </motion.div>
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -95,13 +97,14 @@ export const PricingComponent = () => {
           >
             Choose Your Creative Tier
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-white/60 text-sm max-w-md mx-auto leading-relaxed"
           >
-            Simple, transparent pricing engineered for creators, builders, and studios. Upgrade or cancel anytime.
+            Simple, transparent pricing engineered for creators, builders, and
+            studios. Upgrade or cancel anytime.
           </motion.p>
         </div>
 
@@ -153,7 +156,7 @@ export const PricingComponent = () => {
 
               {/* Action Trigger */}
               <div className="pt-8 mt-auto">
-                <Link href="/dashboard" className="w-full flex">
+                <Link href="/dashboard/billing" className="w-full flex">
                   <button className="w-full py-3 text-xs font-bold rounded-full bg-white text-black hover:bg-white/90 active:scale-[0.97] transition-all cursor-pointer shadow-md text-center flex items-center justify-center">
                     Choose Plan
                   </button>
@@ -206,7 +209,7 @@ export const PricingComponent = () => {
 
               {/* Action Trigger */}
               <div className="pt-8 mt-auto">
-                <Link href="/dashboard" className="w-full flex">
+                <Link href="/dashboard/billing" className="w-full flex">
                   <button className="w-full py-3 text-xs font-bold rounded-full bg-white text-black hover:bg-white/90 active:scale-[0.97] transition-all cursor-pointer shadow-md text-center flex items-center justify-center">
                     Choose Plan
                   </button>
@@ -218,7 +221,6 @@ export const PricingComponent = () => {
           {/* Card 3: Yearly Pro Plan */}
           <motion.div variants={itemVariants} className="flex">
             <div className="flex flex-col justify-between p-8 rounded-3xl border border-white/15 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 w-full min-h-[500px] shadow-2xl relative">
-              
               {/* Best Value floating badge */}
               <div className="absolute -top-3.5 right-6 z-20 flex items-center gap-0.5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-white text-black shadow-lg">
                 Best Value (Save ~17%)
@@ -257,7 +259,9 @@ export const PricingComponent = () => {
                       <div className="mt-0.5 p-0.5 bg-blue-500/20 rounded-full border border-blue-500/30 text-blue-400 flex items-center justify-center shrink-0">
                         <Check className="h-3 w-3" />
                       </div>
-                      <span className="leading-tight font-medium">{feature}</span>
+                      <span className="leading-tight font-medium">
+                        {feature}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -265,7 +269,7 @@ export const PricingComponent = () => {
 
               {/* Action Trigger */}
               <div className="pt-8 mt-auto">
-                <Link href="/dashboard" className="w-full flex">
+                <Link href="/dashboard/billing" className="w-full flex">
                   <button className="w-full py-3 text-xs font-bold rounded-full bg-white text-black hover:bg-white/90 active:scale-[0.97] transition-all cursor-pointer shadow-md text-center flex items-center justify-center">
                     Choose Plan
                   </button>
@@ -274,7 +278,6 @@ export const PricingComponent = () => {
             </div>
           </motion.div>
         </motion.div>
-
       </div>
     </div>
   );

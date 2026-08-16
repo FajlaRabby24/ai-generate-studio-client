@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatedBeam } from "@/components/ui/animated-beam";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -9,12 +10,10 @@ import {
   Mic,
   Scissors,
   Video,
-  Sparkles,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useRef } from "react";
-import { AnimatedBeam } from "@/components/ui/animated-beam";
-import Image from "next/image";
 
 interface ShinyTextProps {
   text: string;

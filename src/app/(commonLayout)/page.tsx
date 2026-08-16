@@ -11,7 +11,7 @@ export default async function Home() {
   const mediaData = await fetch(
     `${envVars.API_BASE_URL}/history/recent-media`,
     {
-      next: { revalidate: 43200 }, // ৪৩২০০ সেকেন্ড = ১২ ঘণ্টা (আধা দিন)
+      next: { revalidate: 43200 }, 
     },
   );
   const data = await mediaData.json();

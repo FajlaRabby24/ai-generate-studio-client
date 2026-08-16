@@ -6,9 +6,15 @@ import Link from "next/link";
 
 export function FooterCTA() {
   return (
-    <footer className="relative z-10 overflow-hidden pt-12 pb-8 bg-background border-t border-border/40">
+    <footer className="relative w-full z-10 overflow-hidden pt-12 pb-8 bg-background">
+      {/* Right Spotlight */}
+      <div className="absolute bottom-0 right-0 w-[50%] h-full pointer-events-none select-none z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,#ffffff12,transparent_70%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(225deg,#ffffff0d_0%,#ffffff03_35%,transparent_80%)]" />
+      </div>
+
       {/* 1. Call to Action Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-36">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-36 relative z-10">
         <div className="relative rounded-3xl overflow-hidden border border-border/60 bg-gradient-to-b from-primary/10 via-card/50 to-card/80 p-8 sm:p-12 md:p-16 text-center backdrop-blur-xl shadow-2xl">
           {/* Subtle Glow Backdrop */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-3xl rounded-full -z-10 pointer-events-none" />
@@ -60,7 +66,7 @@ export function FooterCTA() {
       </div>
 
       {/* 2. Main Footer Navigation */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 pb-12 border-b border-border/40">
           {/* Brand Info */}
           <div className="col-span-2 space-y-4">
