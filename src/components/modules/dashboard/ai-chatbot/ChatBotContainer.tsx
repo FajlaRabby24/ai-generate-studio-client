@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { MagicCard } from "@/components/ui/magic-card";
 import { GenerationType } from "@/config/constant";
 import { envVars } from "@/config/env";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   getConversationChatsById,
   getPreviousConversation,
@@ -307,13 +309,50 @@ export function ChatBotContainer() {
 
                       {/* Message Bubble */}
                       <div
-                        className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-sm leading-relaxed whitespace-pre-wrap ${
+                        className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-sm leading-relaxed ${
                           isUser
-                            ? "bg-primary text-primary-foreground rounded-tr-none"
+                            ? "bg-primary text-primary-foreground rounded-tr-none whitespace-pre-wrap"
                             : "bg-muted/80 dark:bg-muted/30 border border-border/20 text-foreground rounded-tl-none"
                         }`}
                       >
-                        {msg?.parts[0]?.text}
+                        {isUser ? (
+                          msg?.parts[0]?.text
+                        ) : (
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: ({ children }) => <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>,
+                              table: ({ children }) => (
+                                <div className="overflow-x-auto my-4 rounded-xl border border-white/10 bg-black/20 shadow-lg">
+                                  <table className="min-w-full divide-y divide-white/10 text-left text-xs">
+                                    {children}
+                                  </table>
+                                </div>
+                              ),
+                              thead: ({ children }) => <thead className="bg-white/5">{children}</thead>,
+                              tbody: ({ children }) => <tbody className="divide-y divide-white/5">{children}</tbody>,
+                              tr: ({ children }) => <tr className="hover:bg-white/5 transition-colors">{children}</tr>,
+                              th: ({ children }) => <th className="px-4 py-3 font-bold text-zinc-300 uppercase tracking-wider text-[10px]">{children}</th>,
+                              td: ({ children }) => <td className="px-4 py-3 text-zinc-400 align-top leading-normal">{children}</td>,
+                              ul: ({ children }) => <ul className="list-disc pl-5 mb-3 space-y-1.5">{children}</ul>,
+                              ol: ({ children }) => <ol className="list-decimal pl-5 mb-3 space-y-1.5">{children}</ol>,
+                              li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                              a: ({ href, children }) => (
+                                <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
+                                  {children}
+                                </a>
+                              ),
+                              strong: ({ children }) => <strong className="font-extrabold text-foreground">{children}</strong>,
+                              code: ({ children }) => (
+                                <code className="px-1.5 py-0.5 rounded bg-muted-foreground/10 text-xs font-mono border border-border">
+                                  {children}
+                                </code>
+                              ),
+                            }}
+                          >
+                            {msg?.parts[0]?.text}
+                          </ReactMarkdown>
+                        )}
                       </div>
                     </motion.div>
                   );
