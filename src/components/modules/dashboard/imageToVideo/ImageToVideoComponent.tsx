@@ -39,7 +39,8 @@ const ImageToVideoComponent = () => {
   });
 
   const recentGenerations = recentRes?.data;
-  const allVideos = recentGenerations?.flatMap((gen) => gen.imageToVideos) || [];
+  const allVideos =
+    recentGenerations?.flatMap((gen) => gen.imageToVideos) || [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -65,13 +66,11 @@ const ImageToVideoComponent = () => {
     mutationFn: imageToVideoService,
     onSuccess: (data) => {
       if (data?.success) {
-        toast.success(
-          "Video generation started successfully!",
-          {
-            description: "Creating a video takes about 3-5 minutes. You can safely leave this page and check back or reload later.",
-            duration: 10000,
-          }
-        );
+        toast.success("Video generation started successfully!", {
+          description:
+            "Creating a video takes about 3-5 minutes. You can safely leave this page and check back or reload later.",
+          duration: 10000,
+        });
         setPrompt("");
         handleDeselectFile();
         queryClient.invalidateQueries({ queryKey: ["recentImageToVideo"] });
@@ -228,7 +227,7 @@ const ImageToVideoComponent = () => {
             <Button
               onClick={handleGenerate}
               disabled={!file || !prompt.trim() || isGenerating}
-              className="w-full h-14 rounded-xl cursor-pointer bg-primary text-primary-foreground shadow-lg shadow-primary/25 font-bold group relative overflow-hidden shrink-0"
+              className="w-full h-14 rounded-xl  bg-primary text-primary-foreground shadow-lg shadow-primary/25 font-bold group relative overflow-hidden shrink-0 cursor-pointer"
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] group-hover:animate-[shimmer_2s_infinite]" />
               {isGenerating ? (
@@ -237,7 +236,7 @@ const ImageToVideoComponent = () => {
                   Generating Video...
                 </span>
               ) : (
-                <span className="flex items-center justify-center gap-2 text-lg cursor-pointer">
+                <span className="flex items-center justify-center gap-2 text-lg">
                   <Video className="w-5 h-5" />
                   Generate Video
                 </span>

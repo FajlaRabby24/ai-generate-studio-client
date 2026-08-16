@@ -9,14 +9,7 @@ import {
 } from "@/services/dashboard/text-to-video/textToVideo.service";
 import { ITextToVideoRecord } from "@/types/textToVideo.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Clock,
-  History,
-  Settings2,
-  Sparkles,
-  Video,
-  Wand2,
-} from "lucide-react";
+import { Clock, History, Settings2, Sparkles, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -37,13 +30,11 @@ const TextToVideoComponent = () => {
     mutationFn: textToVideoService,
     onSuccess: (data) => {
       if (data?.success) {
-        toast.success(
-          "Video generation started successfully!",
-          {
-            description: "Creating a video takes about 3-5 minutes. You can safely leave this page and check back or reload later.",
-            duration: 10000,
-          }
-        );
+        toast.success("Video generation started successfully!", {
+          description:
+            "Creating a video takes about 3-5 minutes. You can safely leave this page and check back or reload later.",
+          duration: 10000,
+        });
         setPrompt("");
         // Invalidate query to refetch pending items
         queryClient.invalidateQueries({ queryKey: ["recentTextToVideo"] });
@@ -153,7 +144,7 @@ const TextToVideoComponent = () => {
               <Button
                 onClick={handleGenerate}
                 disabled={isPending || !prompt.trim()}
-                className="w-full sm:w-auto h-14 px-8 rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg shadow-primary/25 font-bold group relative overflow-hidden shrink-0"
+                className="w-full sm:w-auto h-14 px-8 cursor-pointer rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg shadow-primary/25 font-bold group relative overflow-hidden shrink-0"
               >
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] group-hover:animate-[shimmer_2s_infinite]" />
                 {isPending ? (
