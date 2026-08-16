@@ -37,7 +37,8 @@ const RemoveBackgroundComponent = () => {
   });
 
   const recentGenerations = recentRes?.data;
-  const allBgRemoves = recentGenerations?.flatMap((gen) => gen.backgroundRemoves) || [];
+  const allBgRemoves =
+    recentGenerations?.flatMap((gen) => gen.backgroundRemoves) || [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
