@@ -38,7 +38,11 @@ const TextToVideoComponent = () => {
     onSuccess: (data) => {
       if (data?.success) {
         toast.success(
-          "Video generation started! Please wait for it to process.",
+          "Video generation started successfully!",
+          {
+            description: "Creating a video takes about 3-5 minutes. You can safely leave this page and check back or reload later.",
+            duration: 10000,
+          }
         );
         setPrompt("");
         // Invalidate query to refetch pending items

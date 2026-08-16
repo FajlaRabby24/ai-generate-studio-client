@@ -66,7 +66,11 @@ const ImageToVideoComponent = () => {
     onSuccess: (data) => {
       if (data?.success) {
         toast.success(
-          data?.message || "Video generation started successfully!",
+          "Video generation started successfully!",
+          {
+            description: "Creating a video takes about 3-5 minutes. You can safely leave this page and check back or reload later.",
+            duration: 10000,
+          }
         );
         setPrompt("");
         handleDeselectFile();
