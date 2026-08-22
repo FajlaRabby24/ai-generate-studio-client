@@ -4,14 +4,22 @@ Welcome to the frontend repository of **AI Generate Studio**, a premium, full-st
 
 ---
 
+## 🖼️ User Interface Screenshot
+
+Here is a preview of the AI Generate Studio application landing page which this API powers:
+
+![AI Generate Studio Homepage Screenshot](./public/ai-generate-studio.png)
+
+---
+
 ## 🚀 Key Features
 
-*   **Premium Glassmorphic UI/UX**: Designed with a high-end dark mode aesthetic, vibrant HSL gradients, custom animated page transitions, and smooth hover effects.
-*   **Real-time Credit & Limit Tracking**: Dynamically counts and displays user's remaining daily generations (e.g. `2 / 3 requests used today`).
-*   **Fully Responsive Sidebar Navigation**: Clean, accessible side drawer supporting desktop and mobile devices.
-*   **State-of-the-Art Forms & Validation**: Built with React Hook Form and Zod to ensure prompt inputs are validated locally before dispatching API requests.
-*   **Optimized Performance**: Leverages TanStack React Query v5 for lightning-fast server state caching, optimistic updates, and loading spinners.
-*   **Global/Local Payment Workflows**: Implements seamless integrations with Stripe Checkout and SSLCommerz hosted checkouts.
+- **Premium Glassmorphic UI/UX**: Designed with a high-end dark mode aesthetic, vibrant HSL gradients, custom animated page transitions, and smooth hover effects.
+- **Real-time Credit & Limit Tracking**: Dynamically counts and displays user's remaining daily generations (e.g. `2 / 3 requests used today`).
+- **Fully Responsive Sidebar Navigation**: Clean, accessible side drawer supporting desktop and mobile devices.
+- **State-of-the-Art Forms & Validation**: Built with React Hook Form and Zod to ensure prompt inputs are validated locally before dispatching API requests.
+- **Optimized Performance**: Leverages TanStack React Query v5 for lightning-fast server state caching, optimistic updates, and loading spinners.
+- **Global/Local Payment Workflows**: Implements seamless integrations with Stripe Checkout and SSLCommerz hosted checkouts.
 
 ---
 
@@ -34,12 +42,12 @@ The platform offers a comprehensive set of AI creation tools and payment options
 
 ## 💻 Tech Stack
 
-*   **Framework**: Next.js 16 (App Router) & React 19
-*   **Package Manager**: Bun (for supercharged installation & running speeds)
-*   **Styling & Design System**: Tailwind CSS v4, shadcn/ui components, and Lucide React icons
-*   **Animations**: Framer Motion
-*   **Data Fetching**: TanStack React Query v5 & Axios
-*   **State Management**: React Hook Form & Zod schemas
+- **Framework**: Next.js 16 (App Router) & React 19
+- **Package Manager**: Bun (for supercharged installation & running speeds)
+- **Styling & Design System**: Tailwind CSS v4, shadcn/ui components, and Lucide React icons
+- **Animations**: Framer Motion
+- **Data Fetching**: TanStack React Query v5 & Axios
+- **State Management**: React Hook Form & Zod schemas
 
 ---
 
@@ -95,22 +103,27 @@ REFRESH_TOKEN_SECRET="your-refresh-secret"
 First, ensure you have [Bun](https://bun.sh) installed. Then run the following commands:
 
 ### 1. Install Dependencies
+
 ```bash
 bun install
 ```
 
 ### 2. Run the Development Server
+
 ```bash
 bun run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) in your browser to inspect the application.
 
 ### 3. Build for Production
+
 ```bash
 bun run build
 ```
 
 ### 4. Run Linter
+
 ```bash
 bun run lint
 ```
